@@ -1,32 +1,30 @@
 <?php
 
-require_once ("app/widgets/HTMLElement.php");
+require_once ("app/widgets/RawHTMLElement.php");
 
 class Tag implements HTMLElement
 {
     private static $tabOffset = 4;
     private $name;
     private $attributes = array();
-    private $content = null;
+    private $content = array();
 
-    public function __construct($name, $attributes=array(), $content=null)
+    public function __construct($name, $attributes=array(), $content=array())
     {
         $this->name = $name;
         $this->setAttributes($attributes);
         $this->setContent($content);
     }
 
-    public function add (HTMLElement $tag)
+    public function add ($tag)
     {
-        if (!is_array($this->content))
-            $this->content = array();
-        $this->content[] = $tag;
+        $this->insert ($tag, sizeof($this->content));
     }
 
-    public function insert (HTMLElement $tag, $position)
+    public function insert ($tag, $position)
     {
-        if (!is_array($this->content))
-            $this->content = array();
+        if (is_string($tag))
+            $tag = new RawHTMLElement($tag);   
         array_splice($this->content, $position, 0, array($tag));
     }
 
@@ -42,7 +40,15 @@ class Tag implements HTMLElement
 
     public function setContent ($content)
     {
-        $this->content = $content;
+        if (is_array($content))
+        {
+            foreach ($content as $contentElement)
+                $this->add ($contentElement);
+        }
+        else
+        {
+            $this->add ($content);
+        }
     }
 
     public function toHtml($offset=0)
@@ -54,25 +60,29 @@ class Tag implements HTMLElement
         foreach ($this->attributes as $key=>$value)
             $html .= " " . $key . "=\"" . $value . "\"";
         
-        if ($this->content !== null)
+        if (sizeof($this->content) > 0)
         {
             $html .= ">";
-            if (is_array($this->content))
+            if ((sizeof($this->content) == 1) && ($this->content[0] instanceof RawHTMLElement))
             {
-                foreach ($this->content as $childrenTag)
-                    $html .= $newLine . $childrenTag->toHtml($offset + Tag::$tabOffset);
-                $html .= $newLine . $offsetString;
-            }
-            else 
-            {
-                if (strpos($this->content, "\n") !== false)
+                $contentString = $this->content[0]->getHtml();
+                if (strpos($contentString, "\n") !== false)
                 {
-                    $html .= $newLine . $this->content . $newLine . $offsetString;
+                    $html .= $newLine . $contentString . $newLine . $offsetString;
                 }
                 else
                 {
-                    $html .= $this->content;
+                    $html .= $contentString;
                 }
+            }
+            else
+            {
+                foreach ($this->content as $childrenTag)
+                {
+                    if ($childrenTag instanceof HTMLElement)
+                        $html .= $newLine . $childrenTag->toHtml($offset + Tag::$tabOffset);
+                }
+                $html .= $newLine . $offsetString;
             }
             $html .= "</" . $this->name . ">";
         }
