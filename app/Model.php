@@ -1,6 +1,6 @@
 <?php
 
-class Model 
+abstract class Model 
 {
     public function __set($name, $value)
     {
@@ -9,7 +9,7 @@ class Model
 
     public function __get($name)
     {
-        if ( isset($this->$name))
+        if (isset($this->$name))
             return $this->$name;
     }
     
