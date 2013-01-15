@@ -1,7 +1,6 @@
 <?php
 
 require_once ("app/widgets/Tag.php");
-require_once ("app/widgets/RawHTMLElement.php");
 
 class HTMLView implements View
 {
