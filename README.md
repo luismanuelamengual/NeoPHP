@@ -14,9 +14,9 @@ NeoPHP
 2.1. Controladores
 
 Se utiliza solo 1 url y una acción asociada, es decir supongamos que el proyecto se llama "azureus", entonces la url para acceder a las paginas va a ser del tipo "http://localhost/azureus/?action=???". La acción va a indicar que acción hacer en la aplicación, por ejemplo:
-action=site/showMainPage   => Se ejecutará la función "showMainPageAction" que va a estar dentro del controlador "SiteController" (La clase SiteController deberá estar en la carpeta "controllers", es decir quedaría app->controllers->SiteController)
-action=site/users/addUser => Se ejecutará la función "addUserAction" que va a estar dentro del controlador "UsersController" (Este controlador lo buscaría en la siguiente ruta app->controllers->site->UsersController)
-action=site/ => Ejecutaría la function "defaultAction" en el controlador "SiteController"
+  - action=site/showMainPage   => Se ejecutará la función "showMainPageAction" que va a estar dentro del controlador "SiteController" (La clase SiteController deberá estar en la carpeta "controllers", es decir quedaría app->controllers->SiteController)
+  - action=site/users/addUser => Se ejecutará la función "addUserAction" que va a estar dentro del controlador "UsersController" (Este controlador lo buscaría en la siguiente ruta app->controllers->site->UsersController)
+  - action=site/ => Ejecutaría la function "defaultAction" en el controlador "SiteController"
 
 Si no se especifica una acción, el framework busca un controlador con el nombre "MainController" y dentro de el la funcion "defaultAction", es decir, si se quiere hacer el famoso "Hola Mundo" quedaría de la siguiente manera
 
@@ -231,7 +231,7 @@ $doUser->update();
 <h3>3. Como comenzar a utilizarlo</h3>
 Solo se tiene que copiar la carpeta "trunk" al raiz de un proyecto nuevo y ya está, de ahi en más ya se puede empezar a crear controladores propios y vistas dentro del mismo.
 Es recomendado utilizar ciertas configuración en el php.ini, pero no se obligatorias, estas son:
-session.auto_start = 1
-session.use_cookies = 1
-session.use_trans_sid = 0;
+  - session.auto_start = 1
+  - session.use_cookies = 1
+  - session.use_trans_sid = 0;
 
