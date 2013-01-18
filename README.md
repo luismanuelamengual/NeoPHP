@@ -1,9 +1,7 @@
 NeoPHP
 ======
 
-Great organized PHP framework
-
-1. Que atributos tiene
+<h3>1. Que atributos tiene</h3>
   - Utiliza el patrón de diseño MVC (Model Vista Controlador)
   - Te mantiene todo ordenado, por que te obliga a crear los archivos con una nomenclatura dada y en lugares especificos
   - Tiene 1 solo punto de ingreso (index.php)
@@ -11,7 +9,7 @@ Great organized PHP framework
   - Tampoco se utilizan variables $_SESSION, La sesión se usa a través de una clase especial que maneja dicha variable,
   - Para base de datos no se pone NADA de SQL, las tablas están modeladas como objetos y a través de métodos podes hacer búsquedas, inserciones, eliminaciónes, etc. Todas las consultas se hacen de manera homogenea y transparentes al que programe por afuera del framework y además utiliza PDO con lo cual no importa la base de datos que este corriendo atrás.
 
-2. Como funciona
+<h3>2. Como funciona</h3>
 
 2.1. Controladores
 
@@ -230,7 +228,7 @@ $doUser->addWhereStatement("username='pepe'");
 $doUser->update();
 `````
 
-3. Como comenzar a utilizarlo
+<h3>3. Como comenzar a utilizarlo</h3>
 Solo se tiene que copiar la carpeta "app" y "index.php" al raiz de tu proyecto y ya está, de ahi en más ya podes empezar a crear tus propios controladores y vistas dentro de la carpeta app.
 Es recomendado utilizar ciertas configuración en el php.ini, pero no se obligatorias, estas son:
  session.auto_start = 1
