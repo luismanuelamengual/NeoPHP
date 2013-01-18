@@ -229,9 +229,9 @@ $doUser->update();
 `````
 
 <h3>3. Como comenzar a utilizarlo</h3>
-Solo se tiene que copiar la carpeta "app" y "index.php" al raiz de tu proyecto y ya está, de ahi en más ya podes empezar a crear tus propios controladores y vistas dentro de la carpeta app.
+Solo se tiene que copiar la carpeta "trunk" al raiz de un proyecto nuevo y ya está, de ahi en más ya se puede empezar a crear controladores propios y vistas dentro del mismo.
 Es recomendado utilizar ciertas configuración en el php.ini, pero no se obligatorias, estas son:
- session.auto_start = 1
- session.use_cookies = 1
- session.use_trans_sid = 0;
+session.auto_start = 1
+session.use_cookies = 1
+session.use_trans_sid = 0;
 
