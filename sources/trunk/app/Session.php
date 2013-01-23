@@ -21,12 +21,12 @@ class Session
         return self::$instance;
     }
     
-    public function getName ()
+    public function getName()
     {
         return session_name();
     }
     
-    public function getId ()
+    public function getId()
     {
         return session_id();
     }

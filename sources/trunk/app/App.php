@@ -9,16 +9,13 @@
  */
 class App
 {
-    private $session;
-    private $preferences;
+    private $views = array();
     private $controllers = array();
     private $connections = array();
-    private $views = array();
     private static $instance;
     
     private function __construct() 
     {
-        $this->loadDefaultPreferences();
     }
 
     public static function getInstance()
@@ -118,26 +115,20 @@ class App
     
     public function getSession ()
     {
-        if (empty($this->session))
-        {
-            require_once ('app/Session.php');
-            $this->session = Session::getInstance();
-        }    
-        return $this->session;
+        require_once ('app/Session.php');
+        return Session::getInstance();
     }
     
     public function getPreferences ()
     {
-        if (empty($this->preferences))
-        {
-            require_once ('app/Preferences.php');
-            $this->preferences = Preferences::getInstance();
-        }
-        return $this->preferences;
+        require_once ('app/Preferences.php');
+        return Preferences::getInstance();
     }
     
-    protected function loadDefaultPreferences ()
+    public function getTranslator ()
     {
+        require_once ('app/Translator.php');
+        return Translator::getInstance();
     }
 }
 
