@@ -230,7 +230,9 @@ $doUser->update();
 
 <h3>3. Como comenzar a utilizarlo</h3>
 Solo se tiene que copiar la carpeta "trunk" al raiz de un proyecto nuevo y ya está, de ahi en más ya se puede empezar a crear controladores propios y vistas dentro del mismo.
+
 Es posible que en entornos Windows haya que configurar en el archivo de configuración de apache (httpd.conf) el DocumentIndex para que apunte a index.php en lugar de index.html
+
 Es recomendado utilizar ciertas configuración en el php.ini, pero no se obligatorias, estas son:
   - session.auto_start = 1
   - session.use_cookies = 1
