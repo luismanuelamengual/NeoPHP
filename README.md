@@ -2,11 +2,12 @@ NeoPHP
 ======
 
 <h3>1. Que atributos tiene</h3>
-  - Utiliza el patrón de diseño MVC (Model Vista Controlador)
-  - Te mantiene todo ordenado, por que te obliga a crear los archivos con una nomenclatura dada y en lugares especificos
-  - Tiene 1 solo punto de ingreso (index.php)
+  - Patrón de diseño MVC (Modelo Vista Controlador)
+  - Clases ordenadas de manera jerarquica y estructuradas mediante nomenclatura especifica
+  - Unico punto de ingreso (index.php)
+  - Soporte para multiples lenguages
   - No se utilizan nunca variables $_GET, $_POST o $_REQUEST. Estas se mapean en argumentos en las acciones de los controladores lo que hace que quede todo mucho más prolijo.
-  - Tampoco se utilizan variables $_SESSION, La sesión se usa a través de una clase especial que maneja dicha variable,
+  - No se utilizan variables $_SESSION, La sesión se usa a través de una clase especial que maneja dicha variable,
   - Para base de datos no se pone NADA de SQL, las tablas están modeladas como objetos y a través de métodos podes hacer búsquedas, inserciones, eliminaciónes, etc. Todas las consultas se hacen de manera homogenea y transparentes al que programe por afuera del framework y además utiliza PDO con lo cual no importa la base de datos que este corriendo atrás.
 
 <h3>2. Como funciona</h3>
@@ -107,7 +108,37 @@ $helloWorldView->setHelloWorldText ("Hola Mundito");
 $helloWorldView->render();
 `````
 
-2.3. Sesión
+2.3. Traducciones
+
+Las traducciones se hacen utilizando la clase Translator. Utiliza una nomenclatura especial para poder cargar correctamente los archivos de idiomas. Los archivos de idioma se crean en la carpeta resources. Ahi se puede crear una estructura jerarquiqua de carpetas finalizando con archivos .ini en donde estaran finalmente los textos en los distintos idiomas.
+
+El archivo .ini de idioma debe tener la siguiente estructura
+
+`````ini
+[es]
+firstname = nombre
+lastname = apellido
+
+[en]
+firstname = FirstName
+lastname = LastName
+`````
+
+Luego desde PHP se debe especificar el idioma con el que trabajará, por defecto se utilizara el idioma predeterminado del servidor web. Para establecer el idioma hay que ejecutar la siguiente sentencia
+
+`````php
+App::getInstance()->getTranslator()->setLanguage("pt");
+`````
+
+Finalmente para obtener los textos traducidos, hay que escribir sentencias como las siguientes
+
+`````php
+App::getInstance()->getTranslator()->getText("car");  //Buscara "car" en el archivo *resources/default.ini*
+App::getInstance()->getTranslator()->getText("general.firstname");  //Buscara "firstname" en el archivo *resources/general.ini*
+App::getInstance()->getTranslator()->getText("views.aboutus.welcome");  //Buscara "welcome" en el archivo *resources/views/aboutus.ini*
+`````
+
+2.4. Sesión
 
 Para usar sesión tenes que usar la clase Session, se usa de la siguiente manera.
  
@@ -129,7 +160,7 @@ Para cerrar sesión
 App::getInstance()->getSession()->destroy();
 `````
 
-2.4. Base de datos
+2.5. Base de datos
 
 Para base de datos se usan las clases "Connection" y "DataObject"
 Para crear una nueva conexión a base de datos tenes que crear una clase "blablaConnection" que extienda de Connection con ciertos parametros. Utiliza PDO por consiguiente no importa con que base de datos te estes conectando. Podes crear mas de 1 conexión a base de datos, por ejemplo podrías tener una conexión a una base de datos en producción y o otra a una de pruebas, e sea podrias tener 2 clases asi
@@ -158,7 +189,7 @@ App::getInstance()->getConnection("production");
 App::getInstance()->getConnection("development");
 `````
 
-2.4.1. Consultas SQL
+2.5.1. Consultas SQL
 
 Si quisieramos hacer "SELECT * FROM User" e iterar por los resultados deberíamos hacer lo siguientes
 
@@ -177,13 +208,13 @@ while ($doUser->fetch())
 Tambien podrías obtener el resultSet en forma de array con el método fetchAll
 $resultSet = $doUser->fetchAll();
 
-Si quisieramos hacer "SELECT username FROM user WHERE username="alvarito" AND password="123"
+Si quisieramos hacer "SELECT username FROM user WHERE username="pepech" AND password="123"
 
 `````php
 $connection = App::getInstance()->getConnection("production");
 $doUser = $connection->getDataObject("User");
 $doUser->addSelectField ("username");
-$doUser->addWhereCondition("username='alvarito'");
+$doUser->addWhereCondition("username='pepech'");
 $doUser->addWhereCondition("password='123'");
 $doUser->find(true); //El true indica que hace un fetch automatico
 echo $doUser->username;
