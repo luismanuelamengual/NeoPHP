@@ -76,14 +76,39 @@ class HelloWorldView extends HTMLView
     protected function buildHead ()
     {
         $this->headTag->add(new Tag("title", array(), "Hello World Example"));
+        $this->headTag->add(new Tag("meta", array("http-equiv"=>"content-type", "content"=>"text/html; charset=UTF-8")));
+        $this->headTag->add(new Tag("meta", array("name"=>"language", "content"=>"es")));
     }
    
     protected function buildBody ()
     {
-        $this->bodyTag->add(new Tag("span", array("class"=>"helloWorld"), "Hello World");
+        $this->bodyTag->add($this->createHelloWorldPanel());
+    }
+    
+    protected function createHelloWorldPanel ()
+    {
+        return new Tag("div", array("class"=>"helloWorldPanel"), new Tag("span", array(), "HelloWorld"));
     }
 }
 ?>
+`````
+
+El resultado en HTML de ejecutar el método render a esta vista será el siguiente
+
+`````html
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Hello World Example</title>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+        <meta name="language" content="es" />
+    </head>
+    <body>
+        <div class="helloWorldPanel">
+            <span>HelloWorld</span>
+        </div>
+    </body>
+</html>
 `````
 
 Paso 2: Crear una acción que renderize la vista
