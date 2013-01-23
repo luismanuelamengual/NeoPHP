@@ -8,7 +8,10 @@ class Translator
     
     private function __construct() 
     {
-        $this->setLanguage("es");
+        $lang = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2);
+        if (empty($lang))
+            $lang = "es";
+        $this->setLanguage($lang);
     }
 
     public static function getInstance()
