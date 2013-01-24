@@ -14,12 +14,14 @@ NeoPHP
 
 2.1. Controladores
 
-Se utiliza solo 1 url y una acción asociada, es decir supongamos que el proyecto se llama "azureus", entonces la url para acceder a las paginas va a ser del tipo "http://localhost/azureus/?action=???". La acción va a indicar que acción hacer en la aplicación, por ejemplo:
-  - action=site/showMainPage   => Se ejecutará la función "showMainPageAction" que va a estar dentro del controlador "SiteController" (La clase SiteController deberá estar en la carpeta "controllers", es decir quedaría app->controllers->SiteController)
-  - action=site/users/addUser => Se ejecutará la función "addUserAction" que va a estar dentro del controlador "UsersController" (Este controlador lo buscaría en la siguiente ruta app->controllers->site->UsersController)
-  - action=site/ => Ejecutaría la function "defaultAction" en el controlador "SiteController"
+Se utiliza solo 1 url y una acción asociada, es decir supongamos que el proyecto se llama "azureus", entonces la url para acceder a las paginas (o servicios web) va a ser del tipo "http://localhost/azureus/?action=???". 
+La acción es un string separado por barras que indica que controlador va a atender la petición y que función dentro de dicho controlador es el que se va a ejecutar.
 
-Si no se especifica una acción, el framework busca un controlador con el nombre "MainController" y dentro de el la funcion "defaultAction", es decir, si se quiere hacer el famoso "Hola Mundo" quedaría de la siguiente manera
+Por ejemplo, si la acción es *site/user/addUser* entonces el framework va a buscar en la carpeta *app/controllers/site/* el controlador de nombre *UserController* y dentro de dicho controlador va a llamar a la función *addUserAction*.
+Si se especifica solo *site/user/* entonces se va a llamar a la funcion *defaultAction* dentro del controlador UserController.
+Por último, si no se especifica ninguna acción entonces se va a ejecutar la acción *defaultAction* dentro del controlador *MainController* en *app/controllers/*
+
+Si se quisiera hacer el famoso "Hola Mundo" quedaría de la siguiente manera:
 
 `````php
 <?php
@@ -194,7 +196,7 @@ App::getInstance()->getTranslator()->getText("views.aboutus.welcome");  //Buscar
 
 2.4. Sesión
 
-Para usar sesión tenes que usar la clase Session, se usa de la siguiente manera.
+Para manejo de sesión se tiene que usar la clase Session, se usa de la siguiente manera.
  
 Para iniciar sesión
 `````php
