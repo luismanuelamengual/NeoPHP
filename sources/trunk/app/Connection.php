@@ -1,6 +1,6 @@
 <?php
 
-class Connection
+abstract class Connection
 {
     private $dsn;
     private $username;
