@@ -48,18 +48,45 @@ class SiteController extends Controller
 ?>
 `````
 
-La idea con los controladores es crear controladores que agrupen funcionalidad sobre 1 mismo aspecto, es decir podriamos crear un controlador que maneje toda la lógica de usuarios, por ejemplo UserController que tenga las siguientes acciones:
-  - addUserAction  //Accion de agregar un usuario a la base de datos 
-  - updateUserAction  //Accion de actualizar un usuario a la base de datos 
-  - deleteUserAction  //Accion de borrar un usuario a la base de datos 
-  - showUserFormAction  //Muestra el formulario de datos de usuario
-  - showUserInformationAction  //Muestra el formulario de datos de usuario una vez ingresado/actualizado (información no editable)
+La idea con los controladores es crear controladores que agrupen funcionalidad sobre 1 mismo aspecto, es decir podriamos crear un controlador que maneje toda la lógica de usuarios, por ejemplo una clase UserController que tenga el siguiente formato:
+
+`````php
+<?php
+class UsersController extends Controller
+{
+    public function addUserAction ($firstname, $lastname, $username, $password)
+    {
+        //Agregar un usuario a la base de datos
+    }
+    
+    public function updateUserAction ($userid, $firstname, $lastname, $username, $password)
+    {
+        //Actualizar un usuario en la base de datos
+    }
+    
+    public function deleteUserAction ($userid)
+    {
+        //Eliminar un usuario de la base de datos
+    }
+    
+    public function showUserFormAction ($userid)
+    {
+        //Renderizar una vista que muestre un formulario de inserción/actualización de usuarios
+    }
+    
+    public function showUserDataAction ($userid)
+    {
+        //Renderizar una vista que muestre la información del usuario
+    }
+}
+?>
+`````
 
 2.2. Vistas
 
-Crear vistas es muy facil, todas las vistas heredan de una clase "View" que contiene un método "render", y hay una clase incluida en el framework, que es la clase HTMLView que te permite crear vistas de tipo HTML. Si queres crear un vista con el clasico "hola mundo" seria de la siguiente manera:
+Crear vistas es muy facil, todas las vistas heredan de una clase "View" que contiene un método "render", y hay una clase incluida en el framework, que es la clase HTMLView que te permite crear vistas de tipo HTML. Si se quiere crear un vista con el clasico "hola mundo" seria de la siguiente manera:
 
-Paso 1: Crear un archivo PHP llamado "HelloWorldView" dentro de la carpeta "view"
+Paso 1: Crear un archivo PHP llamado "HelloWorldView.php" dentro de la carpeta "view"
 
 `````php
 <?php
@@ -133,6 +160,8 @@ $helloWorldView->setHelloWorldText ("Hola Mundito");
 $helloWorldView->render();
 `````
 
+Notece que dentro de las vistas no debería haber ninguna logica de negocios (solo el renderizado de datos). La lógica, como por ejemplo inserciónes/actualización en base de datos deberían ser hechas en los controladores.
+
 2.3. Traducciones
 
 Las traducciones se hacen utilizando la clase Translator. Utiliza una nomenclatura especial para poder cargar correctamente los archivos de idiomas. Los archivos de idioma se crean en la carpeta resources. Ahi se puede crear una estructura jerarquiqua de carpetas finalizando con archivos .ini en donde estaran finalmente los textos en los distintos idiomas.
@@ -188,12 +217,10 @@ App::getInstance()->getSession()->destroy();
 2.5. Base de datos
 
 Para base de datos se usan las clases "Connection" y "DataObject"
-Para crear una nueva conexión a base de datos tenes que crear una clase "blablaConnection" que extienda de Connection con ciertos parametros. Utiliza PDO por consiguiente no importa con que base de datos te estes conectando. Podes crear mas de 1 conexión a base de datos, por ejemplo podrías tener una conexión a una base de datos en producción y o otra a una de pruebas, e sea podrias tener 2 clases asi
+Para crear una nueva conexión a base de datos se tiene que crear una clase de tipo "xxxConnection" que extienda de Connection con ciertos parametros. Utiliza PDO por consiguiente no importa con que base de datos con la que este conectado atras. 
+Se pueden crear más de 1 conexión a base de datos, por ejemplo se podría tener una conexión a una base de datos en producción y o otra a una de pruebas, o sea, se podría tener 2 clases que hereden de Connection, Una llamada ProductionConnection y otra llamada DevelopmentConnection (creadass dentro de la carpeta connections)
 
-ProductionConnection (quedaría en app->connections->ProductionConnection.php)
-DevelopmentConnection (quddaria en app->connections->DevelopmentConnection.php)
-
-Por ejemplo, el archivo de conexión a la de producción sería de una base de datos mysql sería de la siguiente manera:
+Por ejemplo, el archivo de conexión a la de producción, a una base de datos mysql, sería de la siguiente manera:
 
 `````php
 <?php
@@ -287,7 +314,7 @@ $doUser->update();
 <h3>3. Como comenzar a utilizarlo</h3>
 Solo se tiene que copiar la carpeta "trunk" al raiz de un proyecto nuevo y ya está, de ahi en más ya se puede empezar a crear controladores propios y vistas dentro del mismo.
 
-Es posible que en entornos Windows haya que configurar en el archivo de configuración de apache (httpd.conf) el DocumentIndex para que apunte a index.php en lugar de index.html
+Es posible que en entornos *Windows* haya que configurar en el archivo de configuración de apache (httpd.conf) el DocumentIndex para que apunte a index.php en lugar de index.html
 
 Es recomendado utilizar ciertas configuración en el php.ini (no obligatorias), estas son:
   - session.auto_start = 1
