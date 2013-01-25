@@ -1,6 +1,6 @@
 <?php
 
-require_once ("app/widgets/RawHTMLElement.php");
+require_once ("app/widgets/html/RawHTMLElement.php");
 
 class Tag implements HTMLElement
 {

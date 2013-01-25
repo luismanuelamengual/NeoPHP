@@ -1,6 +1,6 @@
 <?php
 
-require_once ("app/widgets/Tag.php");
+require_once ("app/widgets/html/Tag.php");
 
 class HTMLView implements View
 {

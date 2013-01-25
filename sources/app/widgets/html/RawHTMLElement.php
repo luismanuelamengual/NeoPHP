@@ -1,6 +1,6 @@
 <?php
 
-require_once ("app/widgets/HTMLElement.php");
+require_once ("app/widgets/html/HTMLElement.php");
 
 class RawHTMLElement implements HTMLElement
 {
