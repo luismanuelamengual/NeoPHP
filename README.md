@@ -10,7 +10,35 @@ NeoPHP
   - No se utilizan variables $_SESSION, La sesión se usa a través de una clase especial que maneja dicha variable,
   - Para base de datos no se pone NADA de SQL, las tablas están modeladas como objetos y a través de métodos se puede hacer búsquedas, inserciones, eliminaciónes, etc. Todas las consultas se hacen de manera homogenea y transparentes al que programe por afuera del framework y además utiliza PDO con lo cual no importa la base de datos que este corriendo atrás.
 
-<h3>2. Funcionamiento</h3>
+<h3>2. Estructura</h3>
+
+<pre>
+{proyectname}/
+  index.php             Punto de ingreso a la aplicación
+  app/                  Carpeta que contiene todos los archivos de aplicación
+    connections/        Contiene todas las conexiones a base de datos que se utilicen
+    controllers/        Contiene los controladores (capa de lógica de negocios)
+    models/             Contiene todos los tipos las entidades
+    resources/          Contiene archivos de idioma para la aplicación
+    utils/              Contiene clases de utilidades generales
+    views/              Contiene todas las vistas de la aplicación (capa de presentación)
+    widgets/            Contiene componentes creados por el usuario para ser usados en las vistas
+    App.php             Clase principal de la aplicación. A través de este objeto se tiene acesso a cualquier lugar
+    Connection.php      Clase para manejo de una conexión a Base de Datos
+    Controller.php      Clase del cual extender para crear un Controlador
+    DataObject.php      Clase para crear objetos que tengan interacción con la base de datos
+    Model.php           Clase del cual extender para crear un Modelo
+    Preferences.php     Clase para almacenar cualquier configuración o preferencia de la aplicación
+    Session.php         Clase para el manejo de Sesión
+    Translator.php      Clase para manejar traducción en distintos idiomas
+    View.php            Clase del cual extender para crear Vistas
+  assets/               Contiene librerías de terceros utilizadas por la aplicación
+  css/                  Contiene archivos de estlios
+  images/               Contiene imagenes utilizadas en la aplicación (no dependientes del estilo o tema)
+  js/                   Contiene archivos javascript utilizadas en la aplicación
+</pre>
+
+<h3>3. Funcionamiento</h3>
 
 <h4>2.1. Controladores</h4>
 
@@ -122,6 +150,20 @@ class HelloWorldView extends HTMLView
 ?>
 `````
 
+Paso 2: Crear una acción que renderize la vista
+
+`````php
+<?php
+class MainController extends Controller
+{
+    public function defaultAction ()
+    {
+        App::getInstance()->getView("helloWorld")->render ();
+    }
+}
+?>
+`````
+
 El resultado en HTML de ejecutar el método render a esta vista será el siguiente
 
 `````html
@@ -140,21 +182,7 @@ El resultado en HTML de ejecutar el método render a esta vista será el siguien
 </html>
 `````
 
-Paso 2: Crear una acción que renderize la vista
-
-`````php
-<?php
-class MainController extends Controller
-{
-    public function defaultAction ()
-    {
-        App::getInstance()->getView("helloWorld")->render ();
-    }
-}
-?>
-`````
-
-y listo !!, ahi queda. Eventualmente se podría configurar ciertas cosas a la vista antes de renderizarla, por ejemplo podrías hacer lo siguiente:
+Eventualmente se podría configurar ciertas cosas a la vista antes de renderizarla, por ejemplo se podría hacer lo siguiente:
 
 `````php
 $helloWorldView = App::getInstance()->getView("helloWorld");
@@ -314,7 +342,7 @@ $doUser->addWhereStatement("username='pepe'");
 $doUser->update();
 `````
 
-<h3>3. Instalación y puesta en marcha</h3>
+<h3>4. Instalación y puesta en marcha</h3>
 Solo se tiene que copiar el contenido de la carpeta "sources" al raiz de un proyecto nuevo y listo, de ahi en más ya se puede empezar a crear controladores propios y vistas dentro del mismo.
 
 Es posible que en entornos *Windows* haya que configurar en el archivo de configuración de apache (httpd.conf) el DocumentIndex para que apunte a index.php en lugar de index.html
