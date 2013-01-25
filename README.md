@@ -8,11 +8,11 @@ NeoPHP
   - Soporte para multiples lenguages
   - No se utilizan nunca variables $_GET, $_POST o $_REQUEST. Estas se mapean en argumentos en las acciones de los controladores lo que hace que quede todo mucho más prolijo.
   - No se utilizan variables $_SESSION, La sesión se usa a través de una clase especial que maneja dicha variable,
-  - Para base de datos no se pone NADA de SQL, las tablas están modeladas como objetos y a través de métodos podes hacer búsquedas, inserciones, eliminaciónes, etc. Todas las consultas se hacen de manera homogenea y transparentes al que programe por afuera del framework y además utiliza PDO con lo cual no importa la base de datos que este corriendo atrás.
+  - Para base de datos no se pone NADA de SQL, las tablas están modeladas como objetos y a través de métodos se puede hacer búsquedas, inserciones, eliminaciónes, etc. Todas las consultas se hacen de manera homogenea y transparentes al que programe por afuera del framework y además utiliza PDO con lo cual no importa la base de datos que este corriendo atrás.
 
 <h3>2. Como funciona</h3>
 
-2.1. Controladores
+<h4>2.1. Controladores</h4>
 
 Se utiliza solo 1 url y una acción asociada, es decir supongamos que el proyecto se llama "azureus", entonces la url para acceder a las paginas (o servicios web) va a ser del tipo "http://localhost/azureus/?action=???". 
 La acción es un string separado por barras que indica que controlador va a atender la petición y que función dentro de dicho controlador es el que se va a ejecutar.
@@ -84,7 +84,7 @@ class UsersController extends Controller
 ?>
 `````
 
-2.2. Vistas
+<h4>2.2. Vistas</h4>
 
 Crear vistas es muy facil, todas las vistas heredan de una clase "View" que contiene un método "render", y hay una clase incluida en el framework, que es la clase HTMLView que te permite crear vistas de tipo HTML. Si se quiere crear un vista con el clasico "hola mundo" seria de la siguiente manera:
 
@@ -154,7 +154,7 @@ class MainController extends Controller
 ?>
 `````
 
-Y listo !!, ahi queda. Eventualmente se podría configurar ciertas cosas a la vista antes de renderizarla, por ejemplo podrías hacer lo siguiente:
+y listo !!, ahi queda. Eventualmente se podría configurar ciertas cosas a la vista antes de renderizarla, por ejemplo podrías hacer lo siguiente:
 
 `````php
 $helloWorldView = App::getInstance()->getView("helloWorld");
@@ -164,7 +164,7 @@ $helloWorldView->render();
 
 Notece que dentro de las vistas no debería haber ninguna logica de negocios (solo el renderizado de datos). La lógica, como por ejemplo inserciónes/actualización en base de datos deberían ser hechas en los controladores.
 
-2.3. Traducciones
+<h4>2.3. Traducciones</h4>
 
 Las traducciones se hacen utilizando la clase Translator. Utiliza una nomenclatura especial para poder cargar correctamente los archivos de idiomas. Los archivos de idioma se crean en la carpeta resources. Ahi se puede crear una estructura jerarquiqua de carpetas finalizando con archivos .ini en donde estaran finalmente los textos en los distintos idiomas.
 
@@ -194,7 +194,7 @@ App::getInstance()->getTranslator()->getText("general.firstname");  //Buscara "f
 App::getInstance()->getTranslator()->getText("views.aboutus.welcome");  //Buscara "welcome" en el archivo *resources/views/aboutus.ini*
 `````
 
-2.4. Sesión
+<h4>2.4. Sesión</h4>
 
 Para manejo de sesión se tiene que usar la clase Session, se usa de la siguiente manera.
  
@@ -216,7 +216,7 @@ Para cerrar sesión
 App::getInstance()->getSession()->destroy();
 `````
 
-2.5. Base de datos
+<h4>2.5. Base de datos</h4>
 
 Para base de datos se usan las clases "Connection" y "DataObject"
 Para crear una nueva conexión a base de datos se tiene que crear una clase de tipo "xxxConnection" que extienda de Connection con ciertos parametros. Utiliza PDO por consiguiente no importa con que base de datos con la que este conectado atras. 
