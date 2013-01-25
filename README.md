@@ -1,7 +1,7 @@
 NeoPHP
 ======
 
-<h3>1. Que atributos tiene</h3>
+<h3>1. Atributos</h3>
   - Patrón de diseño MVC (Modelo Vista Controlador)
   - Clases ordenadas de manera jerarquica y estructuradas mediante nomenclatura especifica
   - Unico punto de ingreso (index.php)
@@ -10,7 +10,7 @@ NeoPHP
   - No se utilizan variables $_SESSION, La sesión se usa a través de una clase especial que maneja dicha variable,
   - Para base de datos no se pone NADA de SQL, las tablas están modeladas como objetos y a través de métodos se puede hacer búsquedas, inserciones, eliminaciónes, etc. Todas las consultas se hacen de manera homogenea y transparentes al que programe por afuera del framework y además utiliza PDO con lo cual no importa la base de datos que este corriendo atrás.
 
-<h3>2. Como funciona</h3>
+<h3>2. Funcionamiento</h3>
 
 <h4>2.1. Controladores</h4>
 
@@ -186,12 +186,13 @@ Luego desde PHP se debe especificar el idioma con el que trabajará, por defecto
 App::getInstance()->getTranslator()->setLanguage("pt");
 `````
 
-Finalmente para obtener los textos traducidos, hay que escribir sentencias como las siguientes
+Finalmente para la obtención de los textos traducidos hay que llamar a la funcion getText. A continuación se muestran algunos ejemplos:
+
 
 `````php
-App::getInstance()->getTranslator()->getText("car");  //Buscara "car" en el archivo *resources/default.ini*
-App::getInstance()->getTranslator()->getText("general.firstname");  //Buscara "firstname" en el archivo *resources/general.ini*
-App::getInstance()->getTranslator()->getText("views.aboutus.welcome");  //Buscara "welcome" en el archivo *resources/views/aboutus.ini*
+App::getInstance()->getTranslator()->getText("car");  //Buscará "car" en el archivo *resources/default.ini*
+App::getInstance()->getTranslator()->getText("general.firstname");  //Buscará "firstname" en el archivo *resources/general.ini*
+App::getInstance()->getTranslator()->getText("views.aboutus.welcome");  //Buscará "welcome" en el archivo *resources/views/aboutus.ini*
 `````
 
 <h4>2.4. Sesión</h4>
@@ -313,8 +314,8 @@ $doUser->addWhereStatement("username='pepe'");
 $doUser->update();
 `````
 
-<h3>3. Como comenzar a utilizarlo</h3>
-Solo se tiene que copiar la carpeta "trunk" al raiz de un proyecto nuevo y ya está, de ahi en más ya se puede empezar a crear controladores propios y vistas dentro del mismo.
+<h3>3. Instalación y puesta en marcha</h3>
+Solo se tiene que copiar el contenido de la carpeta "sources" al raiz de un proyecto nuevo y listo, de ahi en más ya se puede empezar a crear controladores propios y vistas dentro del mismo.
 
 Es posible que en entornos *Windows* haya que configurar en el archivo de configuración de apache (httpd.conf) el DocumentIndex para que apunte a index.php en lugar de index.html
 
