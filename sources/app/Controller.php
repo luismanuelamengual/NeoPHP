@@ -20,6 +20,8 @@ abstract class Controller
                         $parameterValue = $params[$methodParam->getName()];
                     else if (isset($_REQUEST[$methodParam->getName()]))
                         $parameterValue = $_REQUEST[$methodParam->getName()];
+                    else if ($methodParam->getName() == "php_input")
+                        $parameterValue = @file_get_contents("php://input");
                     $actionParameters[] = $parameterValue;
                 }
                 call_user_func_array(array($this, $actionFunction), $actionParameters);
