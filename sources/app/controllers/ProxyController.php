@@ -2,7 +2,7 @@
 
 require_once ("app/utils/WebUtils.php");
 
-class AjaxController extends Controller
+class ProxyController extends Controller
 {
     public function getContentsAction ($url, $method="GET", $contentType="application/x-www-form-urlencoded", $content=null, $timeout=null, $proxy=null)
     {

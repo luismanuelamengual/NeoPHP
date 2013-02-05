@@ -128,8 +128,9 @@ class DataObject
         return $this->sql->joinStatement;
     }
     
-    public function addJoin (DataObject $dataObject, $type, $sourceField, $destinationField=null)
+    public function addJoin (DataObject $dataObject, $type=DataObject::JOINTYPE_INNER, $sourceField=null, $destinationField=null)
     {
+        $sourceField = !empty($sourceField)? $sourceField : (lcfirst($dataObject->getTableName()) . "id");
         $destinationField = !empty($destinationField)? $destinationField : $sourceField;
         if (empty($this->sql->joinStatement))
             $this->sql->joinStatement = "";
