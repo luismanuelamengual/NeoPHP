@@ -68,6 +68,7 @@ class App
         }
         catch (Exception $ex)
         {
+            print($ex);
             $this->getLogger()->error ($ex);
         }
     }
