@@ -16,6 +16,7 @@ class App
     
     private function __construct() 
     {
+        set_error_handler(array("App", "errorHandler"), E_ALL);
     }
 
     public static function getInstance()
@@ -47,21 +48,28 @@ class App
     
     public function executeAction($action, $params=array())
     {
-        if ($action == null)
-            $action = "default";
-        $controllerSeparatorPosition = strrpos($action, "/");
-        if ($controllerSeparatorPosition === FALSE)
+        try
         {
-            $controllerName = "main";
-            $controllerAction = $action;
+            if ($action == null)
+                $action = "default";
+            $controllerSeparatorPosition = strrpos($action, "/");
+            if ($controllerSeparatorPosition === FALSE)
+            {
+                $controllerName = "main";
+                $controllerAction = $action;
+            }
+            else
+            {
+                $controllerName = substr($action,0,$controllerSeparatorPosition);
+                $controllerAction = substr($action,$controllerSeparatorPosition+1,strlen($action));
+            }
+            $controller = $this->getController($controllerName);
+            $controller->executeAction($controllerAction, $params);
         }
-        else
+        catch (Exception $ex)
         {
-            $controllerName = substr($action,0,$controllerSeparatorPosition);
-            $controllerAction = substr($action,$controllerSeparatorPosition+1,strlen($action));
+            $this->getLogger()->error ($ex);
         }
-        $controller = $this->getController($controllerName);
-        $controller->executeAction($controllerAction, $params);
     }
 
     public function redirectAction($action, $params=array())
@@ -129,6 +137,17 @@ class App
     {
         require_once ('app/Translator.php');
         return Translator::getInstance();
+    }
+    
+    public function getLogger ()
+    {
+        require_once ('app/Logger.php');
+        return Logger::getInstance();
+    }
+    
+    public function errorHandler ($errno, $errstr, $errfile, $errline)
+    {
+        throw new ErrorException($errstr, $errno, 0, $errfile, $errline);
     }
 }
 
