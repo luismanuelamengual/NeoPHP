@@ -2,40 +2,33 @@
 
 class Session
 {
-    const SESSION_STARTED = TRUE;
-    const SESSION_NOT_STARTED = FALSE;
-    private $sessionState = self::SESSION_NOT_STARTED;
     private static $instance;
    
     private function __construct()
     {
+        $this->startSession();
     }
 
     public static function getInstance()
     {
         if (!isset(self::$instance))
-        {
             self::$instance = new self;
-            self::$instance->startSession();
-        }
         return self::$instance;
     }
     
-    public function getName()
+    public function getName ()
     {
         return session_name();
     }
     
-    public function getId()
+    public function getId ()
     {
         return session_id();
     }
-
+    
     public function startSession()
     {
-        if ($this->sessionState == self::SESSION_NOT_STARTED)
-            $this->sessionState = session_start();
-        return $this->sessionState;
+        try { session_start(); } catch (Exception $ex) {}
     }
 
     public function __set($name, $value)
@@ -61,18 +54,17 @@ class Session
 
     public function destroy()
     {
-        if ($this->sessionState == self::SESSION_STARTED)
-        {
-            $this->sessionState = !session_destroy();
-            unset($_SESSION);
-            return !$this->sessionState;
-        }
-        return FALSE;
+        session_destroy();
     }
 
     public function isStarted ()
     {
-        return $this->sessionState == self::SESSION_STARTED && (sizeof($_SESSION) > 0);
+        return sizeof($_SESSION) > 0;
+    }
+    
+    public function getSessionVars ()
+    {
+        return $_SESSION;
     }
 }
 
