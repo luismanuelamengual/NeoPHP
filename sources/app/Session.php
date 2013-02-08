@@ -3,11 +3,6 @@
 class Session
 {
     private static $instance;
-   
-    private function __construct()
-    {
-        $this->startSession();
-    }
 
     public static function getInstance()
     {
