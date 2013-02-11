@@ -246,17 +246,17 @@ class DataObject
         $sql = "SELECT ";
         $sql .= !empty($this->sql->selectStatement)? $this->sql->selectStatement : "*";
         $sql .= " FROM " . $this->tableName;
-        if ($this->sql->alias)
+        if (isset($this->sql->alias))
             $sql .= " AS " . $this->sql->alias;
-        if ($this->sql->joinStatement)
+        if (isset($this->sql->joinStatement))
             $sql .= " " . $this->sql->joinStatement;
-        if ($this->sql->whereStatement)
+        if (isset($this->sql->whereStatement))
             $sql .= " WHERE " . $this->sql->whereStatement;
-        if ($this->sql->havingStatement)
+        if (isset($this->sql->havingStatement))
             $sql .= " HAVING " . $this->sql->havingStatement;
-        if ($this->sql->groupByStatement)
+        if (isset($this->sql->groupByStatement))
             $sql .= " GROUP BY " . $this->sql->groupByStatement;
-        if ($this->sql->orderByStatement)
+        if (isset($this->sql->orderByStatement))
             $sql .= " ORDER BY " . $this->sql->orderByStatement;
         return $sql;
     }
