@@ -48,6 +48,7 @@ class App
     
     public function executeAction($action, $params=array())
     {
+        $returnValue = FALSE;
         try
         {
             if ($action == null)
@@ -64,13 +65,14 @@ class App
                 $controllerAction = substr($action,$controllerSeparatorPosition+1,strlen($action));
             }
             $controller = $this->getController($controllerName);
-            $controller->executeAction($controllerAction, $params);
+            $returnValue = $controller->executeAction($controllerAction, $params);
         }
         catch (Exception $ex)
         {
             print($ex);
             $this->getLogger()->error ($ex);
         }
+        return $returnValue;
     }
 
     public function redirectAction($action, $params=array())

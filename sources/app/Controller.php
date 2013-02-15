@@ -4,6 +4,7 @@ abstract class Controller
 { 
     public function executeAction($action, $params=array())
     {
+        $returnValue = FALSE;
         $executeAction = $this->onBeforeActionExecution($action);
         if ($executeAction === true)
         {
@@ -24,7 +25,7 @@ abstract class Controller
                         $parameterValue = @file_get_contents("php://input");
                     $actionParameters[] = $parameterValue;
                 }
-                call_user_func_array(array($this, $actionFunction), $actionParameters);
+                $returnValue = call_user_func_array(array($this, $actionFunction), $actionParameters);
             }
             else
             {
@@ -32,6 +33,7 @@ abstract class Controller
             }
             $this->onAfterActionExecution($action);
         }
+        return $returnValue;
     }
     
     public function onBeforeActionExecution ($action)
