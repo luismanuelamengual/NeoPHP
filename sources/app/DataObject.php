@@ -65,7 +65,7 @@ class DataObject
     
     public function getTableAlias ()
     {
-        return $this->sql->alias;
+        return isset($this->sql->alias)? $this->sql->alias : "";
     }
     
     public function setSelectStatement ($selectStatement)
@@ -75,7 +75,7 @@ class DataObject
     
     public function getSelectStatement ()
     {
-        return $this->sql->selectStatement;
+        return isset($this->sql->selectStatement)? $this->sql->selectStatement : "";
     }
     
     public function setWhereStatement ($whereStatement)
@@ -85,7 +85,7 @@ class DataObject
     
     public function getWhereStatement ()
     {
-        return $this->sql->whereStatement;
+        return isset($this->sql->whereStatement)? $this->sql->whereStatement : "";
     }
     
     public function setHavingStatement ($havingStatement)
@@ -95,7 +95,7 @@ class DataObject
     
     public function getHavingStatement ()
     {
-        return $this->sql->havingStatement;
+        return isset($this->sql->havingStatement)? $this->sql->havingStatement : "";
     }
     
     public function setOrderByStatement ($orderByStatement)
@@ -105,7 +105,7 @@ class DataObject
     
     public function getOrderByStatement ()
     {
-        return $this->sql->orderByStatement;
+        return isset($this->sql->orderByStatement)? $this->sql->orderByStatement : "";
     }
     
     public function setGroupByStatement ($groupByStatement)
@@ -115,7 +115,7 @@ class DataObject
     
     public function getGroupByStatement ()
     {
-        return $this->sql->groupByStatement;
+        return isset($this->sql->groupByStatement)? $this->sql->groupByStatement: "";
     }
     
     public function setJoinStatement ($joinStatement)
@@ -125,7 +125,7 @@ class DataObject
     
     public function getJoinStatement ()
     {
-        return $this->sql->joinStatement;
+        return isset($this->sql->joinStatement)? $this->sql->joinStatement : "";
     }
     
     public function addJoin (DataObject $dataObject, $type=DataObject::JOINTYPE_INNER, $sourceField=null, $destinationField=null)
