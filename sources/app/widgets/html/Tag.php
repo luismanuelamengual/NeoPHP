@@ -37,6 +37,11 @@ class Tag implements HTMLElement
     {
         $this->attributes[$key] = $value;
     }
+    
+    public function getAttribute ($key)
+    {
+        return $this->attributes[$key];
+    }
 
     public function setContent ($content)
     {
