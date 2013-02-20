@@ -23,7 +23,11 @@ class RawHTMLElement implements HTMLElement
     
     public function toHtml($offset=0)
     {
-        return $this->html;
+        $html = "";
+        if ($offset > 0)
+            $html .= str_repeat(" ", $offset);
+        $html .= $this->html;
+        return $html;
     }
 }
 
