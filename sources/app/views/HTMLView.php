@@ -1,6 +1,7 @@
 <?php
 
 require_once ("app/widgets/html/Tag.php");
+require_once ("app/widgets/html/HTMLComponent.php");
 
 class HTMLView implements View
 {
@@ -93,6 +94,28 @@ class HTMLView implements View
             $this->bodyTag->setAttribute("onload", $onLoadScript);
             array_push($this->hashes, $hash);
         }
+    }
+    
+    protected function addComponent (HTMLComponent $component, $parentTag=null)
+    {
+        $componentTag = $component->getComponent();
+        if (!empty($componentTag))
+        {
+            if (empty($parentTag))
+                $parentTag = $this->bodyTag;
+            $parentTag->add ($componentTag);
+        }  
+        $componentAggregates = $component->getComponentAggregates();
+        foreach ($componentAggregates->styleFiles as $styleFile)
+            $this->addStyleFile ($styleFile);
+        foreach ($componentAggregates->styles as $style)
+            $this->addStyle ($style);
+        foreach ($componentAggregates->scriptFiles as $scriptFile)
+            $this->addScriptFile ($scriptFile);
+        foreach ($componentAggregates->scripts as $script)
+            $this->addScript ($script);
+        foreach ($componentAggregates->onLoadScripts as $onLoadScript)
+            $this->addOnLoadScript ($onLoadScript);
     }
     
     protected function onViewBuilded()
