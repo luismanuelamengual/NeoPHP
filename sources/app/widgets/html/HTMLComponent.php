@@ -3,11 +3,13 @@
 abstract class HTMLComponent
 {
     private $created = false;
+    protected $attributes;
     protected $componentTag;
     protected $componentAggregates;
     
-    public function __construct() 
+    public function __construct($attributes=array()) 
     {
+        $this->attributes = $attributes;
         $this->componentTag = null;
         $this->componentAggregates = new stdClass();
         $this->componentAggregates->styleFiles = array();
