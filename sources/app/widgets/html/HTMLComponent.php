@@ -11,8 +11,13 @@ abstract class HTMLComponent implements HTMLElement
     public function __construct(HTMLView $view, $attributes=array()) 
     {
         $this->view = $view;
-        $this->attributes = $attributes;
+        $this->attributes = array_merge($this->getDefaultAttributes(), $attributes);
         $this->component = $this->createComponent();
+    }
+    
+    protected function getDefaultAttributes ()
+    {
+        return array ();
     }
     
     public function toHtml($offset=0)
