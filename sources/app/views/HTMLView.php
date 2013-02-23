@@ -9,11 +9,17 @@ class HTMLView implements View
     private $hashes = array();
     protected $docTypeDeclaration;
     protected $htmlTag;
-    protected $bodyTag;
     protected $headTag;
+    protected $bodyTag;
     
     public function __construct ()
     {
+        $this->docTypeDeclaration = '<!DOCTYPE html>';
+        $this->htmlTag = new Tag("html");
+        $this->headTag = new Tag("head");
+        $this->bodyTag = new Tag("body");
+        $this->htmlTag->add($this->headTag);
+        $this->htmlTag->add($this->bodyTag);
     }
     
     public function render()
@@ -21,20 +27,25 @@ class HTMLView implements View
         if (!$this->builded)
         {
             $this->build();
-            $this->onViewBuilded();
+            $this->onBuilded();
             $this->builded = true;
         }
         echo $this->docTypeDeclaration . "\n" . $this->htmlTag->toHtml();
     }
     
-    protected function build()
+    public function getHtmlTag ()
     {
-        $this->docTypeDeclaration = '<!DOCTYPE html>';
-        $this->htmlTag = new Tag("html");
-        $this->bodyTag = new Tag("body");
-        $this->headTag = new Tag("head");
-        $this->htmlTag->add($this->headTag);
-        $this->htmlTag->add($this->bodyTag);
+        return $this->htmlTag;
+    }
+    
+    public function getHeadTag ()
+    {
+        return $this->htmlTag;
+    }
+    
+    public function getBodyTag ()
+    {
+        return $this->htmlTag;
     }
     
     public function addStyleFile ($styleFile, $hash=null)
@@ -96,9 +107,8 @@ class HTMLView implements View
         }
     }
     
-    protected function onViewBuilded()
-    {
-    }
+    protected function build() {}
+    protected function onBuilded() {}
 }
 
 ?>
