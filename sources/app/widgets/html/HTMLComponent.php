@@ -1,68 +1,56 @@
 <?php
 
-abstract class HTMLComponent
+require_once ("app/widgets/html/HTMLElement.php");
+
+abstract class HTMLComponent implements HTMLElement
 {
     private $created = false;
+    protected $view;
     protected $attributes;
-    protected $componentTag;
-    protected $componentAggregates;
+    protected $component;
     
-    public function __construct($attributes=array()) 
+    public function __construct(HTMLView $view, $attributes=array()) 
     {
+        $this->view = $view;
         $this->attributes = $attributes;
-        $this->componentTag = null;
-        $this->componentAggregates = new stdClass();
-        $this->componentAggregates->styleFiles = array();
-        $this->componentAggregates->styles = array();
-        $this->componentAggregates->scriptFiles = array();
-        $this->componentAggregates->scripts = array();
-        $this->componentAggregates->onLoadScripts = array();
     }
     
-    public function getComponent ()
+    public function toHtml($offset=0)
     {
         if (!$this->created)
         {
-            $this->componentTag = $this->createComponent();
+            $this->component = $this->createComponent();
             $this->created = true;
         }
-        return $this->componentTag;
+        return !empty($this->component)? $this->component->toHtml($offset) : "";
+    }
+        
+    protected function addStyleFile ($styleFile, $hash=null)
+    {
+        $this->view->addStyleFile($styleFile, $hash);
     }
     
-    public function getComponentAggregates ()
+    protected function addStyle ($style, $hash=null)
     {
-        return $this->componentAggregates;
-    }
-    
-    protected function addStyleFile ($styleFile)
-    {
-        array_push($this->componentAggregates->styleFiles, $styleFile);
-    }
-    
-    protected function addStyle ($style)
-    {
-        array_push($this->componentAggregates->styles, $style);
+        $this->view->addStyle($style, $hash);
     }
 
-    protected function addScriptFile ($scriptFile)
+    protected function addScriptFile ($scriptFile, $hash=null)
     {
-        array_push($this->componentAggregates->scriptFiles, $scriptFile);
+        $this->view->addScriptFile($scriptFile, $hash);
     }
 
-    protected function addScript ($script)
+    protected function addScript ($script, $hash=null)
     {
-        array_push($this->componentAggregates->scripts, $script);
+        $this->view->addScript($script, $hash);
     }
     
-    protected function addOnLoadScript ($onLoadScript)
+    protected function addOnLoadScript ($onLoadScript, $hash=null)
     {
-        array_push($this->componentAggregates->onLoadScripts, $onLoadScript);
+        $this->view->addOnLoadScript($onLoadScript, $hash);
     }
     
-    protected function createComponent ()
-    {
-        return null;
-    }
+    protected function createComponent ();
 }
 
 ?>

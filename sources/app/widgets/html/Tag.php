@@ -16,18 +16,6 @@ class Tag implements HTMLElement
         $this->setContent($content);
     }
 
-    public function add ($tag)
-    {
-        $this->insert ($tag, sizeof($this->content));
-    }
-
-    public function insert ($tag, $position)
-    {
-        if (is_string($tag))
-            $tag = new RawHTMLElement($tag);   
-        array_splice($this->content, $position, 0, array($tag));
-    }
-
     public function setAttributes ($attributes)
     {
         $this->attributes = $attributes;
@@ -54,6 +42,18 @@ class Tag implements HTMLElement
         {
             $this->add ($content);
         }
+    }
+    
+    public function add ($tag)
+    {
+        $this->insert ($tag, sizeof($this->content));
+    }
+
+    public function insert ($tag, $position)
+    {
+        if (is_string($tag))
+            $tag = new RawHTMLElement($tag);   
+        array_splice($this->content, $position, 0, array($tag));
     }
 
     public function toHtml($offset=0)
