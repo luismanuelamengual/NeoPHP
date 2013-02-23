@@ -4,7 +4,6 @@ require_once ("app/widgets/html/HTMLElement.php");
 
 abstract class HTMLComponent implements HTMLElement
 {
-    private $created = false;
     protected $view;
     protected $attributes;
     protected $component;
@@ -13,15 +12,11 @@ abstract class HTMLComponent implements HTMLElement
     {
         $this->view = $view;
         $this->attributes = $attributes;
+        $this->component = $this->createComponent();
     }
     
     public function toHtml($offset=0)
     {
-        if (!$this->created)
-        {
-            $this->component = $this->createComponent();
-            $this->created = true;
-        }
         return !empty($this->component)? $this->component->toHtml($offset) : "";
     }
         
