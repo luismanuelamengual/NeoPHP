@@ -50,7 +50,7 @@ abstract class HTMLComponent implements HTMLElement
         $this->view->addOnLoadScript($onLoadScript, $hash);
     }
     
-    protected function createComponent ();
+    protected function createComponent () {}
 }
 
 ?>

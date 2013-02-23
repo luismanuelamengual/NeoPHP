@@ -37,7 +37,7 @@ class HTMLView implements View
         $this->htmlTag->add($this->bodyTag);
     }
     
-    protected function addStyleFile ($styleFile, $hash=null)
+    public function addStyleFile ($styleFile, $hash=null)
     {
         if ($hash == null)
             $hash = md5($styleFile);
@@ -48,7 +48,7 @@ class HTMLView implements View
         }
     }
     
-    protected function addStyle ($style, $hash=null)
+    public function addStyle ($style, $hash=null)
     {
         if ($hash == null)
             $hash = md5($style);
@@ -59,7 +59,7 @@ class HTMLView implements View
         }
     }
 
-    protected function addScriptFile ($scriptFile, $hash=null)
+    public function addScriptFile ($scriptFile, $hash=null)
     {
         if ($hash == null)
             $hash = md5($scriptFile);
@@ -70,7 +70,7 @@ class HTMLView implements View
         }
     }
 
-    protected function addScript ($script, $hash=null)
+    public function addScript ($script, $hash=null)
     {
         if ($hash == null)
             $hash = md5($script);
@@ -81,7 +81,7 @@ class HTMLView implements View
         }
     }
     
-    protected function addOnLoadScript ($script, $hash=null)
+    public function addOnLoadScript ($script, $hash=null)
     {
         if ($hash == null)
             $hash = md5($script);
