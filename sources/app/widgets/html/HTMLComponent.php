@@ -15,14 +15,14 @@ abstract class HTMLComponent implements HTMLElement
         $this->component = $this->createComponent();
     }
     
-    protected function getDefaultAttributes ()
-    {
-        return array ();
-    }
-    
     public function toHtml($offset=0)
     {
         return !empty($this->component)? $this->component->toHtml($offset) : "";
+    }
+    
+    protected function getDefaultAttributes ()
+    {
+        return array ();
     }
         
     protected function addStyleFile ($styleFile, $hash=null)
