@@ -40,12 +40,12 @@ class HTMLView implements View
     
     public function getHeadTag ()
     {
-        return $this->htmlTag;
+        return $this->headTag;
     }
     
     public function getBodyTag ()
     {
-        return $this->htmlTag;
+        return $this->bodyTag;
     }
     
     public function addStyleFile ($styleFile, $hash=null)
