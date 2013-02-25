@@ -6,6 +6,7 @@ NeoPHP
   - Clases ordenadas de manera jerarquica y estructuradas mediante nomenclatura especifica
   - Unico punto de ingreso (index.php)
   - Soporte para multiples lenguages
+  - Soporte para logueo de información, errores, advertencias, etc
   - No se utilizan nunca variables $_GET, $_POST o $_REQUEST. Estas se mapean en argumentos en las acciones de los controladores lo que hace que quede todo mucho más prolijo.
   - No se utilizan variables $_SESSION, La sesión se usa a través de una clase especial que maneja dicha variable,
   - Para base de datos no se pone NADA de SQL, las tablas están modeladas como objetos y a través de métodos se puede hacer búsquedas, inserciones, eliminaciónes, etc. Todas las consultas se hacen de manera homogenea y transparentes al que programe por afuera del framework y además utiliza PDO con lo cual no importa la base de datos que este corriendo atrás.
@@ -27,6 +28,7 @@ NeoPHP
     Connection.php      Clase para manejo de una conexión a Base de Datos
     Controller.php      Clase del cual extender para crear un Controlador
     DataObject.php      Clase para crear objetos que tengan interacción con la base de datos
+    Logger.php          Clase que se encarga de loguear a archivos errores e información
     Model.php           Clase del cual extender para crear un Modelo
     Preferences.php     Clase para almacenar cualquier configuración o preferencia de la aplicación
     Session.php         Clase para el manejo de Sesión
@@ -36,6 +38,7 @@ NeoPHP
   css/                  Contiene archivos de estlios
   images/               Contiene imagenes utilizadas en la aplicación (no dependientes del estilo o tema)
   js/                   Contiene archivos javascript utilizadas en la aplicación
+  logs/                 Contiene todos los archivos de logs generados
 </pre>
 
 <h3>3. Funcionamiento</h3>
@@ -222,8 +225,51 @@ App::getInstance()->getTranslator()->getText("car");  //Buscará "car" en el arc
 App::getInstance()->getTranslator()->getText("general.firstname");  //Buscará "firstname" en el archivo *resources/general.ini*
 App::getInstance()->getTranslator()->getText("views.aboutus.welcome");  //Buscará "welcome" en el archivo *resources/views/aboutus.ini*
 `````
+<h4>2.4. Logueo</h4>
 
-<h4>2.4. Sesión</h4>
+Para loguear a archivos los errores, las advertencias o simplemente información de la aplicación se utiliza la clase Logger.
+Los archivos de logs se guardan en la carpeta *logs* en archivos .txt con el timestamp de la fecha en la que fue generada la entrada de log.
+Existen diferentes niveles de logueo que se pueden utilizar para el logueo, estos son: FINE, INFO, NOTICE, WARNING y ERROR.
+Por defecto se generan automaticamente entradas de logueo de tipo ERROR ante una excepción en la aplicación.
+
+Algunos ejemplos de entradas de logueo
+
+`````php
+App::getInstance()->getLogger()->fine ("Se esta creando la base de datos ...");
+App::getInstance()->getLogger()->info ("La base de datos cuenta con 57 tablas");
+App::getInstance()->getLogger()->warning ("Algunos indices de tablas no se pudieron crear !!");
+`````
+
+Por defecto solo se loguean a archivo los niveles WARNING Y ERROR. Si se quisiera ademas loguear los niveles de tipo NOTICE deberiamos ejecutar una sentencia como la siguiente
+
+`````php
+App::getInstance()->getLogger()->setLogsMask (Logger::LEVEL_ERROR|Logger::LEVEL_WARNING|Logger::LEVEL_NOTICE);
+`````
+
+Los archivos de logueo generados tienen el siguiente formato
+
+`````txt
+[23.02.2013 11:07:20] ERROR: exception 'ErrorException' with message 'include_once(app/views/institutionalSite/Nonexistent.php): failed to open stream: No such file or directory' in /var/www/Blueshark/app/views/institutionalSite/ContactUsView.php:30
+Stack trace:
+#0 /var/www/Blueshark/app/views/institutionalSite/ContactUsView.php(30): App::errorHandler(2, 'include_once(ap...', '/var/www/Bluesh...', 30, Array)
+#1 /var/www/Blueshark/app/views/institutionalSite/ContactUsView.php(30): ContactUsView::createInfoPanel()
+#2 /var/www/Blueshark/app/views/institutionalSite/ContactUsView.php(24): ContactUsView->createInfoPanel()
+#3 /var/www/Blueshark/app/views/institutionalSite/InstitutionalSiteView.php(40): ContactUsView->createBodyContent()
+#4 /var/www/Blueshark/app/views/institutionalSite/InstitutionalSiteView.php(33): InstitutionalSiteView->createPage()
+#5 /var/www/Blueshark/app/views/institutionalSite/InstitutionalSiteView.php(15): InstitutionalSiteView->buildBody()
+#6 /var/www/Blueshark/app/views/HTMLView.php(29): InstitutionalSiteView->build()
+#7 /var/www/Blueshark/app/controllers/InstitutionalSiteController.php(34): HTMLView->render()
+#8 [internal function]: InstitutionalSiteController->showContactUsAction()
+#9 /var/www/Blueshark/app/Controller.php(27): call_user_func_array(Array, Array)
+#10 /var/www/Blueshark/app/App.php(69): Controller->executeAction('showContactUs', Array)
+#11 /var/www/Blueshark/index.php(3): App->executeAction('institutionalSi...')
+#12 {main}
+[23.02.2013 11:10:13] WARNING: Este es una advertencia lanzada de forma manual
+`````
+
+IMPORTANTE: Para el correcto funcionamiento de la clase de logue es necesario que la carpeta en donde se guardan los logs tenga permisos de escritura.
+
+<h4>2.5. Sesión</h4>
 
 Para manejo de sesión se tiene que usar la clase Session, se usa de la siguiente manera.
  
@@ -245,7 +291,7 @@ Para cerrar sesión
 App::getInstance()->getSession()->destroy();
 `````
 
-<h4>2.5. Base de datos</h4>
+<h4>2.6. Base de datos</h4>
 
 Para base de datos se usan las clases "Connection" y "DataObject"
 Para crear una nueva conexión a base de datos se tiene que crear una clase de tipo "xxxConnection" que extienda de Connection con ciertos parametros. Utiliza PDO por consiguiente no importa con que base de datos con la que este conectado atras. 
@@ -347,7 +393,7 @@ Solo se tiene que copiar el contenido de la carpeta "sources" al raiz de un proy
 
 Es posible que en entornos *Windows* haya que configurar en el archivo de configuración de apache (httpd.conf) el DocumentIndex para que apunte a index.php en lugar de index.html
 
-Es recomendado utilizar ciertas configuración en el php.ini (no obligatorias), estas son:
+Es recomendado utilizar ciertas configuraciones en el php.ini (no obligatorias), estas son:
   - session.auto_start = 1
   - session.use_cookies = 1
   - session.use_trans_sid = 0;
