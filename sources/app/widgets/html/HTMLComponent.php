@@ -2,55 +2,72 @@
 
 require_once ("app/widgets/html/HTMLElement.php");
 
-abstract class HTMLComponent implements HTMLElement
+abstract class HTMLComponent implements HTMLElement, HTMLViewListener
 {
+    private $builded;
     protected $view;
-    protected $attributes;
-    protected $component;
+    protected $settings;
+    protected $htmlElement;
     
-    public function __construct(HTMLView $view, $attributes=array()) 
+    public final function __construct (HTMLView $view, $settings=array()) 
     {
+        $this->builded = false;
+        $this->settings = array_merge($this->getDefaultSettings(), $settings);
+        $this->htmlElement = null;
         $this->view = $view;
-        $this->attributes = array_merge($this->getDefaultAttributes(), $attributes);
-        $this->component = $this->createComponent();
+        $this->view->addListener($this);
     }
     
-    public function toHtml($offset=0)
+    public final function toHtml ($offset=0)
     {
-        return !empty($this->component)? $this->component->toHtml($offset) : "";
+        return !empty($this->htmlElement)? $this->htmlElement->toHtml($offset) : "";
     }
     
-    protected function getDefaultAttributes ()
+    public final function onViewBuild (HTMLView $view)
     {
-        return array ();
+        if (!$this->builded)
+        {
+            $this->buildComponent();
+            $this->builded = true;
+        }
+    }
+    
+    protected final function setHTMLElement (HTMLElement $element)
+    {
+        $this->htmlElement = $element;
     }
         
-    protected function addStyleFile ($styleFile, $hash=null)
+    protected final function addStyleFile ($styleFile, $hash=null)
     {
         $this->view->addStyleFile($styleFile, $hash);
     }
     
-    protected function addStyle ($style, $hash=null)
+    protected final function addStyle ($style, $hash=null)
     {
         $this->view->addStyle($style, $hash);
     }
 
-    protected function addScriptFile ($scriptFile, $hash=null)
+    protected final function addScriptFile ($scriptFile, $hash=null)
     {
         $this->view->addScriptFile($scriptFile, $hash);
     }
 
-    protected function addScript ($script, $hash=null)
+    protected final function addScript ($script, $hash=null)
     {
         $this->view->addScript($script, $hash);
     }
     
-    protected function addOnLoadScript ($onLoadScript, $hash=null)
+    protected final function addOnLoadScript ($onLoadScript, $hash=null)
     {
         $this->view->addOnLoadScript($onLoadScript, $hash);
     }
     
-    protected function createComponent () {}
+    protected function getDefaultSettings ()
+    {
+        return array ();
+    }
+    
+    protected abstract function buildComponent ();
 }
 
 ?>

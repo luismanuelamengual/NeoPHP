@@ -1,5 +1,6 @@
 <?php
 
+require_once ("app/views/HTMLViewListener.php");
 require_once ("app/widgets/html/Tag.php");
 require_once ("app/widgets/html/HTMLComponent.php");
 
@@ -7,14 +8,15 @@ class HTMLView implements View
 {
     private $builded = false;
     private $hashes = array();
-    protected $docTypeDeclaration;
+    private $listeners = array();
+    protected $docType;
     protected $htmlTag;
     protected $headTag;
     protected $bodyTag;
     
-    public function __construct ()
+    public final function __construct ($settings = array())
     {
-        $this->docTypeDeclaration = '<!DOCTYPE html>';
+        $this->docType = '<!DOCTYPE html>';
         $this->htmlTag = new Tag("html");
         $this->headTag = new Tag("head");
         $this->bodyTag = new Tag("body");
@@ -22,33 +24,38 @@ class HTMLView implements View
         $this->htmlTag->add($this->bodyTag);
     }
     
-    public function render()
+    public final function render()
     {
         if (!$this->builded)
         {
             $this->build();
-            $this->onBuilded();
+            $this->fireViewBuildEvent();
             $this->builded = true;
         }
-        echo $this->docTypeDeclaration . "\n" . $this->htmlTag->toHtml();
+        echo $this->docType . "\n" . $this->htmlTag->toHtml();
     }
     
-    public function getHtmlTag ()
+    public final function addListener (HTMLViewListener $listener)
+    {
+        array_push($this->listeners, $listener);
+    }
+    
+    public final function getHtmlTag ()
     {
         return $this->htmlTag;
     }
     
-    public function getHeadTag ()
+    public final function getHeadTag ()
     {
         return $this->headTag;
     }
     
-    public function getBodyTag ()
+    public final function getBodyTag ()
     {
         return $this->bodyTag;
     }
     
-    public function addStyleFile ($styleFile, $hash=null)
+    public final function addStyleFile ($styleFile, $hash=null)
     {
         if ($hash == null)
             $hash = md5($styleFile);
@@ -59,7 +66,7 @@ class HTMLView implements View
         }
     }
     
-    public function addStyle ($style, $hash=null)
+    public final function addStyle ($style, $hash=null)
     {
         if ($hash == null)
             $hash = md5($style);
@@ -70,7 +77,7 @@ class HTMLView implements View
         }
     }
 
-    public function addScriptFile ($scriptFile, $hash=null)
+    public final function addScriptFile ($scriptFile, $hash=null)
     {
         if ($hash == null)
             $hash = md5($scriptFile);
@@ -81,7 +88,7 @@ class HTMLView implements View
         }
     }
 
-    public function addScript ($script, $hash=null)
+    public final function addScript ($script, $hash=null)
     {
         if ($hash == null)
             $hash = md5($script);
@@ -92,7 +99,7 @@ class HTMLView implements View
         }
     }
     
-    public function addOnLoadScript ($script, $hash=null)
+    public final function addOnLoadScript ($script, $hash=null)
     {
         if ($hash == null)
             $hash = md5($script);
@@ -107,8 +114,13 @@ class HTMLView implements View
         }
     }
     
+    private final function fireViewBuildEvent ()
+    {
+        foreach ($this->listeners as $listener)
+            call_user_func (array($listener, "onViewBuild"), $this);
+    }
+    
     protected function build() {}
-    protected function onBuilded() {}
 }
 
 ?>
