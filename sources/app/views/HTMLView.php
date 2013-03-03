@@ -1,6 +1,5 @@
 <?php
 
-require_once ("app/views/HTMLViewListener.php");
 require_once ("app/widgets/html/Tag.php");
 require_once ("app/widgets/html/HTMLComponent.php");
 
@@ -8,7 +7,6 @@ class HTMLView implements View
 {
     private $builded = false;
     private $hashes = array();
-    private $listeners = array();
     protected $docType;
     protected $htmlTag;
     protected $headTag;
@@ -29,15 +27,9 @@ class HTMLView implements View
         if (!$this->builded)
         {
             $this->build();
-            $this->fireViewBuildEvent();
             $this->builded = true;
         }
         echo $this->docType . "\n" . $this->htmlTag->toHtml();
-    }
-    
-    public final function addListener (HTMLViewListener $listener)
-    {
-        array_push($this->listeners, $listener);
     }
     
     public final function getHtmlTag ()
@@ -112,12 +104,6 @@ class HTMLView implements View
             $this->bodyTag->setAttribute("onload", $onLoadScript);
             array_push($this->hashes, $hash);
         }
-    }
-    
-    private final function fireViewBuildEvent ()
-    {
-        foreach ($this->listeners as $listener)
-            call_user_func (array($listener, "onViewBuild"), $this);
     }
     
     protected function build() {}
