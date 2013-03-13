@@ -12,7 +12,7 @@ class HTMLView implements View
     protected $headTag;
     protected $bodyTag;
     
-    public final function __construct ($settings = array())
+    public final function __construct ()
     {
         $this->docType = '<!DOCTYPE html>';
         $this->htmlTag = new Tag("html");
