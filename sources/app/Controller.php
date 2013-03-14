@@ -16,16 +16,17 @@ abstract class Controller
             else if (method_exists($this, $actionFunction))
             {
                 $actionParameters = array();
-                $r = new ReflectionMethod($this, $actionFunction);
-                $methodParams = $r->getParameters();
+                $controllerMethod = new ReflectionMethod($this, $actionFunction);
+                $methodParams = $controllerMethod->getParameters();
                 foreach ($methodParams as $methodParam)
                 {
+                    $parameterName = $methodParam->getName();
                     $parameterValue = null;
-                    if (isset($params[$methodParam->getName()]))
-                        $parameterValue = $params[$methodParam->getName()];
-                    else if (isset($_REQUEST[$methodParam->getName()]))
-                        $parameterValue = $_REQUEST[$methodParam->getName()];
-                    else if ($methodParam->getName() == "php_input")
+                    if (isset($params[$parameterName]))
+                        $parameterValue = $params[$parameterName];
+                    else if (isset($_REQUEST[$parameterName]))
+                        $parameterValue = $_REQUEST[$parameterName];
+                    else if ($parameterName == "php_input")
                         $parameterValue = @file_get_contents("php://input");
                     $actionParameters[] = $parameterValue;
                 }
