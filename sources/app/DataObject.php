@@ -337,7 +337,7 @@ class DataObject
         $this->resetResults();
         $this->currentResult = ($isQuery)? $this->connection->query($sql) : $this->connection->exec($sql);
         if (!$this->currentResult->success)
-            echo "ERROR " . $this->currentResult->error->code . ": " . $this->currentResult->error->driverErrorMessage;
+            throw new Exception("Error de sentencia sql (" . $this->currentResult->error->code . "): " . $this->currentResult->error->driverErrorMessage);
     }
 }
 

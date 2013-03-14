@@ -54,8 +54,7 @@ abstract class Connection
             catch (PDOException $e)
             {
                 $this->connection = null;
-                print "ERROR: " . $e->getMessage () . "<br/>";
-                die ();
+                throw new Exception ("No se pudo establecer conexión con la base de datos: " . $e->getMessage());
             }
         }
     }
