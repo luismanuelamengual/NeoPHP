@@ -14,10 +14,9 @@ abstract class Controller
             {
                 $actionParameters = array();
                 $controllerMethod = new ReflectionMethod($this, $actionFunction);
-                $methodParams = $controllerMethod->getParameters();
-                foreach ($methodParams as $methodParam)
+                foreach ($controllerMethod->getParameters() as $parameter)
                 {
-                    $parameterName = $methodParam->getName();
+                    $parameterName = $parameter->getName();
                     $parameterValue = null;
                     if (isset($params[$parameterName]))
                         $parameterValue = $params[$parameterName];
