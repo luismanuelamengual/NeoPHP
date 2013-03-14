@@ -2,6 +2,8 @@
 
 final class Logger
 {
+    const ACTION_PRINT = 1;
+    const ACTION_FILE = 2;
     const LEVEL_ERROR = 1;
     const LEVEL_WARNING = 2;
     const LEVEL_NOTICE = 4;
@@ -9,30 +11,20 @@ final class Logger
     const LEVEL_FINE = 16;
     
     private static $instance;
-    private $logsFilePath;
-    private $logsFileMask;
-    private $logsPrintMask;
+    private $actions = array();
     
     private function __construct() 
     {
-        $this->setLogsFilePath(App::getInstance()->getBasePath() . DIRECTORY_SEPARATOR . "logs" . DIRECTORY_SEPARATOR);
-        $this->setLogsFileMask(Logger::LEVEL_ERROR|Logger::LEVEL_WARNING);
-        $this->setLogsPrintMask(Logger::LEVEL_ERROR);
-    }
-
-    public function setLogsFilePath ($logsFilePath)
-    {
-        $this->logsFilePath = $logsFilePath;
-    }
-    
-    public function setLogsFileMask ($logsFileMask)
-    {
-        $this->logsFileMask = $logsFileMask;
-    }
-    
-    public function setLogsPrintMask ($logsPrintMask)
-    {
-        $this->logsPrintMask = $logsPrintMask;
+        $printAction = new stdClass();
+        $printAction->type = Logger::ACTION_PRINT;
+        $printAction->mask = Logger::LEVEL_ERROR;
+        $this->addAction($printAction);        
+        $fileAction = new stdClass();
+        $fileAction->type = Logger::ACTION_FILE;
+        $fileAction->mask = Logger::LEVEL_ERROR|Logger::LEVEL_WARNING;
+        $fileAction->filename = App::getInstance()->getBasePath() . DIRECTORY_SEPARATOR . "logs" . DIRECTORY_SEPARATOR . "{dateFormat}.txt";
+        $fileAction->filenameDateFormat = "Y-m-d";
+        $this->addAction($fileAction);
     }
     
     public static function getInstance()
@@ -40,6 +32,16 @@ final class Logger
         if (!isset(self::$instance))
             self::$instance = new self;
         return self::$instance;
+    }
+    
+    public function clearActions ()
+    {
+        $this->actions = array();
+    }
+    
+    public function addAction ($action)
+    {
+        array_push($this->actions, $action);
     }
     
     public function error ($message)
@@ -69,17 +71,32 @@ final class Logger
     
     public function log($level, $message)
     {
-        $messageContent = "[" . date("d.m.Y h:i:s", mktime()) . "] " . $this->getLevelString($level) . ": " . $message ."\n";
-        if (($level & $this->logsPrintMask) > 0)
+        $messageContent = "[" . date("Y-m-d h:i:s", mktime()) . "] " . $this->getLevelString($level) . ": " . $message ."\n";
+        foreach ($this->actions as $action)
         {
-            print($messageContent);
-        }
-        if (($level & $this->logsFileMask) > 0)
-        {
-            if (is_writable($this->logsFilePath))
-                file_put_contents ($this->logsFilePath . date("d.m.Y") . ".txt", $messageContent, FILE_APPEND);
-            else
-                throw new Exception ('La carpeta de logs "' . $this->logsFilePath . '" no existe o no tiene permisos de escritura.');
+            if (empty($action->mask) || (($level & $action->mask) > 0))
+            {
+                switch ($action->type)
+                {
+                    case Logger::ACTION_PRINT:
+                        print($messageContent);
+                        break;
+                    case Logger::ACTION_FILE:
+                        $filename = $action->filename;
+                        $logsPath = dirname($filename);
+                        if (is_writable($logsPath))
+                        {
+                            if (!empty($action->filenameDateFormat))
+                                $filename = str_replace("{dateFormat}", date($action->filenameDateFormat), $filename);
+                            file_put_contents ($filename, $messageContent, FILE_APPEND);
+                        }
+                        else
+                        {
+                            throw new Exception ('La carpeta de logs "' . $logsPath . '" no existe o no tiene permisos de escritura.');
+                        }
+                        break;
+                }
+            }
         }
     }
     
