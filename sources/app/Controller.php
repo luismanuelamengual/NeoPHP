@@ -2,18 +2,15 @@
 
 abstract class Controller
 { 
-    public function executeAction($action, $params=array())
+    public final function executeAction($action, $params=array())
     {
-        $returnValue = FALSE;
-        $executeAction = $this->onBeforeActionExecution($action);
-        if ($executeAction === true)
+        $returnValue = false;
+        if (empty($action) || $action == "")
+            $action = "default";
+        $actionFunction = $action . "Action";
+        if (method_exists($this, $actionFunction))
         {
-            $actionFunction = $action . "Action";
-            if (empty($action) || $action == "")
-            {
-                $this->defaultAction();
-            }
-            else if (method_exists($this, $actionFunction))
+            if ($this->onBeforeActionExecution($action) === true)
             {
                 $actionParameters = array();
                 $controllerMethod = new ReflectionMethod($this, $actionFunction);
@@ -31,26 +28,22 @@ abstract class Controller
                     $actionParameters[] = $parameterValue;
                 }
                 $returnValue = call_user_func_array(array($this, $actionFunction), $actionParameters);
+                $this->onAfterActionExecution($action);
             }
-            else
-            {
-                throw new Exception('No se ha encontrado la función "' . $actionFunction . '" en el controlador "' . get_class($this) . '"');
-            }
-            $this->onAfterActionExecution($action);
+        }
+        else
+        {
+            throw new Exception('No se ha encontrado el metodo "' . $actionFunction . '" en el controlador "' . get_class($this) . '"');
         }
         return $returnValue;
     }
     
-    public function onBeforeActionExecution ($action)
+    protected function onBeforeActionExecution ($action)
     {   
         return true;
     }
     
-    public function onAfterActionExecution ($action)
-    {
-    }
-    
-    public function defaultAction ()
+    protected function onAfterActionExecution ($action)
     {
     }
 }

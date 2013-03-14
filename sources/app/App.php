@@ -7,7 +7,7 @@
  * session.use_cookies = 1
  * session.use_trans_sid = 0;
  */
-class App
+final class App
 {
     private $views = array();
     private $controllers = array();
@@ -48,11 +48,8 @@ class App
     
     public function executeAction ($action, $params=array())
     {
-        $returnValue = FALSE;
         try
         {
-            if ($action == null)
-                $action = "default";
             $controllerSeparatorPosition = strrpos($action, "/");
             if ($controllerSeparatorPosition === FALSE)
             {
@@ -64,8 +61,7 @@ class App
                 $controllerName = substr($action,0,$controllerSeparatorPosition);
                 $controllerAction = substr($action,$controllerSeparatorPosition+1,strlen($action));
             }
-            $controller = $this->getController($controllerName);
-            $returnValue = $controller->executeAction($controllerAction, $params);
+            return $this->getController($controllerName)->executeAction($controllerAction, $params);
         }
         catch (Exception $ex)
         {
@@ -73,7 +69,6 @@ class App
             print($ex);
             exit;
         }
-        return $returnValue;
     }
 
     public function redirectAction ($action, $params=array())
