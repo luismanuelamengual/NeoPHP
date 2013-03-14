@@ -41,7 +41,7 @@ class Translator
             $dictionaryName = "";
             $dictionaryKey = "";
             $dictionarySeparator = strrpos($key, ".");
-            $dictionaryName = substr($key,0,$dictionarySeparator);;
+            $dictionaryName = substr($key,0,$dictionarySeparator);
             $dictionaryKey = substr($key,$dictionarySeparator+1,strlen($key));
             $dictionaryFilename = "app/resources/" . str_replace(".", "/", $dictionaryName) . ".ini";
             $dictionaryData = @parse_ini_file($dictionaryFilename, true);
