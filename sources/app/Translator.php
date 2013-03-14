@@ -45,12 +45,12 @@ final class Translator
             $dictionaryName = substr($key,0,$dictionarySeparator);
             $dictionaryKey = substr($key,$dictionarySeparator+1,strlen($key));
             $dictionaryFilename = "app/resources/" . str_replace(".", "/", $dictionaryName) . ".lan";
-            $dictionaryData = @parse_ini_file($dictionaryFilename, true);
-            if ($dictionaryData != FALSE && !empty($dictionaryData[$language]))
+            try { $dictionaryData = @parse_ini_file($dictionaryFilename, true); } catch (Exception $ex) {}
+            if (!empty($dictionaryData) && !empty($dictionaryData[$language]))
                 foreach ($dictionaryData[$language] as $newDictionaryKey=>$newDictionaryText)
                     $this->dictionary[$language][$dictionaryName . "." . $newDictionaryKey] = $newDictionaryText;
             if (empty($this->dictionary[$language][$key]))
-                $this->dictionary[$language][$key] = "{" . $key . "}";
+                $this->dictionary[$language][$key] = "{" . $key . "[" . $language . "]}";
         }
         return $this->dictionary[$language][$key];
     }
