@@ -1,6 +1,6 @@
 <?php
 
-class Translator
+final class Translator
 {
     private $language;
     private $dictionary;
@@ -24,7 +24,6 @@ class Translator
     public function setLanguage ($language)
     {
         $this->language = $language;
-        $this->dictionary = array();
     }
     
     public function getLanguage ()
@@ -32,34 +31,28 @@ class Translator
         return $this->language;
     }
     
-    public function getText ($key)
+    public function getText ($key, $language = null)
     {
+        if (empty($language))
+            $language = $this->language;
         if (strpos($key, ".") === FALSE)
-            $key = "default." . $key;
-        if (empty($this->dictionary[$key]))
+            $key = "general." . $key;
+        if (empty($this->dictionary[$language][$key]))
         {
             $dictionaryName = "";
             $dictionaryKey = "";
             $dictionarySeparator = strrpos($key, ".");
             $dictionaryName = substr($key,0,$dictionarySeparator);
             $dictionaryKey = substr($key,$dictionarySeparator+1,strlen($key));
-            $dictionaryFilename = "app/resources/" . str_replace(".", "/", $dictionaryName) . ".ini";
+            $dictionaryFilename = "app/resources/" . str_replace(".", "/", $dictionaryName) . ".lan";
             $dictionaryData = @parse_ini_file($dictionaryFilename, true);
-            if ($dictionaryData != FALSE)
-            {
-                foreach ($dictionaryData as $dictionaryLanguage=>$dictionaryTexts)
-                {
-                    if ($dictionaryLanguage == $this->language)
-                    {
-                        foreach ($dictionaryTexts as $newDictionaryKey=>$newDictionaryText)
-                            $this->dictionary[$dictionaryName . "." . $newDictionaryKey] = $newDictionaryText;
-                    }
-                }
-            }
-            if (empty($this->dictionary[$key]))
-                $this->dictionary[$key] = "{" . $key . "}";
+            if ($dictionaryData != FALSE && !empty($dictionaryData[$language]))
+                foreach ($dictionaryData[$language] as $newDictionaryKey=>$newDictionaryText)
+                    $this->dictionary[$language][$dictionaryName . "." . $newDictionaryKey] = $newDictionaryText;
+            if (empty($this->dictionary[$language][$key]))
+                $this->dictionary[$language][$key] = "{" . $key . "}";
         }
-        return $this->dictionary[$key];
+        return $this->dictionary[$language][$key];
     }
 }
 
