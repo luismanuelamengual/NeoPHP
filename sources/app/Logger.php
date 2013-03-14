@@ -1,6 +1,6 @@
 <?php
 
-class Logger
+final class Logger
 {
     const LEVEL_ERROR = 1;
     const LEVEL_WARNING = 2;
@@ -9,23 +9,30 @@ class Logger
     const LEVEL_FINE = 16;
     
     private static $instance;
-    private $logsPath;
-    private $logsMask;
+    private $logsFilePath;
+    private $logsFileMask;
+    private $logsPrintMask;
     
     private function __construct() 
     {
-        $this->setLogsPath(App::getInstance()->getBasePath() . DIRECTORY_SEPARATOR . "logs" . DIRECTORY_SEPARATOR);
-        $this->setLogsMask(Logger::LEVEL_ERROR|Logger::LEVEL_WARNING);
+        $this->setLogsFilePath(App::getInstance()->getBasePath() . DIRECTORY_SEPARATOR . "logs" . DIRECTORY_SEPARATOR);
+        $this->setLogsFileMask(Logger::LEVEL_ERROR|Logger::LEVEL_WARNING);
+        $this->setLogsPrintMask(Logger::LEVEL_ERROR);
     }
 
-    public function setLogsPath ($logsPath)
+    public function setLogsFilePath ($logsFilePath)
     {
-        $this->logsPath = $logsPath;
+        $this->logsFilePath = $logsFilePath;
     }
     
-    public function setLogsMask ($logsMask)
+    public function setLogsFileMask ($logsFileMask)
     {
-        $this->logsMask = $logsMask;
+        $this->logsFileMask = $logsFileMask;
+    }
+    
+    public function setLogsPrintMask ($logsPrintMask)
+    {
+        $this->logsPrintMask = $logsPrintMask;
     }
     
     public static function getInstance()
@@ -33,24 +40,6 @@ class Logger
         if (!isset(self::$instance))
             self::$instance = new self;
         return self::$instance;
-    }
-    
-    public function log($level, $message)
-    {
-        if (($level & $this->logsMask) > 0)
-        {
-            $today = date("d.m.Y");
-            if (is_writable($this->logsPath))
-            {   
-                $filename = $this->logsPath . "$today.txt";
-                $content = "[" . date("d.m.Y h:i:s", mktime()) . "] " . $this->getLevelString($level) . ": " . $message ."\n";
-                file_put_contents ($filename, $content ,FILE_APPEND);
-            }
-            else
-            {
-                throw new Exception ("Logs folder \"" . $this->logsPath . "\" not writable. Set permissions to the folder");
-            }
-        }
     }
     
     public function error ($message)
@@ -76,6 +65,22 @@ class Logger
     public function fine ($message)
     {
         $this->log(Logger::LEVEL_FINE, $message);
+    }
+    
+    public function log($level, $message)
+    {
+        $messageContent = "[" . date("d.m.Y h:i:s", mktime()) . "] " . $this->getLevelString($level) . ": " . $message ."\n";
+        if (($level & $this->logsPrintMask) > 0)
+        {
+            print($messageContent);
+        }
+        if (($level & $this->logsFileMask) > 0)
+        {
+            if (is_writable($this->logsFilePath))
+                file_put_contents ($this->logsFilePath . date("d.m.Y") . ".txt", $messageContent, FILE_APPEND);
+            else
+                throw new Exception ('La carpeta de logs "' . $this->logsFilePath . '" no existe o no tiene permisos de escritura.');
+        }
     }
     
     private function getLevelString ($level)
