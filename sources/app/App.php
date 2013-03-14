@@ -21,7 +21,7 @@ class App
 
     public static function getInstance()
     {
-        if ( !isset(self::$instance))
+        if (!isset(self::$instance))
             self::$instance = new self;
         return self::$instance;
     }
@@ -38,7 +38,7 @@ class App
         return substr($scriptName, 0, strpos($scriptName, "index.php"));        
     }
     
-    public function getUrl($action, $params=array())
+    public function getUrl ($action, $params=array())
     {
         $url = $this->getBaseUrl() . "?action=" . $action;
         if (sizeof($params) > 0)
@@ -46,7 +46,7 @@ class App
         return $url;
     }
     
-    public function executeAction($action, $params=array())
+    public function executeAction ($action, $params=array())
     {
         $returnValue = FALSE;
         try
@@ -76,12 +76,12 @@ class App
         return $returnValue;
     }
 
-    public function redirectAction($action, $params=array())
+    public function redirectAction ($action, $params=array())
     {
         $this->redirect($this->getUrl($action, $params));
     }
     
-    public function redirect($url)
+    public function redirect ($url)
     {
         header("Location: " . $url);
     }
