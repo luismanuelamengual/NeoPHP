@@ -9,7 +9,11 @@ abstract class Controller
         if ($executeAction === true)
         {
             $actionFunction = $action . "Action";
-            if (method_exists($this, $actionFunction))
+            if (empty($action) || $action == "")
+            {
+                $this->defaultAction();
+            }
+            else if (method_exists($this, $actionFunction))
             {
                 $actionParameters = array();
                 $r = new ReflectionMethod($this, $actionFunction);
@@ -29,7 +33,7 @@ abstract class Controller
             }
             else
             {
-                $this->defaultAction();
+                throw new Exception('No se ha encontrado la función "' . $actionFunction . '" en el controlador "' . get_class($this) . '"');
             }
             $this->onAfterActionExecution($action);
         }

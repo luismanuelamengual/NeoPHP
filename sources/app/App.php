@@ -69,8 +69,9 @@ class App
         }
         catch (Exception $ex)
         {
-            print($ex);
             $this->getLogger()->error ($ex);
+            print($ex);
+            exit;
         }
         return $returnValue;
     }
