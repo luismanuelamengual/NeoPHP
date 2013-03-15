@@ -17,6 +17,10 @@ final class App
     private function __construct() 
     {
         set_error_handler(array("App", "errorHandler"), E_ALL);
+        $frameworkBasePath = $this->getFrameworkBasePath();
+        $basePath = $this->getBasePath();
+        if ($frameworkBasePath !== $basePath)
+            set_include_path(get_include_path() . PATH_SEPARATOR . $this->getFrameworkBasePath());
     }
 
     public static function getInstance()
@@ -25,17 +29,26 @@ final class App
             self::$instance = new self;
         return self::$instance;
     }
- 
+    
+    public function start ()
+    {
+        App::getInstance()->executeAction((!empty($_REQUEST['action'])? $_REQUEST['action'] : null));
+    }
+    
+    public function getFrameworkBasePath()
+    {
+        $reflectionObject = new ReflectionObject($this);
+        return dirname(dirname($reflectionObject->getFileName())) . DIRECTORY_SEPARATOR;
+    }
+    
     public function getBasePath()
     {
-        $reflectionObject = new ReflectionObject(App::getInstance());
-        return dirname(dirname($reflectionObject->getFileName()));
+        return dirname($_SERVER["SCRIPT_FILENAME"]) . DIRECTORY_SEPARATOR;
     }
     
     public function getBaseUrl()
     {
-        $scriptName = $_SERVER["SCRIPT_NAME"];
-        return substr($scriptName, 0, strpos($scriptName, "index.php"));        
+        return dirname($_SERVER["SCRIPT_NAME"]) . "/";
     }
     
     public function getUrl ($action, $params=array())
@@ -46,7 +59,7 @@ final class App
         return $url;
     }
     
-    public function executeAction ($action, $params=array())
+    private function executeAction ($action, $params=array())
     {
         try
         {
