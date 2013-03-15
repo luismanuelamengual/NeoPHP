@@ -240,16 +240,18 @@ App::getInstance()->getLogger()->info ("La base de datos cuenta con 57 tablas");
 App::getInstance()->getLogger()->warning ("Algunos indices de tablas no se pudieron crear !!");
 `````
 
-Por defecto solo se loguean a archivo los niveles WARNING Y ERROR. Si se quisiera ademas loguear los niveles de tipo NOTICE deberiamos ejecutar una sentencia como la siguiente
-
-`````php
-App::getInstance()->getLogger()->setLogsMask (Logger::LEVEL_ERROR|Logger::LEVEL_WARNING|Logger::LEVEL_NOTICE);
-`````
-
 Los archivos de logueo generados tienen el siguiente formato
 
-`````txt
-[23.02.2013 11:07:20] ERROR: exception 'ErrorException' with message 'include_once(app/views/institutionalSite/Nonexistent.php): failed to open stream: No such file or directory' in /var/www/Blueshark/app/views/institutionalSite/ContactUsView.php:30
+<pre>
+[23.02.2013 11:07:20] FINE: Se esta creando la base de datos ...
+[23.02.2013 11:10:13] INFO: La base de datos cuenta con 57 tablas
+[23.02.2013 11:10:28] WARNING: Algunos indices de tablas no se pudieron crear !!
+</pre>
+
+En caso de errores, se loguea el stacktrace
+
+<pre>
+[23.02.2013 11:07:20] ERROR: exception "ErrorException" with message "No such file or directory" in /var/www/Blueshark/app/views/institutionalSite/ContactUsView.php:30
 Stack trace:
 #0 /var/www/Blueshark/app/views/institutionalSite/ContactUsView.php(30): App::errorHandler(2, 'include_once(ap...', '/var/www/Bluesh...', 30, Array)
 #1 /var/www/Blueshark/app/views/institutionalSite/ContactUsView.php(30): ContactUsView::createInfoPanel()
@@ -264,8 +266,7 @@ Stack trace:
 #10 /var/www/Blueshark/app/App.php(69): Controller->executeAction('showContactUs', Array)
 #11 /var/www/Blueshark/index.php(3): App->executeAction('institutionalSi...')
 #12 {main}
-[23.02.2013 11:10:13] WARNING: Este es una advertencia lanzada de forma manual
-`````
+</pre>
 
 IMPORTANTE: Para el correcto funcionamiento de la clase de logue es necesario que la carpeta en donde se guardan los logs tenga permisos de escritura.
 
@@ -303,9 +304,24 @@ Por ejemplo, el archivo de conexión a la de producción, a una base de datos my
 <?php
 class ProductionConnection extends Connection
 {
-    public function __construct ()
+    public function getDsn ()
     {
-        parent::__construct ("mysql:host={hostname};dbname=mysql", "{username}", "{password}", array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"));
+        return "mysql:host=localhost;dbname=telemetrix";
+    }
+    
+    public function getUsername ()
+    {
+        return "root";
+    }
+    
+    public function getPassword ()
+    {
+        return "root";
+    }
+    
+    public function getDriverOptions ()
+    {
+        return array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8");
     }
 }
 ?>
