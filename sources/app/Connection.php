@@ -2,54 +2,26 @@
 
 abstract class Connection
 {
-    private $dsn;
-    private $username;
-    private $password;
-    private $driverOptions;
     private $connection;
     
-    public function __construct ($dsn = "", $username = "", $password = "", $driverOptions = array())
+    public final function __construct ()
     {
-        $this->dsn = $dsn;
-        $this->username = $username;
-        $this->password = $password;
-        $this->driverOptions = $driverOptions;
+        $this->connection = null;
     }
-    
-    public function getDsn ()
+        
+    private final function connect ()
     {
-        return $this->dsn;
-    }
-    
-    public function getUsername ()
-    {
-        return $this->username;
-    }
-    
-    public function getPassword ()
-    {
-        return $this->password;
-    }
-    
-    public function getDriverOptions ()
-    {
-        return $this->driverOptions;
-    }
-    
-    public function isConnected ()
-    {
-        return !empty($this->connection);
-    }
-    
-    private function connect ()
-    {
-        if (!$this->isConnected())
+        if (empty($this->connection))
         {
             try 
             {
-                $this->connection = new PDO ($this->dsn, $this->username, $this->password, $this->driverOptions);
+                $dsn = $this->getDsn();
+                $username = $this->getUsername();
+                $password = $this->getPassword();
+                $options = $this->getDriverOptions();
+                $this->connection = new PDO ($dsn, $username, $password, $options);
                 $this->connection->setAttribute (PDO::ATTR_CASE, PDO::CASE_LOWER);
-                $this->connection->dbtype = substr ($this->dsn, 0, strpos ($this->dsn, ":"));
+                $this->connection->dbtype = substr ($dsn, 0, strpos ($dsn, ":"));
             }
             catch (PDOException $e)
             {
@@ -59,13 +31,13 @@ abstract class Connection
         }
     }
     
-    public function getDataObject($tableName)
+    public final function getDataObject($tableName)
     {
         require_once ('app/DataObject.php');
         return new DataObject($this, $tableName);
     }
     
-    public function query ($sql)
+    public final function query ($sql)
     {
         $this->connect();
         $statement = $this->connection->query($sql);
@@ -87,7 +59,7 @@ abstract class Connection
         return $result;
     }
     
-    public function exec ($sql)
+    public final function exec ($sql)
     {
         $this->connect();
         $afectedRows = $this->connection->exec($sql);
@@ -108,6 +80,11 @@ abstract class Connection
         }
         return $result;
     }
+    
+    public abstract function getDsn ();
+    public abstract function getUsername ();
+    public abstract function getPassword ();
+    public abstract function getDriverOptions ();
 }
 
 ?>
