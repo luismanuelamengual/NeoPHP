@@ -20,7 +20,7 @@ final class App
         $frameworkBasePath = $this->getFrameworkBasePath();
         $basePath = $this->getBasePath();
         if ($frameworkBasePath !== $basePath)
-            set_include_path(get_include_path() . PATH_SEPARATOR . $this->getFrameworkBasePath());
+            set_include_path($this->getFrameworkBasePath() . PATH_SEPARATOR . get_include_path());
     }
 
     public static function getInstance()
