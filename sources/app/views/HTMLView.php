@@ -5,8 +5,7 @@ require_once ("app/widgets/html/HTMLComponent.php");
 
 class HTMLView implements View
 {
-    private $builded = false;
-    private $hashes = array();
+    private $innerData;
     protected $docType;
     protected $htmlTag;
     protected $headTag;
@@ -20,14 +19,16 @@ class HTMLView implements View
         $this->bodyTag = new Tag("body");
         $this->htmlTag->add($this->headTag);
         $this->htmlTag->add($this->bodyTag);
+        $this->innerData = new stdClass();
+        $this->innerData->hashes = array();
     }
     
     public final function render()
     {
-        if (!$this->builded)
+        if (empty($this->innerData->builded))
         {
             $this->build();
-            $this->builded = true;
+            $this->innerData->builded = true;
         }
         echo $this->docType . "\n" . $this->htmlTag->toHtml();
     }
@@ -47,14 +48,35 @@ class HTMLView implements View
         return $this->bodyTag;
     }
     
+    public final function setTitle ($title)
+    {
+        if (!empty($this->innerData->titleTag))
+        {
+            $this->innerData->titleTag->setContent ($title);
+        }
+        else
+        {
+            $this->innerData->titleTag = new Tag("title", array(), $title);
+            $this->headTag->insert ($this->innerData->titleTag, 0);
+            $this->innerData->metasOffset = empty($this->innerData->metasOffset)? 1 : ($this->innerData->metasOffset+1);
+        }
+    }
+    
+    public final function addMeta ($attributes)
+    {
+        if (empty($this->innerData->metasOffset))
+            $this->innerData->metasOffset = 0;
+        $this->headTag->insert(new Tag("meta", $attributes), ($this->innerData->metasOffset++));
+    }
+    
     public final function addStyleFile ($styleFile, $hash=null)
     {
         if ($hash == null)
             $hash = md5($styleFile);
-        if (!in_array($hash, $this->hashes))
+        if (!in_array($hash, $this->innerData->hashes))
         {
             $this->headTag->add(new Tag("link", array("rel"=>"stylesheet", "type"=>"text/css", "href"=>$styleFile)));
-            array_push($this->hashes, $hash);
+            $this->innerData->hashes[] = $hash;
         }
     }
     
@@ -62,10 +84,10 @@ class HTMLView implements View
     {
         if ($hash == null)
             $hash = md5($style);
-        if (!in_array($hash, $this->hashes))
+        if (!in_array($hash, $this->innerData->hashes))
         {
             $this->headTag->add(new Tag("style", array("type"=>"text/css"), $style));
-            array_push($this->hashes, $hash);
+            $this->innerData->hashes[] = $hash;
         }
     }
 
@@ -73,10 +95,10 @@ class HTMLView implements View
     {
         if ($hash == null)
             $hash = md5($scriptFile);
-        if (!in_array($hash, $this->hashes))
+        if (!in_array($hash, $this->innerData->hashes))
         {
             $this->htmlTag->add(new Tag("script", array("type"=>"text/javascript", "src"=>$scriptFile), ""));
-            array_push($this->hashes, $hash);
+            $this->innerData->hashes[] = $hash;
         }
     }
 
@@ -84,10 +106,10 @@ class HTMLView implements View
     {
         if ($hash == null)
             $hash = md5($script);
-        if (!in_array($hash, $this->hashes))
+        if (!in_array($hash, $this->innerData->hashes))
         {
             $this->htmlTag->add(new Tag("script", array("type"=>"text/javascript"), $script));
-            array_push($this->hashes, $hash);
+            $this->innerData->hashes[] = $hash;
         }
     }
     
@@ -95,14 +117,14 @@ class HTMLView implements View
     {
         if ($hash == null)
             $hash = md5($script);
-        if (!in_array($hash, $this->hashes))
+        if (!in_array($hash, $this->innerData->hashes))
         {
             $onLoadScript = $this->bodyTag->getAttribute("onload");
             if (empty($onLoadScript))
                 $onLoadScript = "";
             $onLoadScript .= $script;
             $this->bodyTag->setAttribute("onload", $onLoadScript);
-            array_push($this->hashes, $hash);
+            $this->innerData->hashes[] = $hash;
         }
     }
     
