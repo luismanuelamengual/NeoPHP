@@ -22,7 +22,7 @@ final class Logger
         $fileAction = new stdClass();
         $fileAction->type = Logger::ACTION_FILE;
         $fileAction->mask = Logger::LEVEL_ERROR|Logger::LEVEL_WARNING;
-        $fileAction->filename = App::getInstance()->getBasePath() . DIRECTORY_SEPARATOR . "logs" . DIRECTORY_SEPARATOR . "{dateFormat}.txt";
+        $fileAction->filename = App::getInstance()->getBasePath() . "logs" . DIRECTORY_SEPARATOR . "{dateFormat}.txt";
         $fileAction->filenameDateFormat = "Y-m-d";
         $this->addAction($fileAction);
     }
