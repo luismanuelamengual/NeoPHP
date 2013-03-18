@@ -6,19 +6,27 @@ class Tag implements HTMLElement
 {
     private static $tabOffset = 4;
     private $name;
-    private $attributes = array();
-    private $content = array();
+    private $attributes;
+    private $content;
 
-    public function __construct($name, $attributes=array(), $content=array())
+    public function __construct($name, $attributes=null, $content=null)
     {
         $this->name = $name;
-        $this->setAttributes($attributes);
-        $this->setContent($content);
+        if ($content == null && (!is_array($attributes) || is_numeric(key($attributes))))
+        {
+            $this->setAttributes(array());
+            $this->setContent($attributes);
+        }
+        else
+        {
+            $this->setAttributes($attributes);
+            $this->setContent($content);
+        }
     }
 
     public function setAttributes ($attributes)
     {
-        $this->attributes = $attributes;
+        $this->attributes = (is_array($attributes))? $attributes : array();
     }
 
     public function setAttribute ($key, $value)
@@ -34,14 +42,17 @@ class Tag implements HTMLElement
     public function setContent ($content)
     {
         $this->content = array();
-        if (is_array($content))
+        if ($content != null)
         {
-            foreach ($content as $contentElement)
-                $this->add ($contentElement);
-        }
-        else
-        {
-            $this->add ($content);
+            if (is_array($content))
+            {
+                foreach ($content as $contentElement)
+                    $this->add ($contentElement);
+            }
+            else
+            {
+                $this->add ($content);
+            }
         }
     }
     
