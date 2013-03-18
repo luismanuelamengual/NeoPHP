@@ -42,7 +42,7 @@ class Tag implements HTMLElement
     public function setContent ($content)
     {
         $this->content = array();
-        if ($content != null)
+        if ($content !== null)
         {
             if (is_array($content))
             {
