@@ -12,7 +12,7 @@ class Tag implements HTMLElement
     public function __construct($name, $attributes=null, $content=null)
     {
         $this->name = $name;
-        if ($content == null && (!is_array($attributes) || is_numeric(key($attributes))))
+        if ($content === null && (!is_array($attributes) || is_numeric(key($attributes))))
         {
             $this->setAttributes(array());
             $this->setContent($attributes);
