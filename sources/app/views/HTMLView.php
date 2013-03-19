@@ -13,14 +13,13 @@ class HTMLView implements View
     
     public final function __construct ()
     {
+        $this->privateData = new stdClass();
         $this->docType = '<!DOCTYPE html>';
         $this->htmlTag = new Tag("html");
         $this->headTag = new Tag("head");
         $this->bodyTag = new Tag("body");
         $this->htmlTag->add($this->headTag);
         $this->htmlTag->add($this->bodyTag);
-        $this->privateData = new stdClass();
-        $this->privateData->hashes = array();
     }
     
     public final function render()
@@ -73,10 +72,10 @@ class HTMLView implements View
     {
         if ($hash == null)
             $hash = md5($styleFile);
-        if (!in_array($hash, $this->privateData->hashes))
+        if (!isset($this->privateData->styleFileHashes[$hash]))
         {
             $this->headTag->add(new Tag("link", array("rel"=>"stylesheet", "type"=>"text/css", "href"=>$styleFile)));
-            $this->privateData->hashes[] = $hash;
+            $this->privateData->styleFileHashes[$hash] = true;
         }
     }
     
@@ -84,10 +83,10 @@ class HTMLView implements View
     {
         if ($hash == null)
             $hash = md5($style);
-        if (!in_array($hash, $this->privateData->hashes))
+        if (!isset($this->privateData->styleHashes[$hash]))
         {
             $this->headTag->add(new Tag("style", array("type"=>"text/css"), $style));
-            $this->privateData->hashes[] = $hash;
+            $this->privateData->styleHashes[$hash] = true;
         }
     }
 
@@ -95,10 +94,10 @@ class HTMLView implements View
     {
         if ($hash == null)
             $hash = md5($scriptFile);
-        if (!in_array($hash, $this->privateData->hashes))
+        if (!isset($this->privateData->scriptFileHashes[$hash]))
         {
             $this->htmlTag->add(new Tag("script", array("type"=>"text/javascript", "src"=>$scriptFile), ""));
-            $this->privateData->hashes[] = $hash;
+            $this->privateData->scriptFileHashes[$hash] = true;
         }
     }
 
@@ -106,10 +105,10 @@ class HTMLView implements View
     {
         if ($hash == null)
             $hash = md5($script);
-        if (!in_array($hash, $this->privateData->hashes))
+        if (!isset($this->privateData->scriptHashes[$hash]))
         {
             $this->htmlTag->add(new Tag("script", array("type"=>"text/javascript"), $script));
-            $this->privateData->hashes[] = $hash;
+            $this->privateData->scriptHashes[$hash] = true;
         }
     }
     
@@ -117,14 +116,14 @@ class HTMLView implements View
     {
         if ($hash == null)
             $hash = md5($script);
-        if (!in_array($hash, $this->privateData->hashes))
+        if (!isset($this->privateData->onLoadScriptHashes[$hash]))
         {
             $onLoadScript = $this->bodyTag->getAttribute("onload");
             if (empty($onLoadScript))
                 $onLoadScript = "";
             $onLoadScript .= $script;
             $this->bodyTag->setAttribute("onload", $onLoadScript);
-            $this->privateData->hashes[] = $hash;
+            $this->privateData->onLoadScriptHashes[$hash] = true;
         }
     }
     
