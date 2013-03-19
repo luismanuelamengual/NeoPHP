@@ -4,7 +4,6 @@ require_once ("app/widgets/html/HTMLElement.php");
 
 abstract class HTMLComponent implements HTMLElement
 {
-    private $builded;
     protected $attributes;
     protected $htmlElement;
     
@@ -21,12 +20,7 @@ abstract class HTMLComponent implements HTMLElement
     
     public final function build (HTMLView $view)
     {
-        if (!$this->builded)
-        {
-            $this->addDependencies($view);
-            $this->setHTMLElement($this->createHTMLElement());
-            $this->builded = true;
-        }
+        $this->setHTMLElement($this->createHTMLElement($view));
     }
     
     private function setHTMLElement (HTMLElement $htmlElement=null)
@@ -39,8 +33,7 @@ abstract class HTMLComponent implements HTMLElement
         return array ();
     }
     
-    protected function addDependencies (HTMLView $view) {}
-    protected function createHTMLElement () { return null; }
+    protected abstract function createHTMLElement (HTMLView $view);
 }
 
 ?>

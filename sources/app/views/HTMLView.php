@@ -5,7 +5,7 @@ require_once ("app/widgets/html/HTMLComponent.php");
 
 class HTMLView implements View
 {
-    private $innerData;
+    private $privateData;
     protected $docType;
     protected $htmlTag;
     protected $headTag;
@@ -19,16 +19,16 @@ class HTMLView implements View
         $this->bodyTag = new Tag("body");
         $this->htmlTag->add($this->headTag);
         $this->htmlTag->add($this->bodyTag);
-        $this->innerData = new stdClass();
-        $this->innerData->hashes = array();
+        $this->privateData = new stdClass();
+        $this->privateData->hashes = array();
     }
     
     public final function render()
     {
-        if (empty($this->innerData->builded))
+        if (empty($this->privateData->builded))
         {
             $this->build();
-            $this->innerData->builded = true;
+            $this->privateData->builded = true;
         }
         echo $this->docType . "\n" . $this->htmlTag->toHtml();
     }
@@ -50,33 +50,33 @@ class HTMLView implements View
     
     public final function setTitle ($title)
     {
-        if (!empty($this->innerData->titleTag))
+        if (!empty($this->privateData->titleTag))
         {
-            $this->innerData->titleTag->setContent ($title);
+            $this->privateData->titleTag->setContent ($title);
         }
         else
         {
-            $this->innerData->titleTag = new Tag("title", array(), $title);
-            $this->headTag->insert ($this->innerData->titleTag, 0);
-            $this->innerData->metasOffset = empty($this->innerData->metasOffset)? 1 : ($this->innerData->metasOffset+1);
+            $this->privateData->titleTag = new Tag("title", array(), $title);
+            $this->headTag->insert ($this->privateData->titleTag, 0);
+            $this->privateData->metasOffset = empty($this->privateData->metasOffset)? 1 : ($this->privateData->metasOffset+1);
         }
     }
     
     public final function addMeta ($attributes)
     {
-        if (empty($this->innerData->metasOffset))
-            $this->innerData->metasOffset = 0;
-        $this->headTag->insert(new Tag("meta", $attributes), ($this->innerData->metasOffset++));
+        if (empty($this->privateData->metasOffset))
+            $this->privateData->metasOffset = 0;
+        $this->headTag->insert(new Tag("meta", $attributes), ($this->privateData->metasOffset++));
     }
     
     public final function addStyleFile ($styleFile, $hash=null)
     {
         if ($hash == null)
             $hash = md5($styleFile);
-        if (!in_array($hash, $this->innerData->hashes))
+        if (!in_array($hash, $this->privateData->hashes))
         {
             $this->headTag->add(new Tag("link", array("rel"=>"stylesheet", "type"=>"text/css", "href"=>$styleFile)));
-            $this->innerData->hashes[] = $hash;
+            $this->privateData->hashes[] = $hash;
         }
     }
     
@@ -84,10 +84,10 @@ class HTMLView implements View
     {
         if ($hash == null)
             $hash = md5($style);
-        if (!in_array($hash, $this->innerData->hashes))
+        if (!in_array($hash, $this->privateData->hashes))
         {
             $this->headTag->add(new Tag("style", array("type"=>"text/css"), $style));
-            $this->innerData->hashes[] = $hash;
+            $this->privateData->hashes[] = $hash;
         }
     }
 
@@ -95,10 +95,10 @@ class HTMLView implements View
     {
         if ($hash == null)
             $hash = md5($scriptFile);
-        if (!in_array($hash, $this->innerData->hashes))
+        if (!in_array($hash, $this->privateData->hashes))
         {
             $this->htmlTag->add(new Tag("script", array("type"=>"text/javascript", "src"=>$scriptFile), ""));
-            $this->innerData->hashes[] = $hash;
+            $this->privateData->hashes[] = $hash;
         }
     }
 
@@ -106,10 +106,10 @@ class HTMLView implements View
     {
         if ($hash == null)
             $hash = md5($script);
-        if (!in_array($hash, $this->innerData->hashes))
+        if (!in_array($hash, $this->privateData->hashes))
         {
             $this->htmlTag->add(new Tag("script", array("type"=>"text/javascript"), $script));
-            $this->innerData->hashes[] = $hash;
+            $this->privateData->hashes[] = $hash;
         }
     }
     
@@ -117,14 +117,14 @@ class HTMLView implements View
     {
         if ($hash == null)
             $hash = md5($script);
-        if (!in_array($hash, $this->innerData->hashes))
+        if (!in_array($hash, $this->privateData->hashes))
         {
             $onLoadScript = $this->bodyTag->getAttribute("onload");
             if (empty($onLoadScript))
                 $onLoadScript = "";
             $onLoadScript .= $script;
             $this->bodyTag->setAttribute("onload", $onLoadScript);
-            $this->innerData->hashes[] = $hash;
+            $this->privateData->hashes[] = $hash;
         }
     }
     
