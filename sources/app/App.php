@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Clase App - Atención, para un correcto funcionamiento es necesario 
- * utilizar las siguientes configuraciones en PHP.ini
- * session.auto_start = 1
- * session.use_cookies = 1
- * session.use_trans_sid = 0;
- */
 final class App
 {
     private $views = array();
@@ -32,31 +25,7 @@ final class App
     
     public function start ()
     {
-        App::getInstance()->executeAction((!empty($_REQUEST['action'])? $_REQUEST['action'] : null));
-    }
-    
-    public function getFrameworkBasePath()
-    {
-        $reflectionObject = new ReflectionObject($this);
-        return dirname(dirname($reflectionObject->getFileName())) . DIRECTORY_SEPARATOR;
-    }
-    
-    public function getBasePath()
-    {
-        return dirname($_SERVER["SCRIPT_FILENAME"]) . DIRECTORY_SEPARATOR;
-    }
-    
-    public function getBaseUrl()
-    {
-        return dirname($_SERVER["SCRIPT_NAME"]) . "/";
-    }
-    
-    public function getUrl ($action, $params=array())
-    {
-        $url = $this->getBaseUrl() . "?action=" . $action;
-        if (sizeof($params) > 0)
-            $url .= "&" . http_build_query($params);
-        return $url;
+        $this->executeAction((!empty($_REQUEST['action'])? $_REQUEST['action'] : null));
     }
     
     private function executeAction ($action, $params=array())
@@ -91,6 +60,30 @@ final class App
     public function redirect ($url)
     {
         header("Location: " . $url);
+    }
+    
+    public function getFrameworkBasePath()
+    {
+        $reflectionObject = new ReflectionObject($this);
+        return dirname(dirname($reflectionObject->getFileName())) . DIRECTORY_SEPARATOR;
+    }
+    
+    public function getBasePath()
+    {
+        return dirname($_SERVER["SCRIPT_FILENAME"]) . DIRECTORY_SEPARATOR;
+    }
+    
+    public function getBaseUrl()
+    {
+        return dirname($_SERVER["SCRIPT_NAME"]) . "/";
+    }
+    
+    public function getUrl ($action, $params=array())
+    {
+        $url = $this->getBaseUrl() . "?action=" . $action;
+        if (sizeof($params) > 0)
+            $url .= "&" . http_build_query($params);
+        return $url;
     }
     
     public function getController ($controllerName)
