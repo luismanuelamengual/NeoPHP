@@ -20,6 +20,7 @@ abstract class HTMLComponent implements HTMLElement
     
     public final function build (HTMLView $view)
     {
+        $this->addViewDependencies ($view);
         $this->setHTMLElement($this->createHTMLElement($view));
     }
     
@@ -34,6 +35,7 @@ abstract class HTMLComponent implements HTMLElement
     }
     
     protected abstract function createHTMLElement (HTMLView $view);
+    protected function addViewDependencies (HTMLView $view) {}
 }
 
 ?>
