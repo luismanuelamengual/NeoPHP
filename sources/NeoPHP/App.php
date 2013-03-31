@@ -17,6 +17,7 @@
 final class App
 {
     private static $instance;
+    private $appFolderName;
     private $restfull;
     private $controllers = array();
     private $connections = array();
@@ -24,6 +25,7 @@ final class App
     private function __construct ()
     {
         set_error_handler(array("App", "errorHandler"), E_ALL);
+        $this->appFolderName = "app";
     }
 
     public static function getInstance ()
@@ -36,6 +38,16 @@ final class App
     public function start ()
     {
         $this->executeAction(($this->restfull)? substr($_SERVER["REQUEST_URI"], strlen(dirname($_SERVER["SCRIPT_NAME"]))+1) : (!empty($_REQUEST['action'])? $_REQUEST['action'] : null));
+    }
+    
+    public function getAppFolderName ()
+    {
+        return $this->appFolderName;
+    }
+    
+    public function setAppFolderName ($appFolderName)
+    {
+        $this->appFolderName = $appFolderName;
     }
     
     public function setRestfull ($restfull)
@@ -135,7 +147,7 @@ final class App
         $pathSeparatorPosition = strrpos($name, "/");
         $pathSeparatorPosition = ($pathSeparatorPosition != false)? ($pathSeparatorPosition+1) : 0;
         $className = ucfirst(substr($name,$pathSeparatorPosition,strlen($name))) . ucfirst($category);
-        require_once ("app/" . $basePath . substr($name,0,$pathSeparatorPosition) . $className . '.php');
+        require_once ($this->getAppFolderName() . "/" . $basePath . substr($name,0,$pathSeparatorPosition) . $className . '.php');
         return new $className;
     }
     
