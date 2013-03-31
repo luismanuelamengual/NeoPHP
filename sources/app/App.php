@@ -1,22 +1,37 @@
 <?php
 
+/**
+ * Si se activa el modo REST se requieren 3 cosas:
+ * 1) Activación del modulo rewrite. Se hace con el siguiente comando: "sudo a2enmod rewrite" 
+ * 2) Configurar en el archivo de configuración de apache para el DirectoryIndex adecuado la propiedad "AllowOverride All"
+ * 3) Utilización de un archivo .htaccess en el raiz del proyecto con el siguient contenido
+ * DirectoryIndex index.php
+ * <IfModule mod_rewrite.c>
+ *   RewriteEngine On
+ *   RewriteRule ^$ index.php [QSA,L]
+ *   RewriteCond %{REQUEST_FILENAME} !-f
+ *   RewriteCond %{REQUEST_FILENAME} !-d
+ *   RewriteRule ^(.*)$ index.php [QSA,L]
+ * </IfModule>
+ */
 final class App
 {
     private $views = array();
     private $controllers = array();
     private $connections = array();
+    private $restfull;
     private static $instance;
     
-    private function __construct() 
+    private function __construct ()
     {
-        set_error_handler(array("App", "errorHandler"), E_ALL);
+        set_error_handler(array("App", "errorHandler"), E_ALL);    
         $frameworkBasePath = $this->getFrameworkBasePath();
         $basePath = $this->getBasePath();
         if ($frameworkBasePath !== $basePath)
             set_include_path($this->getFrameworkBasePath() . PATH_SEPARATOR . get_include_path());
     }
 
-    public static function getInstance()
+    public static function getInstance ()
     {
         if (!isset(self::$instance))
             self::$instance = new self;
@@ -25,10 +40,15 @@ final class App
     
     public function start ()
     {
-        $this->executeAction((!empty($_REQUEST['action'])? $_REQUEST['action'] : null));
+        $this->executeAction(($this->restfull)? substr($_SERVER["REQUEST_URI"], strlen(dirname($_SERVER["SCRIPT_NAME"]))+1) : (!empty($_REQUEST['action'])? $_REQUEST['action'] : null));
     }
     
-    private function executeAction ($action, $params=array())
+    public function setRestfull ($restfull)
+    {
+        $this->restfull = $restfull;
+    }
+    
+    public function executeAction ($action, $params=array())
     {
         try
         {
@@ -80,9 +100,12 @@ final class App
     
     public function getUrl ($action, $params=array())
     {
-        $url = $this->getBaseUrl() . "?action=" . $action;
+        $url = $this->getBaseUrl();
+        if (!$this->restfull)
+            $url .= "?action=";
+        $url .= $action;
         if (sizeof($params) > 0)
-            $url .= "&" . http_build_query($params);
+            $url .= (($this->restfull)?"?":"&") . http_build_query($params);
         return $url;
     }
     
