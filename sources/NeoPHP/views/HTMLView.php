@@ -1,7 +1,7 @@
 <?php
 
-require_once ("app/widgets/html/Tag.php");
-require_once ("app/widgets/html/HTMLComponent.php");
+require_once ("NeoPHP/widgets/html/Tag.php");
+require_once ("NeoPHP/widgets/html/HTMLComponent.php");
 
 class HTMLView implements View
 {

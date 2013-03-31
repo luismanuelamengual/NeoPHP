@@ -33,7 +33,7 @@ abstract class Connection
     
     public final function getDataObject($tableName)
     {
-        require_once ('app/DataObject.php');
+        require_once ('NeoPHP/DataObject.php');
         return new DataObject($this, $tableName);
     }
     

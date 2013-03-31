@@ -23,11 +23,7 @@ final class App
     
     private function __construct ()
     {
-        set_error_handler(array("App", "errorHandler"), E_ALL);    
-        $frameworkBasePath = $this->getFrameworkBasePath();
-        $basePath = $this->getBasePath();
-        if ($frameworkBasePath !== $basePath)
-            set_include_path($this->getFrameworkBasePath() . PATH_SEPARATOR . get_include_path());
+        set_error_handler(array("App", "errorHandler"), E_ALL);
     }
 
     public static function getInstance ()
@@ -81,12 +77,6 @@ final class App
         header("Location: " . $url);
     }
     
-    public function getFrameworkBasePath()
-    {
-        $reflectionObject = new ReflectionObject($this);
-        return dirname(dirname($reflectionObject->getFileName())) . DIRECTORY_SEPARATOR;
-    }
-    
     public function getBasePath()
     {
         return dirname($_SERVER["SCRIPT_FILENAME"]) . DIRECTORY_SEPARATOR;
@@ -112,7 +102,7 @@ final class App
     {
         if (!isset($this->controllers[$controllerName]))
         {
-            require_once ('app/Controller.php');
+            require_once ('NeoPHP/Controller.php');
             $this->controllers[$controllerName] = $this->get($controllerName, "controller", "controllers/");
         }
         return $this->controllers[$controllerName];
@@ -122,7 +112,7 @@ final class App
     {
         if (!isset($this->connections[$connectionName]))
         {
-            require_once ('app/Connection.php');
+            require_once ('NeoPHP/Connection.php');
             $this->connections[$connectionName] = $this->get($connectionName, "connection", "connections/");
         }
         return $this->connections[$connectionName];
@@ -130,13 +120,13 @@ final class App
     
     public function getView ($viewName)
     {
-        require_once ('app/View.php');
+        require_once ('NeoPHP/View.php');
         return $this->get($viewName, "view", "views/");
     }
     
     public function getModel ($modelName)
     {
-        require_once ('app/Model.php');
+        require_once ('NeoPHP/Model.php');
         return $this->get($modelName, "model", "models/");
     }
     
@@ -151,25 +141,25 @@ final class App
     
     public function getSession ()
     {
-        require_once ('app/Session.php');
+        require_once ('NeoPHP/Session.php');
         return Session::getInstance();
     }
     
     public function getPreferences ()
     {
-        require_once ('app/Preferences.php');
+        require_once ('NeoPHP/Preferences.php');
         return Preferences::getInstance();
     }
     
     public function getTranslator ()
     {
-        require_once ('app/Translator.php');
+        require_once ('NeoPHP/Translator.php');
         return Translator::getInstance();
     }
     
     public function getLogger ()
     {
-        require_once ('app/Logger.php');
+        require_once ('NeoPHP/Logger.php');
         return Logger::getInstance();
     }
     

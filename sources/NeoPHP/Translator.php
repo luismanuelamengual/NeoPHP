@@ -44,7 +44,7 @@ final class Translator
             $dictionarySeparator = strrpos($key, ".");
             $dictionaryName = substr($key,0,$dictionarySeparator);
             $dictionaryKey = substr($key,$dictionarySeparator+1,strlen($key));
-            $dictionaryFilename = "app/resources/" . str_replace(".", "/", $dictionaryName) . ".lan";
+            $dictionaryFilename = App::getInstance()->getBasePath() . "resources" . DIRECTORY_SEPARATOR . str_replace(".", DIRECTORY_SEPARATOR, $dictionaryName) . ".lan";
             try { $dictionaryData = @parse_ini_file($dictionaryFilename, true); } catch (Exception $ex) {}
             if (!empty($dictionaryData) && !empty($dictionaryData[$language]))
                 foreach ($dictionaryData[$language] as $newDictionaryKey=>$newDictionaryText)
