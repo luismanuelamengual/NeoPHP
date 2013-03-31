@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Si se activa el modo REST se requieren 3 cosas:
+ * Si se activa el modo REST se requieren 4 cosas:
  * 1) Activación del modulo rewrite. Se hace con el siguiente comando: "sudo a2enmod rewrite" 
  * 2) Configurar en el archivo de configuración de apache para el DirectoryIndex adecuado la propiedad "AllowOverride All"
  * 3) Utilización de un archivo .htaccess en el raiz del proyecto con el siguient contenido
@@ -13,6 +13,7 @@
  *   RewriteCond %{REQUEST_FILENAME} !-d
  *   RewriteRule ^(.*)$ index.php [QSA,L]
  * </IfModule>
+ * 4) Las url de archivos css y js deben ser completas, NO relativas
  */
 final class App
 {
