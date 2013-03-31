@@ -16,11 +16,10 @@
  */
 final class App
 {
-    private $views = array();
+    private static $instance;
+    private $restfull;
     private $controllers = array();
     private $connections = array();
-    private $restfull;
-    private static $instance;
     
     private function __construct ()
     {
@@ -119,16 +118,6 @@ final class App
         return $this->controllers[$controllerName];
     }
     
-    public function getView ($viewName)
-    {
-        if (!isset($this->views[$viewName]))
-        {
-            require_once ('app/View.php');
-            $this->views[$viewName] = $this->get($viewName, "view", "views/");
-        }
-        return $this->views[$viewName];
-    }
-    
     public function getConnection ($connectionName)
     {
         if (!isset($this->connections[$connectionName]))
@@ -137,6 +126,18 @@ final class App
             $this->connections[$connectionName] = $this->get($connectionName, "connection", "connections/");
         }
         return $this->connections[$connectionName];
+    }
+    
+    public function getView ($viewName)
+    {
+        require_once ('app/View.php');
+        return $this->get($viewName, "view", "views/");
+    }
+    
+    public function getModel ($modelName)
+    {
+        require_once ('app/Model.php');
+        return $this->get($modelName, "model", "models/");
     }
     
     public function get ($name, $category, $basePath = "")
