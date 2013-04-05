@@ -4,7 +4,7 @@ class ProductionConnection extends Connection
 {
     public function getDsn ()
     {
-        return "mysql:host=localhost;dbname=" . App::getInstance()->getPreferences()->title;
+        return "mysql:host=localhost;dbname=" . App::getInstance()->getSettings()->title;
     }
     
     public function getUsername ()

@@ -17,7 +17,7 @@ class InstitutionalSiteView extends HTMLView
     
     protected function buildHead ()
     {
-        $this->headTag->add(new Tag("title", array(), App::getInstance()->getPreferences()->title));
+        $this->headTag->add(new Tag("title", array(), App::getInstance()->getSettings()->title));
         $this->headTag->add(new Tag("meta", array("http-equiv"=>"content-type", "content"=>"text/html; charset=UTF-8")));
         $this->headTag->add(new Tag("meta", array("name"=>"language", "content"=>"es")));
         $this->headTag->add(new Tag("meta", array("name"=>"description", "content"=>"")));
@@ -58,13 +58,13 @@ class InstitutionalSiteView extends HTMLView
     protected function createFooterContent ()
     {            
         $this->footerTag = new Tag("div", array("id"=>"footerContent"));
-        $this->footerTag->add(new Tag("div", array("id"=>"copyright"), "&copy; Copyright 2013. " . App::getInstance()->getPreferences()->title . " - Todos los derechos reservados"));
+        $this->footerTag->add(new Tag("div", array("id"=>"copyright"), "&copy; Copyright 2013. " . App::getInstance()->getSettings()->title . " - Todos los derechos reservados"));
         return $this->footerTag;
     }
     
     protected function createTitle ()
     {
-        return new Tag("h1", array(), new Tag("a", array("href"=>"#", "class"=>"title"), App::getInstance()->getPreferences()->title));
+        return new Tag("h1", array(), new Tag("a", array("href"=>"#", "class"=>"title"), App::getInstance()->getSettings()->title));
     }
     
     protected function createNavBar ()
