@@ -16,60 +16,45 @@ final class Loader
         $this->basePath = $basePath;
     }
     
-    public function getInstance ($name, $params=null, $basePath=null)
+    public function getInstance ($resource, $params=null, $basePath=null)
     {
-        if (empty($basePath))
-            $basePath = $this->basePath;
-        $pathSeparator = "/";
-        $pathSeparatorPosition = strrpos($name, $pathSeparator);
-        $pathSeparatorPosition = ($pathSeparatorPosition != false)? ($pathSeparatorPosition+1) : 0;
-        $className = ucfirst(substr($name,$pathSeparatorPosition,strlen($name)));        
-        require_once ((!empty($basePath)? ($basePath . $pathSeparator): "") . substr($name,0,$pathSeparatorPosition) . $className . '.php');
-        return $this->instantiateClass($className, $params);
+        $resourceData = $this->getResourceData ($resource, $basePath);
+        require_once ($resourceData["filename"]);
+        return $this->instantiateClass($resourceData["classname"], $params);
     }
     
-    public function getCategorizedInstance ($category, $name, $params=null, $basePath=null)
+    public function getCacheInstance ($resource, $basePath=null)
     {
-        if (empty($basePath))
-            $basePath = $this->basePath;
-        $pathSeparator = "/";
-        $categoryFolderName = $category . "s";
-        $categoryInstanceName = $name . ucfirst($category);
-        $categoryBasePath = (!empty($basePath)? ($basePath . $pathSeparator): "") . $categoryFolderName;
-        return $this->getInstance($categoryInstanceName, $params, $categoryBasePath);
+        if (!isset($this->instancesCache[$resource]))
+            $this->instancesCache[$resource] = $this->getInstance ($resource, null, $basePath);
+        return $this->instancesCache[$resource];
     }
     
-    public function getCacheInstance ($name, $basePath=null)
+    public function getSingletonInstance ($resource, $basePath=null)
     {
-        $cacheHash = (!empty($basePath)? ($basePath . "_") : "") . $name;
-        if (!isset($this->instancesCache[$cacheHash]))
-            $this->instancesCache[$cacheHash] = $this->getInstance ($name, null, $basePath);
-        return $this->instancesCache[$cacheHash];
-    }
-    
-    public function getCategorizedCacheInstance ($category, $name, $basePath=null)
-    {
-        $cacheHash = (!empty($basePath)? ($basePath . "_") : "") . $category . "_" . $name;
-        if (!isset($this->instancesCache[$cacheHash]))
-            $this->instancesCache[$cacheHash] = $this->getCategorizedInstance ($category, $name, null, $basePath);
-        return $this->instancesCache[$cacheHash];
-    }
-    
-    public function getSingletonInstance ($name, $basePath=null)
-    {
-        $cacheHash = (!empty($basePath)? ($basePath . "_") : "") . $name;
-        if (!isset($this->instancesCache[$cacheHash]))
+        if (!isset($this->instancesCache[$resource]))
         {
-            if (empty($basePath))
-                $basePath = $this->basePath;
-            $pathSeparator = "/";
-            $pathSeparatorPosition = strrpos($name, $pathSeparator);
-            $pathSeparatorPosition = ($pathSeparatorPosition != false)? ($pathSeparatorPosition+1) : 0;
-            $className = ucfirst(substr($name,$pathSeparatorPosition,strlen($name)));        
-            require_once ((!empty($basePath)? ($basePath . $pathSeparator): "") . substr($name,0,$pathSeparatorPosition) . $className . '.php');
-            $this->instancesCache[$cacheHash] = $className::getInstance();
+            $resourceData = $this->getResourceData ($resource, $basePath);
+            require_once ($resourceData["filename"]);
+            $this->instancesCache[$resource] = $resourceData["classname"]::getInstance();
         }
-        return $this->instancesCache[$cacheHash];
+        return $this->instancesCache[$resource];
+    }
+    
+    private function getResourceData ($resource, $basePath=null)
+    {
+        if (empty($basePath))
+            $basePath = $this->basePath;
+        $pathSeparator = "/";
+        $pathSeparatorPosition = strrpos($resource, $pathSeparator);
+        $pathParts = array();
+        if (!empty($basePath))
+            $pathParts[] = $basePath;
+        if ($pathSeparatorPosition != false)
+            $pathParts[] = substr($resource, 0, $pathSeparatorPosition);
+        $className = ucfirst(substr($resource, ($pathSeparatorPosition != false)? ($pathSeparatorPosition+1) : 0));
+        $pathParts[] = $className . ".php";
+        return array("classname"=>$className, "filename"=>implode($pathSeparator, $pathParts));
     }
     
     private function instantiateClass ($className, $params=array())

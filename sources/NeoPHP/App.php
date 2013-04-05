@@ -146,25 +146,25 @@ final class App
     public function getController ($controllerName)
     {
         require_once("NeoPHP/Controller.php");
-        return $this->getLoader()->getCategorizedCacheInstance("controller", $controllerName);
+        return $this->getLoader()->getCacheInstance("controllers/" . $controllerName . "Controller");
     }
     
     public function getConnection ($connectionName)
     {
         require_once("NeoPHP/Connection.php");
-        return $this->getLoader()->getCategorizedCacheInstance("connection", $connectionName);
+        return $this->getLoader()->getCacheInstance("connections/" . $connectionName . "Connection");
     }
     
     public function getView ($viewName, $params=array())
     {
         require_once("NeoPHP/View.php");
-        return $this->getLoader()->getCategorizedInstance("view", $viewName, $params);
+        return $this->getLoader()->getInstance("views/" . $viewName . "View", $params);
     }
     
     public function getModel ($modelName, $params=array())
     {
         require_once("NeoPHP/Model.php");
-        return $this->getLoader()->getCategorizedInstance("model", $modelName, $params);
+        return $this->getLoader()->getInstance("models/" . $modelName . "Model", $params);
     }
     
     public function errorHandler ($errno, $errstr, $errfile, $errline)
