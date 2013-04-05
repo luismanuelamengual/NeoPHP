@@ -1,7 +1,5 @@
 <?php
 
-require_once ("NeoPHP/Loader.php");
-
 /**
  * Si se activa el modo REST se requieren 4 cosas:
  * 1) Activación del modulo rewrite. Se hace con el siguiente comando: "sudo a2enmod rewrite" 
@@ -20,16 +18,15 @@ require_once ("NeoPHP/Loader.php");
 final class App
 {
     private static $instance;
-    private $loader;
     private $appFolderName;
     private $restfull;
+    private $loader;
     
     private function __construct ()
     {
         set_error_handler(array("App", "errorHandler"), E_ALL);
         $this->appFolderName = "app";
         $this->restfull = false;
-        $this->loader = new Loader($this->appFolderName);
     }
 
     public static function getInstance ()
@@ -39,7 +36,7 @@ final class App
         return self::$instance;
     }
     
-    public function start ()
+    public function handleRequest ()
     {
         $this->executeAction(($this->restfull)? substr($_SERVER["REQUEST_URI"], strlen(dirname($_SERVER["SCRIPT_NAME"]))+1) : (!empty($_REQUEST['action'])? $_REQUEST['action'] : null));
     }
@@ -47,7 +44,8 @@ final class App
     public function setAppFolderName ($appFolderName)
     {
         $this->appFolderName = $appFolderName;
-        $this->loader->setBasePath($this->appFolderName);
+        if (!empty($this->loader))
+            $this->loader->setBasePath($this->appFolderName);
     }
     
     public function setRestfull ($restfull)
@@ -112,13 +110,17 @@ final class App
     
     public function getLoader ()
     {
+        if (empty($this->loader))
+        {
+            require_once ("NeoPHP/Loader.php");
+            $this->loader = new Loader($this->appFolderName);
+        }
         return $this->loader;
     }
     
     public function getSession ()
     {
-        require_once ('NeoPHP/Session.php');
-        return Session::getInstance();
+        return $this->getLoader()->getSingletonInstance("session", "NeoPHP");
     }
     
     public function getPreferences ()

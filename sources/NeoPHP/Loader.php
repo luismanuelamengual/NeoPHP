@@ -55,6 +55,23 @@ final class Loader
         return $this->instancesCache[$cacheHash];
     }
     
+    public function getSingletonInstance ($name, $basePath=null)
+    {
+        $cacheHash = (!empty($basePath)? ($basePath . "_") : "") . $name;
+        if (!isset($this->instancesCache[$cacheHash]))
+        {
+            if (empty($basePath))
+                $basePath = $this->basePath;
+            $pathSeparator = "/";
+            $pathSeparatorPosition = strrpos($name, $pathSeparator);
+            $pathSeparatorPosition = ($pathSeparatorPosition != false)? ($pathSeparatorPosition+1) : 0;
+            $className = ucfirst(substr($name,$pathSeparatorPosition,strlen($name)));        
+            require_once ((!empty($basePath)? ($basePath . $pathSeparator): "") . substr($name,0,$pathSeparatorPosition) . $className . '.php');
+            $this->instancesCache[$cacheHash] = $className::getInstance();
+        }
+        return $this->instancesCache[$cacheHash];
+    }
+    
     private function instantiateClass ($className, $params=array())
     {
         $instance = null;
