@@ -21,11 +21,6 @@ class Session
         return session_id();
     }
     
-    public function startSession()
-    {
-        try { session_start(); } catch (Exception $ex) {}
-    }
-
     public function __set($name, $value)
     {
         $_SESSION[$name] = $value;
@@ -33,8 +28,7 @@ class Session
 
     public function __get($name)
     {
-        if ( isset($_SESSION[$name]))
-            return $_SESSION[$name];
+        return (isset($_SESSION[$name]))? $_SESSION[$name] : false;
     }
     
     public function __isset($name)
@@ -44,9 +38,14 @@ class Session
    
     public function __unset($name)
     {
-        unset( $_SESSION[$name] );
+        unset($_SESSION[$name] );
     }
 
+    public function start ()
+    {
+        try { session_start(); } catch (Exception $ex) {}
+    }
+    
     public function destroy()
     {
         session_destroy();

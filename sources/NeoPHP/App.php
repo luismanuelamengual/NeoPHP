@@ -123,6 +123,11 @@ final class App
         return $this->getLoader()->getSingletonInstance("session", "NeoPHP");
     }
     
+    public function getServer ()
+    {
+        return $this->getLoader()->getSingletonInstance("server", "NeoPHP");
+    }
+    
     public function getPreferences ()
     {
         return $this->getLoader()->getCacheInstance("preferences", "NeoPHP");

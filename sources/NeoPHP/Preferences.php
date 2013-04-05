@@ -11,8 +11,7 @@ final class Preferences
 
     public function __get($name)
     {
-        if (isset($this->preferences[$name]))
-            return $this->preferences[$name];
+        return (isset($this->preferences[$name]))? $this->preferences[$name] : false;
     }
     
     public function __isset($name)
