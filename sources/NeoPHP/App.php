@@ -128,9 +128,9 @@ final class App
         return $this->getLoader()->getSingletonInstance("server", "NeoPHP");
     }
     
-    public function getPreferences ()
+    public function getSettings ()
     {
-        return $this->getLoader()->getCacheInstance("preferences", "NeoPHP");
+        return $this->getLoader()->getCacheInstance("settings", "NeoPHP");
     }
     
     public function getTranslator ()
