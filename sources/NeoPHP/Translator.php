@@ -4,9 +4,8 @@ final class Translator
 {
     private $language;
     private $dictionary;
-    private static $instance;
     
-    private function __construct() 
+    public function __construct() 
     {
         $lang = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2);
         if (empty($lang))
@@ -14,13 +13,6 @@ final class Translator
         $this->setLanguage($lang);
     }
 
-    public static function getInstance()
-    {
-        if (!isset(self::$instance))
-            self::$instance = new self;
-        return self::$instance;
-    }
-    
     public function setLanguage ($language)
     {
         $this->language = $language;

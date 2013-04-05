@@ -10,7 +10,6 @@ final class Logger
     const LEVEL_INFO = 8;
     const LEVEL_FINE = 16;
     
-    private static $instance;
     private $actions = array();
     
     private function __construct() 
@@ -22,16 +21,9 @@ final class Logger
         $fileAction = new stdClass();
         $fileAction->type = Logger::ACTION_FILE;
         $fileAction->mask = Logger::LEVEL_ERROR|Logger::LEVEL_WARNING;
-        $fileAction->filename = App::getInstance()->getBasePath() . "logs" . DIRECTORY_SEPARATOR . "{dateFormat}.txt";
+        $fileAction->filename = dirname($_SERVER["SCRIPT_FILENAME"]) . DIRECTORY_SEPARATOR . "logs" . DIRECTORY_SEPARATOR . "{dateFormat}.txt";
         $fileAction->filenameDateFormat = "Y-m-d";
         $this->addAction($fileAction);
-    }
-    
-    public static function getInstance()
-    {
-        if (!isset(self::$instance))
-            self::$instance = new self;
-        return self::$instance;
     }
     
     public function clearActions ()

@@ -1,17 +1,8 @@
 <?php
 
-class Preferences
+final class Preferences
 {
-    private static $instance;
     private $preferences = array();
-    private function __construct() {}
-
-    public static function getInstance()
-    {
-        if (!isset(self::$instance))
-            self::$instance = new self;
-        return self::$instance;
-    }
     
     public function __set($name, $value)
     {
@@ -20,7 +11,7 @@ class Preferences
 
     public function __get($name)
     {
-        if ( isset($this->preferences[$name]))
+        if (isset($this->preferences[$name]))
             return $this->preferences[$name];
     }
     

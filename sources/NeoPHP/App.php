@@ -1,5 +1,7 @@
 <?php
 
+require_once ("NeoPHP/Loader.php");
+
 /**
  * Si se activa el modo REST se requieren 4 cosas:
  * 1) Activación del modulo rewrite. Se hace con el siguiente comando: "sudo a2enmod rewrite" 
@@ -18,15 +20,16 @@
 final class App
 {
     private static $instance;
+    private $loader;
     private $appFolderName;
     private $restfull;
-    private $controllers = array();
-    private $connections = array();
     
     private function __construct ()
     {
         set_error_handler(array("App", "errorHandler"), E_ALL);
         $this->appFolderName = "app";
+        $this->restfull = false;
+        $this->loader = new Loader($this->appFolderName);
     }
 
     public static function getInstance ()
@@ -41,14 +44,10 @@ final class App
         $this->executeAction(($this->restfull)? substr($_SERVER["REQUEST_URI"], strlen(dirname($_SERVER["SCRIPT_NAME"]))+1) : (!empty($_REQUEST['action'])? $_REQUEST['action'] : null));
     }
     
-    public function getAppFolderName ()
-    {
-        return $this->appFolderName;
-    }
-    
     public function setAppFolderName ($appFolderName)
     {
         $this->appFolderName = $appFolderName;
+        $this->loader->setBasePath($this->appFolderName);
     }
     
     public function setRestfull ($restfull)
@@ -111,45 +110,9 @@ final class App
         return $url;
     }
     
-    public function getController ($controllerName)
+    public function getLoader ()
     {
-        if (!isset($this->controllers[$controllerName]))
-        {
-            require_once ('NeoPHP/Controller.php');
-            $this->controllers[$controllerName] = $this->get($controllerName, "controller", "controllers/");
-        }
-        return $this->controllers[$controllerName];
-    }
-    
-    public function getConnection ($connectionName)
-    {
-        if (!isset($this->connections[$connectionName]))
-        {
-            require_once ('NeoPHP/Connection.php');
-            $this->connections[$connectionName] = $this->get($connectionName, "connection", "connections/");
-        }
-        return $this->connections[$connectionName];
-    }
-    
-    public function getView ($viewName)
-    {
-        require_once ('NeoPHP/View.php');
-        return $this->get($viewName, "view", "views/");
-    }
-    
-    public function getModel ($modelName)
-    {
-        require_once ('NeoPHP/Model.php');
-        return $this->get($modelName, "model", "models/");
-    }
-    
-    public function get ($name, $category, $basePath = "")
-    {
-        $pathSeparatorPosition = strrpos($name, "/");
-        $pathSeparatorPosition = ($pathSeparatorPosition != false)? ($pathSeparatorPosition+1) : 0;
-        $className = ucfirst(substr($name,$pathSeparatorPosition,strlen($name))) . ucfirst($category);
-        require_once ($this->getAppFolderName() . "/" . $basePath . substr($name,0,$pathSeparatorPosition) . $className . '.php');
-        return new $className;
+        return $this->loader;
     }
     
     public function getSession ()
@@ -160,20 +123,41 @@ final class App
     
     public function getPreferences ()
     {
-        require_once ('NeoPHP/Preferences.php');
-        return Preferences::getInstance();
+        return $this->getLoader()->getCacheInstance("preferences", "NeoPHP");
     }
     
     public function getTranslator ()
     {
-        require_once ('NeoPHP/Translator.php');
-        return Translator::getInstance();
+        return $this->getLoader()->getCacheInstance("translator", "NeoPHP");
     }
     
     public function getLogger ()
     {
-        require_once ('NeoPHP/Logger.php');
-        return Logger::getInstance();
+        return $this->getLoader()->getCacheInstance("logger", "NeoPHP");
+    }
+    
+    public function getController ($controllerName)
+    {
+        require_once("NeoPHP/Controller.php");
+        return $this->getLoader()->getCategorizedCacheInstance("controller", $controllerName);
+    }
+    
+    public function getConnection ($connectionName)
+    {
+        require_once("NeoPHP/Connection.php");
+        return $this->getLoader()->getCategorizedCacheInstance("connection", $connectionName);
+    }
+    
+    public function getView ($viewName, $params=array())
+    {
+        require_once("NeoPHP/View.php");
+        return $this->getLoader()->getCategorizedInstance("view", $viewName, $params);
+    }
+    
+    public function getModel ($modelName, $params=array())
+    {
+        require_once("NeoPHP/Model.php");
+        return $this->getLoader()->getCategorizedInstance("model", $modelName, $params);
     }
     
     public function errorHandler ($errno, $errstr, $errfile, $errline)
