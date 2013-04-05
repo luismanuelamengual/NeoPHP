@@ -2,25 +2,23 @@
 
 abstract class Model 
 {
-    public function __set ($name, $value)
+    public function __call($method, $params) 
     {
-        $this->$name = $value;
-    }
-
-    public function __get ($name)
-    {
-        if (isset($this->$name))
-            return $this->$name;
-    }
-    
-    public function __isset ($name)
-    {
-        return isset($this->$name);
-    }
-   
-    public function __unset ($name)
-    {
-        unset($this->$name);
+        if (substr($method,0,3) == 'get')
+        {
+            $property = lcfirst(substr($method,3));
+            return property_exists($this, $property)? $this->$property : null;
+        } 
+        else if (substr($method,0,3) == 'set')
+        {
+            $property = lcfirst(substr($method,3));
+            if (property_exists($this, $property))
+                $this->$property = $params[0];
+        } 
+        else 
+        {
+            return null;
+        }
     }
 }
 
