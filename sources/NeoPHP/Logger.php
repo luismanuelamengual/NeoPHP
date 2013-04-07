@@ -12,7 +12,7 @@ final class Logger
     
     private $actions = array();
     
-    private function __construct() 
+    public function __construct() 
     {
         $printAction = new stdClass();
         $printAction->type = Logger::ACTION_PRINT;

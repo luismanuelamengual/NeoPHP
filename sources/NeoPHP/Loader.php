@@ -56,14 +56,17 @@ final class Loader
 
 class StaticProxyClass
 {
-    public function __construct($proxyClass) 
+    public function __construct($proxyClassName) 
     {
-        $this->proxyClass = $proxyClass;
+        $this->className = $proxyClassName;
+        $this->classData = new ReflectionClass($this->className);
     }
     
     public function __call($method, $params) 
     {
-        return call_user_func_array($this->proxyClass . "::$method", $params);
+        if (!$this->classData->hasMethod($method))
+            throw new Exception ("No se encuentra el método \"" . $method . "\" en la clase \"" . $this->className . "\"");
+        return call_user_func_array($this->className . "::" . $method, $params);   
     }
 }
 
