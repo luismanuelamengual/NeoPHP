@@ -17,14 +17,11 @@ final class Loader
         $className = ucfirst(substr($resource, $pathSeparatorPosition));
         if (!class_exists($className))
         {
-            $relativePath = $pathSeparatorPosition == 0? "" : substr($resource, 0, $pathSeparatorPosition-1);
+            $relativeFilename = ($pathSeparatorPosition == 0? "" : (substr($resource, 0, $pathSeparatorPosition-1) . $pathSeparator)) . $className . ".php";
             $loaded = false;
             foreach ($this->paths as $path)
             {
-                $filename = $path;
-                if (!empty($relativePath))
-                    $filename .= $pathSeparator . $relativePath;
-                $filename .= $pathSeparator . $className . ".php";
+                $filename = $path . $pathSeparator . $relativeFilename;
                 try
                 {
                     include($filename);
