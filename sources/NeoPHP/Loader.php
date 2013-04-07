@@ -2,74 +2,71 @@
 
 final class Loader
 {
-    private $instancesCache;
-    private $basePath;
-    
-    public function __construct ($basePath=null)
+    public function __construct ($paths=array())
     {
-        $this->instancesCache = array();
-        $this->basePath = $basePath;
+        $this->paths = $paths;
+        if (sizeof($this->paths) == 0)
+            $this->paths[] = "";
     }
     
-    public function setBasePath ($basePath)
+    public function getInstance ($resource, $params=array())
     {
-        $this->basePath = $basePath;
-    }
-    
-    public function getInstance ($resource, $params=null, $basePath=null)
-    {
-        $resourceData = $this->getResourceData ($resource, $basePath);
-        require_once ($resourceData["filename"]);
-        return $this->instantiateClass($resourceData["classname"], $params);
-    }
-    
-    public function getCacheInstance ($resource, $basePath=null)
-    {
-        if (!isset($this->instancesCache[$resource]))
-            $this->instancesCache[$resource] = $this->getInstance ($resource, null, $basePath);
-        return $this->instancesCache[$resource];
-    }
-    
-    public function getSingletonInstance ($resource, $basePath=null)
-    {
-        if (!isset($this->instancesCache[$resource]))
-        {
-            $resourceData = $this->getResourceData ($resource, $basePath);
-            require_once ($resourceData["filename"]);
-            $this->instancesCache[$resource] = $resourceData["classname"]::getInstance();
-        }
-        return $this->instancesCache[$resource];
-    }
-    
-    private function getResourceData ($resource, $basePath=null)
-    {
-        if (empty($basePath))
-            $basePath = $this->basePath;
         $pathSeparator = "/";
         $pathSeparatorPosition = strrpos($resource, $pathSeparator);
-        $pathParts = array();
-        if (!empty($basePath))
-            $pathParts[] = $basePath;
-        if ($pathSeparatorPosition != false)
-            $pathParts[] = substr($resource, 0, $pathSeparatorPosition);
-        $className = ucfirst(substr($resource, ($pathSeparatorPosition != false)? ($pathSeparatorPosition+1) : 0));
-        $pathParts[] = $className . ".php";
-        return array("classname"=>$className, "filename"=>implode($pathSeparator, $pathParts));
-    }
-    
-    private function instantiateClass ($className, $params=array())
-    {
-        $instance = null;
-        if (!empty($params) && sizeof($params) > 0)
+        $pathSeparatorPosition = ($pathSeparatorPosition != false)? ($pathSeparatorPosition+1) : 0;
+        $className = ucfirst(substr($resource, $pathSeparatorPosition));
+        if (!class_exists($className))
         {
-            $reflectionObj = new ReflectionClass($className);
-            $instance = $reflectionObj->newInstanceArgs($params); 
+            $relativePath = $pathSeparatorPosition == 0? "" : substr($resource, 0, $pathSeparatorPosition-1);
+            $loaded = false;
+            foreach ($this->paths as $path)
+            {
+                $filename = $path;
+                if (!empty($relativePath))
+                    $filename .= $pathSeparator . $relativePath;
+                $filename .= $pathSeparator . $className . ".php";
+                try
+                {
+                    include($filename);
+                    $loaded = true;
+                    break;
+                }
+                catch (Exception $ex) {}
+            }
+            if (!$loaded)
+                throw new Exception ("No se pudo obtener el recurso: " . $resource); 
+        }
+        $resourceInstance = null;
+        $reflectionClass = new ReflectionClass($className);
+        if ($reflectionClass->isInstantiable())
+        {
+            $resourceInstance = $reflectionClass->newInstanceArgs($params); 
         }
         else
         {
-            $instance = new $className;
+            if ($reflectionClass->isAbstract())
+            {
+                $resourceInstance = new StaticProxyClass($className);
+            }
+            else if ($reflectionClass->hasMethod("getInstance"))
+            {
+                $resourceInstance = $className::getInstance();
+            }
         }
-        return $instance;
+        return $resourceInstance;
+    }
+}
+
+class StaticProxyClass
+{
+    public function __construct($proxyClass) 
+    {
+        $this->proxyClass = $proxyClass;
+    }
+    
+    public function __call($method, $params) 
+    {
+        return call_user_func_array($this->proxyClass . "::$method", $params);
     }
 }
 
