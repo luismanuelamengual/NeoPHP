@@ -3,6 +3,7 @@
 final class Translator
 {
     private $language;
+    private $resourcesPath;
     private $dictionary;
     
     public function __construct() 
@@ -11,6 +12,7 @@ final class Translator
         if (empty($lang))
             $lang = "es";
         $this->setLanguage($lang);
+        $this->setResourcesPath("resources");
     }
 
     public function setLanguage ($language)
@@ -21,6 +23,16 @@ final class Translator
     public function getLanguage ()
     {
         return $this->language;
+    }
+    
+    public function setResourcesPath ($resourcesPath)
+    {
+        $this->resourcesPath = $resourcesPath;
+    }
+    
+    public function getResourcesPath ()
+    {
+        return $this->resourcesPath;
     }
     
     public function getText ($key, $language = null)
@@ -36,7 +48,7 @@ final class Translator
             $dictionarySeparator = strrpos($key, ".");
             $dictionaryName = substr($key,0,$dictionarySeparator);
             $dictionaryKey = substr($key,$dictionarySeparator+1,strlen($key));
-            $dictionaryFilename = App::getInstance()->getBasePath() . "resources" . DIRECTORY_SEPARATOR . str_replace(".", DIRECTORY_SEPARATOR, $dictionaryName) . ".lan";
+            $dictionaryFilename = $this->getResourcesPath() . DIRECTORY_SEPARATOR . str_replace(".", DIRECTORY_SEPARATOR, $dictionaryName) . ".lan";
             try { $dictionaryData = @parse_ini_file($dictionaryFilename, true); } catch (Exception $ex) {}
             if (!empty($dictionaryData) && !empty($dictionaryData[$language]))
                 foreach ($dictionaryData[$language] as $newDictionaryKey=>$newDictionaryText)
