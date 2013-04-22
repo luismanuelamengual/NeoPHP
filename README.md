@@ -16,29 +16,35 @@ NeoPHP
 <pre>
 {proyectname}/
   index.php             Punto de ingreso a la aplicación
-  app/                  Carpeta que contiene todos los archivos de aplicación
-    connections/        Contiene todas las conexiones a base de datos que se utilicen
-    controllers/        Contiene los controladores (capa de lógica de negocios)
-    models/             Contiene todos los tipos las entidades
-    resources/          Contiene archivos de idioma para la aplicación
-    utils/              Contiene clases de utilidades generales
-    views/              Contiene todas las vistas de la aplicación (capa de presentación)
-    widgets/            Contiene componentes creados por el usuario para ser usados en las vistas
+  NeoPHP/               Carpeta que contiene todas las clases del framework (tambien puede ser incluida via include_path)
+    utils/              Contiene clases de utilidades generales del framework
+    views/              Contiene vistas generales del framework 
+    widgets/            Contiene componentes generales de NeoPHP
     App.php             Clase principal de la aplicación. A través de este objeto se tiene acesso a cualquier lugar
     Connection.php      Clase para manejo de una conexión a Base de Datos
     Controller.php      Clase del cual extender para crear un Controlador
     DataObject.php      Clase para crear objetos que tengan interacción con la base de datos
+    Loader.php          Clase que sirve para incluir dinámicamente todas las demás clases de la aplicación
     Logger.php          Clase que se encarga de loguear a archivos errores e información
     Model.php           Clase del cual extender para crear un Modelo
-    Preferences.php     Clase para almacenar cualquier configuración o preferencia de la aplicación
+    Request.php         Clase para la obtención de variables REQUEST
     Session.php         Clase para el manejo de Sesión
+    Settings.php        Clase para almacenar cualquier configuración o preferencia de la aplicación
     Translator.php      Clase para manejar traducción en distintos idiomas
     View.php            Clase del cual extender para crear Vistas
+  app/                  Carpeta que contiene todos los archivos de aplicación
+    connections/        Contiene todas las conexiones a base de datos que se utilicen
+    controllers/        Contiene los controladores (capa de lógica de negocios)
+    models/             Contiene todos los tipos las entidades
+    utils/              Contiene clases de utilidades generales
+    views/              Contiene todas las vistas de la aplicación (capa de presentación)
+    widgets/            Contiene componentes creados por el usuario para ser usados en las vistas
   assets/               Contiene librerías de terceros utilizadas por la aplicación
   css/                  Contiene archivos de estlios
   images/               Contiene imagenes utilizadas en la aplicación (no dependientes del estilo o tema)
   js/                   Contiene archivos javascript utilizadas en la aplicación
   logs/                 Contiene todos los archivos de logs generados
+  resources/            Contiene archivos de idioma para la aplicación
 </pre>
 
 <h3>3. Funcionamiento</h3>
@@ -123,7 +129,7 @@ Paso 1: Crear un archivo PHP llamado "HelloWorldView.php" dentro de la carpeta "
 
 `````php
 <?php
-require_once ("app/views/HTMLView.php");
+require_once ("NeoPHP/views/HTMLView.php");
 class HelloWorldView extends HTMLView
 {
     protected function build()
@@ -161,7 +167,7 @@ class MainController extends Controller
 {
     public function defaultAction ()
     {
-        App::getInstance()->getView("helloWorld")->render ();
+        App::getInstance()->createView("helloWorld")->render ();
     }
 }
 ?>
@@ -188,7 +194,7 @@ El resultado en HTML de ejecutar el método render a esta vista será el siguien
 Eventualmente se podría configurar ciertas cosas a la vista antes de renderizarla, por ejemplo se podría hacer lo siguiente:
 
 `````php
-$helloWorldView = App::getInstance()->getView("helloWorld");
+$helloWorldView = App::getInstance()->createView("helloWorld");
 $helloWorldView->setHelloWorldText ("Hola Mundito");
 $helloWorldView->render();
 `````
@@ -405,7 +411,7 @@ $doUser->update();
 `````
 
 <h3>4. Instalación y puesta en marcha</h3>
-Solo se tiene que copiar el contenido de la carpeta "sources" al raiz de un proyecto nuevo y listo, de ahi en más ya se puede empezar a crear controladores propios y vistas dentro del mismo.
+Solo se tiene que copiar el contenido de la carpeta "sources" al raiz de un proyecto nuevo y listo, de ahi en más ya se puede empezar a crear controladores propios y vistas dentro del mismo. NOTA: Tambien si se quiere se puede ubicar el código del framework NeoPHP en un lugar no accesible por internet e incluir dicho path en el include_path del php.ini.
 
 Es posible que en entornos *Windows* haya que configurar en el archivo de configuración de apache (httpd.conf) el DocumentIndex para que apunte a index.php en lugar de index.html
 
