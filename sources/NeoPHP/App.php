@@ -105,75 +105,83 @@ final class App
         return $url;
     }
     
-    public function getResource ($resource, $params=array())
+    public function getLoader ()
     {
         if (empty($this->loader))
         {
             require_once ("NeoPHP/Loader.php");
             $this->loader = new Loader(array($this->appFolderName, "NeoPHP"));
         }
-        return $this->loader->getInstance($resource, $params);
+        return $this->loader;
     }
     
-    public function getCacheResource ($resource, $params=array())
+    public function createResourceInstance ($resource, $params=array())
     {
-        if (empty($this->instancesCache[$resource]))
-            $this->instancesCache[$resource] = $this->getResource ($resource, $params);
-        return $this->instancesCache[$resource];
+        return $this->getLoader()->createInstance($resource, $params);
+    }
+    
+    public function getResourceCacheInstance ($resource)
+    {
+        return $this->getLoader()->getCacheInstance($resource);
+    }
+    
+    public function getResourceStaticInstance ($resource)
+    {
+        return $this->getLoader()->getStaticInstance ($resource);
     }
     
     public function getSession ()
     {
-        return $this->getCacheResource("session");
+        return $this->getResourceStaticInstance("session");
     }
     
     public function getServer ()
     {
-        return $this->getCacheResource("server");
+        return $this->getResourceStaticInstance("server");
     }
     
     public function getRequest ()
     {
-        return $this->getCacheResource("request");
+        return $this->getResourceStaticInstance("request");
     }
     
     public function getSettings ()
     {
-        return $this->getCacheResource("settings");
+        return $this->getResourceCacheInstance("settings");
     }
     
     public function getTranslator ()
     {
-        return $this->getCacheResource("translator");
+        return $this->getResourceCacheInstance("translator");
     }
     
     public function getLogger ()
     {
-        return $this->getCacheResource("logger");
+        return $this->getResourceCacheInstance("logger");
     }
     
     public function getController ($controllerName)
     {
         require_once("NeoPHP/Controller.php");
-        return $this->getCacheResource("controllers/" . $controllerName . "Controller");
+        return $this->getResourceCacheInstance("controllers/" . $controllerName . "Controller");
     }
     
     public function getConnection ($connectionName)
     {
         require_once("NeoPHP/Connection.php");
-        return $this->getCacheResource("connections/" . $connectionName . "Connection");
+        return $this->getResourceCacheInstance("connections/" . $connectionName . "Connection");
     }
     
-    public function getView ($viewName, $params=array())
+    public function createView ($viewName, $params=array())
     {
         require_once("NeoPHP/View.php");
-        return $this->getResource("views/" . $viewName . "View", $params);
+        return $this->createResourceInstance("views/" . $viewName . "View", $params);
     }
     
-    public function getModel ($modelName, $params=array())
+    public function createModel ($modelName, $params=array())
     {
         require_once("NeoPHP/Model.php");
-        return $this->getResource("models/" . $modelName . "Model", $params);
+        return $this->createResourceInstance("models/" . $modelName . "Model", $params);
     }
     
     public function errorHandler ($errno, $errstr, $errfile, $errline)

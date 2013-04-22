@@ -9,7 +9,35 @@ final class Loader
             $this->paths[] = "";
     }
     
-    public function getInstance ($resource, $params=array())
+    public function createInstance ($resource, $params=array())
+    {
+        $reflectionClass = new ReflectionClass($this->getClass($resource));
+        return $reflectionClass->newInstanceArgs($params); 
+    }
+    
+    public function getCacheInstance ($resource)
+    {
+        if (empty($this->instancesCache[$resource]))
+            $this->instancesCache[$resource] = $this->createInstance($resource);
+        return $this->instancesCache[$resource];
+    }
+    
+    public function getStaticInstance ($resource)
+    {
+        if (empty($this->instancesCache[$resource]))
+        {
+            $reflectionClass = new ReflectionClass($this->getClass($resource));
+            if ($reflectionClass->isAbstract())
+                $this->instancesCache[$resource] = new StaticProxyClass($className);
+            else if ($reflectionClass->hasMethod("getInstance"))
+                $this->instancesCache[$resource] = $className::getInstance();
+            else
+                throw new Exception ("No se puede obtener una instancia estática del recurso \"" . $resource . "\"");
+        }
+        return $this->instancesCache[$resource];
+    }
+    
+    private function getClass ($resource)
     {
         $pathSeparator = "/";
         $pathSeparatorPosition = strrpos($resource, $pathSeparator);
@@ -33,36 +61,19 @@ final class Loader
             if (!$loaded)
                 throw new Exception ("No se pudo obtener el recurso: " . $resource); 
         }
-        $resourceInstance = null;
-        $reflectionClass = new ReflectionClass($className);
-        if ($reflectionClass->isInstantiable())
-        {
-            $resourceInstance = $reflectionClass->newInstanceArgs($params); 
-        }
-        else
-        {
-            if ($reflectionClass->isAbstract())
-            {
-                $resourceInstance = new StaticProxyClass($className);
-            }
-            else if ($reflectionClass->hasMethod("getInstance"))
-            {
-                $resourceInstance = $className::getInstance();
-            }
-        }
-        return $resourceInstance;
+        return $className;
     }
 }
 
 class StaticProxyClass
 {
-    public function __construct($proxyClassName) 
+    public function __construct ($proxyClassName) 
     {
         $this->className = $proxyClassName;
         $this->classData = new ReflectionClass($this->className);
     }
     
-    public function __call($method, $params) 
+    public function __call ($method, $params) 
     {
         if (!$this->classData->hasMethod($method))
             throw new Exception ("No se encuentra el método \"" . $method . "\" en la clase \"" . $this->className . "\"");
