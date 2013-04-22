@@ -4,12 +4,12 @@ class InstitutionalSiteController extends Controller
 {   
     public function showHomeAction ()
     {
-        App::getInstance()->getView('institutionalSite/home')->render();
+        App::getInstance()->createView('institutionalSite/home')->render();
     }
     
     public function showLoginAction ()
     {
-        App::getInstance()->getView('institutionalSite/login')->render();
+        App::getInstance()->createView('institutionalSite/login')->render();
     }
     
     public function showLoginErrorAction ()
@@ -21,22 +21,22 @@ class InstitutionalSiteController extends Controller
     
     public function showAboutUsAction ()
     {
-        App::getInstance()->getView('institutionalSite/aboutUs')->render();
+        App::getInstance()->createView('institutionalSite/aboutUs')->render();
     }
     
     public function showServicesAction ()
     {
-        App::getInstance()->getView('institutionalSite/services')->render();
+        App::getInstance()->createView('institutionalSite/services')->render();
     }
     
     public function showContactUsAction ()
     {
-        App::getInstance()->getView('institutionalSite/contactUs')->render();
+        App::getInstance()->createView('institutionalSite/contactUs')->render();
     }
     
     public function sendMessageAction ($name, $email, $website, $message)
     {
-        $view = App::getInstance()->getView('institutionalSite/contactUs');
+        $view = App::getInstance()->createView('institutionalSite/contactUs');
         $view->setMessageSent (true);
         $view->render();
     }
