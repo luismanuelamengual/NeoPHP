@@ -49,7 +49,7 @@ NeoPHP
 
 <h3>3. Funcionamiento</h3>
 
-<h4>2.1. Controladores</h4>
+<h4>3.1. Controladores</h4>
 
 Se utiliza solo 1 url y una acción asociada, es decir supongamos que el proyecto se llama "azureus", entonces la url para acceder a las paginas (o servicios web) va a ser del tipo "http://localhost/azureus/?action=???". 
 La acción es un string separado por barras que indica que controlador va a atender la petición y que función dentro de dicho controlador es el que se va a ejecutar.
@@ -121,7 +121,7 @@ class UsersController extends Controller
 ?>
 `````
 
-<h4>2.2. Vistas</h4>
+<h4>3.2. Vistas</h4>
 
 Crear vistas es muy facil, todas las vistas heredan de una clase "View" que contiene un método "render", y hay una clase incluida en el framework, que es la clase HTMLView que te permite crear vistas de tipo HTML. Si se quiere crear un vista con el clasico "hola mundo" seria de la siguiente manera:
 
@@ -201,7 +201,36 @@ $helloWorldView->render();
 
 Notece que dentro de las vistas no debería haber ninguna logica de negocios (solo el renderizado de datos). La lógica, como por ejemplo inserciónes/actualización en base de datos deberían ser hechas en los controladores.
 
-<h4>2.3. Traducciones</h4>
+<h4>3.3. Modelos</h4>
+
+Para la creación de modelos se debe extender de la clase Model y definir como *protegidos* los parámetros del misma. De esta manera automaticamente se crearán los métodos get y set de todos los parámetros protegidos del modelo. A continuación hay un ejemplo de un modelo User
+
+`````php
+<?php
+class UserModel extends Model
+{
+    protected $id;
+    protected $username;
+    protected $password;
+}
+?>
+`````
+
+Luego se puede utilizar este modelo de la siguiente manera:
+
+`````php
+<?php
+$model = App::getInstance()->createModel("user");
+$model->setId(1);
+$model->setUsername("Pepe");
+$model->setPassword("paredes");
+echo $model->getId() . "<br>";
+echo $model->getUsername() . "<br>";
+echo $model->getPassword() . "<br>";
+?>
+`````
+
+<h4>3.4. Traducciones</h4>
 
 Las traducciones se hacen utilizando la clase Translator. Utiliza una nomenclatura especial para poder cargar correctamente los archivos de idiomas. Los archivos de idioma se crean en la carpeta resources. Ahi se puede crear una estructura jerarquiqua de carpetas finalizando con archivos .ini en donde estaran finalmente los textos en los distintos idiomas.
 
@@ -231,7 +260,7 @@ App::getInstance()->getTranslator()->getText("car");  //Buscará "car" en el arc
 App::getInstance()->getTranslator()->getText("general.firstname");  //Buscará "firstname" en el archivo *resources/general.ini*
 App::getInstance()->getTranslator()->getText("views.aboutus.welcome");  //Buscará "welcome" en el archivo *resources/views/aboutus.ini*
 `````
-<h4>2.4. Logueo</h4>
+<h4>3.5. Logueo</h4>
 
 Para loguear a archivos los errores, las advertencias o simplemente información de la aplicación se utiliza la clase Logger.
 Los archivos de logs se guardan en la carpeta *logs* en archivos .txt con el timestamp de la fecha en la que fue generada la entrada de log.
@@ -276,7 +305,7 @@ Stack trace:
 
 IMPORTANTE: Para el correcto funcionamiento de la clase de logue es necesario que la carpeta en donde se guardan los logs tenga permisos de escritura.
 
-<h4>2.5. Sesión</h4>
+<h4>3.6. Sesión</h4>
 
 Para manejo de sesión se tiene que usar la clase Session, se usa de la siguiente manera.
  
@@ -298,7 +327,7 @@ Para cerrar sesión
 App::getInstance()->getSession()->destroy();
 `````
 
-<h4>2.6. Base de datos</h4>
+<h4>3.7. Base de datos</h4>
 
 Para base de datos se usan las clases "Connection" y "DataObject"
 Para crear una nueva conexión a base de datos se tiene que crear una clase de tipo "xxxConnection" que extienda de Connection con ciertos parametros. Utiliza PDO por consiguiente no importa con que base de datos con la que este conectado atras. 
@@ -340,7 +369,7 @@ App::getInstance()->getConnection("production");
 App::getInstance()->getConnection("development");
 `````
 
-2.5.1. Consultas SQL
+3.7.1. Consultas SQL
 
 Si quisieramos hacer "SELECT * FROM User" e iterar por los resultados deberíamos hacer lo siguientes
 
