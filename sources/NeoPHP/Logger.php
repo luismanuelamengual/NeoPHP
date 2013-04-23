@@ -71,7 +71,9 @@ final class Logger
                 switch ($action->type)
                 {
                     case Logger::ACTION_PRINT:
+                        echo "<pre>";
                         print($messageContent);
+                        echo "</pre>";
                         break;
                     case Logger::ACTION_FILE:
                         $filename = $action->filename;
