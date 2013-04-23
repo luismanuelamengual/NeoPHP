@@ -24,6 +24,8 @@ abstract class Controller
                         $parameterValue = $_REQUEST[$parameterName];
                     else if ($parameterName == "php_input")
                         $parameterValue = @file_get_contents("php://input");
+                    else if ($parameter->isOptional())
+                        $parameterValue = $paramtere->getDefaultValue();
                     $actionParameters[] = $parameterValue;
                 }
                 $returnValue = call_user_func_array(array($this, $actionFunction), $actionParameters);
