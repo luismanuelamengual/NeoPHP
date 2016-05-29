@@ -80,10 +80,10 @@ abstract class Application extends ApplicationContext
             if (!isset($this->getProperties()->connections))
                 throw new Exception ("Connections property not found !!");
             
-            $connectionProperty = null; 
+            $connectionConfig = null; 
             if (is_object($this->getProperties()->connections))
             {
-                $connectionProperty = $this->getProperties()->connections[$connectionName];
+                $connectionConfig = $this->getProperties()->connections->$connectionName;
             }
             else
             {
@@ -91,22 +91,22 @@ abstract class Application extends ApplicationContext
                 {
                     if ($testConnectionProperty->name = $connectionName)
                     {
-                        $connectionProperty = $testConnectionProperty;
+                        $connectionConfig = $testConnectionProperty;
                         break;
                     }
                 }
             }
-            if (!isset($connectionProperty))
+            if (!isset($connectionConfig))
                 throw new Exception ("Connection \"$connectionName\" not found !!");
 
             $connection = new Connection();
             $connection->setLogger($this->getLogger());
-            $connection->setDriver($connectionProperty->driver);
-            $connection->setDatabase($connectionProperty->database);
-            $connection->setHost(isset($connectionProperty->host)? $connectionProperty->host : "localhost");
-            $connection->setPort(isset($connectionProperty->port)? $connectionProperty->port : "");
-            $connection->setUsername(isset($connectionProperty->username)? $connectionProperty->username : "");
-            $connection->setPassword(isset($connectionProperty->password)? $connectionProperty->password : "");
+            $connection->setDriver($connectionConfig->driver);
+            $connection->setDatabase($connectionConfig->database);
+            $connection->setHost(isset($connectionConfig->host)? $connectionConfig->host : "localhost");
+            $connection->setPort(isset($connectionConfig->port)? $connectionConfig->port : "");
+            $connection->setUsername(isset($connectionConfig->username)? $connectionConfig->username : "");
+            $connection->setPassword(isset($connectionConfig->password)? $connectionConfig->password : "");
             $this->connections[$connectionName] = $connection;
         }
         return $this->connections[$connectionName];
