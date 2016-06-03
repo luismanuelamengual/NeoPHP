@@ -15,6 +15,11 @@ use stdClass;
 
 abstract class ModelManager extends ApplicationComponent
 {
+    const ANNOTATION_ENTITY = "entity";
+    const ANNOTATION_ATTRIBUTE = "attribute";
+    const ANNOTATION_ID = "id";
+    const ANNOTATION_PARAMETER_NAME = "name";
+    
     private static $modelMetadata = [];
     
     public function __construct (MVCApplication $application)
@@ -237,10 +242,10 @@ abstract class ModelManager extends ApplicationComponent
     {
         $entityMetadata = new stdClass();
         $entityClass = new ReflectionAnnotatedClass($entityClassName);
-        $entityAnnotation = $entityClass->getAnnotation("entity");
+        $entityAnnotation = $entityClass->getAnnotation(self::ANNOTATION_ENTITY);
         if ($entityAnnotation == null)
-            throw new Exception ("Entity class \"$entityClassName\" must have the \"entity\" annotation");
-        $entityName = $entityAnnotation->getParameter("name");
+            throw new Exception ("Entity class \"$entityClassName\" must have the \"" . self::ANNOTATION_ENTITY . "\" annotation");
+        $entityName = $entityAnnotation->getParameter(self::ANNOTATION_PARAMETER_NAME);
         if (empty($entityName))
             $entityName = strtolower($entityClass->getShortName());
         $entityMetadata->name = $entityName; 
@@ -248,18 +253,18 @@ abstract class ModelManager extends ApplicationComponent
         $properties = $entityClass->getProperties();
         foreach ($properties as $property)
         {
-            $attributeAnnotation = $property->getAnnotation("attribute");
+            $attributeAnnotation = $property->getAnnotation(self::ANNOTATION_ATTRIBUTE);
             if ($attributeAnnotation != null)
             {
                 $attribute = new stdClass();
-                $attributeName = $attributeAnnotation->getParameter("name");
+                $attributeName = $attributeAnnotation->getParameter(self::ANNOTATION_PARAMETER_NAME);
                 if (empty($attributeName))
                     $attributeName = strtolower($property->getName());
                 $attribute->name = $attributeName;
                 $attribute->propertyName = $property->getName();
                 $entityMetadata->attributes[] = $attribute;
                 
-                $idAnnotation = $property->getAnnotation("id");
+                $idAnnotation = $property->getAnnotation(self::ANNOTATION_ID);
                 if ($idAnnotation)
                 {
                     $entityMetadata->idAttribute = $attributeName;

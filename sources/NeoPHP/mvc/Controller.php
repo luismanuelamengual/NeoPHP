@@ -14,13 +14,12 @@ use NeoPHP\util\logging\Logger;
 use NeoPHP\util\properties\PropertiesManager;
 use ReflectionFunction;
 use ReflectionMethod;
+use Exception;
 
 abstract class Controller extends ApplicationComponent
 {
     const ANNOTATION_ACTION = "action";
     const ANNOTATION_PARAMETER_NAME = "name";
-   
-    private $useAnnotations = false;
     
     public function __construct (MVCApplication $application)
     {
@@ -89,8 +88,18 @@ abstract class Controller extends ApplicationComponent
         return $this->application->createTemplateView($templateName, $parameters);
     }
     
+    /**
+     * Ejecuta una acción en el controlador con los parámetros establecidos
+     * @param string $action Acción a ejecutar
+     * @param array $parameters Parámetros de la acción
+     * @return type Resultado de la ejecución
+     * @throws Exception Error en la ejecución de la acción
+     */    
     public function executeAction ($action, array $parameters = [])
     {
+        if (empty($action))
+            $action = "index";
+        
         $response = false;
         try
         {
@@ -149,13 +158,16 @@ abstract class Controller extends ApplicationComponent
         return $response;
     }
     
+    /**
+     * Obtiene el método dentro del controlador que tiene que llamar al ejecutar
+     * la acción establecida
+     * @param string $action Acción ejecutada
+     * @return string Nombre del método en el controlador
+     */
     private function getMethodForAction ($action)
     {
-        if (empty($action))
-            $action = "index";
-        
         $methodName = null;
-        if ($this->useAnnotations)
+        if (isset($this->getProperties()->useControllerAnnotations))
         {
             foreach ($this->getClass()->getMethods() as $method)
             {
@@ -184,6 +196,13 @@ abstract class Controller extends ApplicationComponent
         return $methodName;
     }
     
+    /**
+     * Llama internamente a un metodo interno del controlador pasandole como
+     * argumentos al metodo los parámetros establecidos
+     * @param string $method Nombre del método a llamar
+     * @param array $parameters Parámetros a pasar al método
+     * @return type respuesta obtenida del método
+     */
     private function callMethod ($method, array $parameters=[])
     {
         $parameterIndex = 0;
