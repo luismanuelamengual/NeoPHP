@@ -185,31 +185,21 @@ abstract class ModelManager extends ApplicationComponent
     protected function getModelTable ($modelClassName)
     {
         $modelMetadata = $this->getModelMetadata($modelClassName);
-        return $modelMetadata->tableName;
+        return $modelMetadata->name;
     }
     
     protected function getModelIdField ($modelClassName)
     {
-        $modelMetadata = $this->getModelMetadata($modelClassName);
-        $idField = null;
-        foreach ($modelMetadata->columns as $column)
-        {
-            if ($column->id)
-            {
-                $idField = $column->name;
-                break;
-            }
-        }
-        return $idField;
+        return $this->getModelMetadata($modelClassName)->idAttribute;
     }   
     
     protected function getModelFields (Model $model)
     {
         $modelFields = [];
         $modelMetadata = $this->getModelMetadata(get_class($model));
-        foreach ($modelMetadata->columns as $column)
+        foreach ($modelMetadata->attributes as $attribute)
         {
-            $modelFields[$column->name] = IntrospectionUtils::getPropertyValue($model, $column->propertyName);
+            $modelFields[$attribute->name] = IntrospectionUtils::getPropertyValue($model, $attribute->propertyName);
         }
         return $modelFields;
     }
@@ -218,9 +208,9 @@ abstract class ModelManager extends ApplicationComponent
     {
         $modelFields = [];
         $modelMetadata = $this->getModelMetadata(get_class($model));
-        foreach ($modelMetadata->columns as $column)
+        foreach ($modelMetadata->attributes as $attribute)
         {
-            IntrospectionUtils::setPropertyValue($model, $column->propertyName, $fields[$column->name]);
+            IntrospectionUtils::setPropertyValue($model, $attribute->propertyName, $fields[$attribute->name]);
         }
         return $modelFields;
     }
@@ -239,39 +229,43 @@ abstract class ModelManager extends ApplicationComponent
     protected function getModelMetadata ($modelClassName)
     {
         if (empty(self::$modelMetadata[$modelClassName]))
-            self::$modelMetadata[$modelClassName] = $this->retrieveModelMetadata($modelClassName);
+            self::$modelMetadata[$modelClassName] = $this->retrieveEntityMetadata($modelClassName);
         return self::$modelMetadata[$modelClassName];
     }
     
-    protected function retrieveModelMetadata ($modelClassName)
+    protected function retrieveEntityMetadata ($entityClassName)
     {
-        $modelMetadata = new stdClass();
-        $modelClass = new ReflectionAnnotatedClass($modelClassName);
-        $tableAnnotation = $modelClass->getAnnotation("table");
-        if ($tableAnnotation == null)
-            throw new Exception ("Model class \"$modelClassName\" must have the \"table\" annotation");
-        $tableName = $tableAnnotation->getParameter("name");
-        if (empty($tableName))
-            $tableName = strtolower($modelClass->getShortName());
-        $modelMetadata->tableName = $tableName;
-        $modelMetadata->columns = [];
-        $properties = $modelClass->getProperties();
+        $entityMetadata = new stdClass();
+        $entityClass = new ReflectionAnnotatedClass($entityClassName);
+        $entityAnnotation = $entityClass->getAnnotation("entity");
+        if ($entityAnnotation == null)
+            throw new Exception ("Entity class \"$entityClassName\" must have the \"entity\" annotation");
+        $entityName = $entityAnnotation->getParameter("name");
+        if (empty($entityName))
+            $entityName = strtolower($entityClass->getShortName());
+        $entityMetadata->name = $entityName; 
+        $entityMetadata->attributes = [];
+        $properties = $entityClass->getProperties();
         foreach ($properties as $property)
         {
-            $columnAnnotation = $property->getAnnotation("column");
-            if ($columnAnnotation != null)
+            $attributeAnnotation = $property->getAnnotation("attribute");
+            if ($attributeAnnotation != null)
             {
-                $column = new stdClass();
-                $columnName = $columnAnnotation->getParameter("name");
-                if (empty($columnName))
-                    $columnName = strtolower($property->getName());
-                $column->name = $columnName;
-                $column->propertyName = $property->getName();
-                if ($columnAnnotation->getParameter("id") != null) 
-                    $column->id = true;
-                $modelMetadata->columns[] = $column;
+                $attribute = new stdClass();
+                $attributeName = $attributeAnnotation->getParameter("name");
+                if (empty($attributeName))
+                    $attributeName = strtolower($property->getName());
+                $attribute->name = $attributeName;
+                $attribute->propertyName = $property->getName();
+                $entityMetadata->attributes[] = $attribute;
+                
+                $idAnnotation = $property->getAnnotation("id");
+                if ($idAnnotation)
+                {
+                    $entityMetadata->idAttribute = $attributeName;
+                }
             }
         }
-        return $modelMetadata;
+        return $entityMetadata;
     }
 }
