@@ -3,6 +3,7 @@
 namespace NeoPHP\mvc;
 
 use Exception;
+use MongoClient;
 use NeoPHP\app\ApplicationComponent;
 use NeoPHP\core\Collection;
 use NeoPHP\core\reflect\ReflectionAnnotatedClass;
@@ -22,6 +23,7 @@ abstract class ModelManager extends ApplicationComponent
     
     private static $modelMetadata = [];
     private static $connections = [];
+    private static $mongoConnections = [];
     private static $cacheConnections = [];
     
     public function __construct (MVCApplication $application)
@@ -105,6 +107,50 @@ abstract class ModelManager extends ApplicationComponent
     }
     
     /**
+     * Obtiene una nueva conexión de mongo en funcion del nombre especificado
+     * @param string $connectionName Nombre de la conexión que se desea obtener
+     * @return Connection conexión de base de datos
+     */
+    public function getMongoConnection ($connectionName=null)
+    {
+        if (!isset($connectionName))
+            $connectionName = "main";
+        
+        if (!isset(self::$mongoConnections[$connectionName]))
+        {
+            if (!isset($this->getProperties()->mongoConnections))
+                throw new Exception ("Property \"mongoConnections\" not found !!");
+            
+            $connectionConfig = null; 
+            if (is_object($this->getProperties()->mongoConnections))
+            {
+                $connectionConfig = $this->getProperties()->mongoConnections->$connectionName;
+            }
+            else
+            {
+                foreach ($this->getProperties()->mongoConnections as $testConnectionProperty)
+                {
+                    if ($testConnectionProperty->name = $connectionName)
+                    {
+                        $connectionConfig = $testConnectionProperty;
+                        break;
+                    }
+                }
+            }
+            if (!isset($connectionConfig))
+                throw new Exception ("Mongo connection \"$connectionName\" not found !!");
+
+            $mongoHost = isset($connectionConfig->host)? $connectionConfig->host : MongoClient::DEFAULT_HOST;
+            $mongoPort = isset($connectionConfig->port)? $connectionConfig->port : MongoClient::DEFAULT_PORT;
+            $mongoDatabase = $connectionConfig->database;
+            $mongoConnectString = "mongodb://$mongoHost:$mongoPort";
+            $mongoClient = new MongoClient($mongoConnectString);
+            self::$mongoConnections[$connectionName] = $mongoClient->$mongoDatabase;
+        }
+        return self::$mongoConnections[$connectionName];
+    }
+    
+    /**
      * Obtiene el manejador de cache asociado a la aplicación
      * @return MemCache Manejador de cache
      */
@@ -168,7 +214,9 @@ abstract class ModelManager extends ApplicationComponent
         $models = new Collection();
         foreach ($modelsProperties as $modelProperties)
         {
-            $models->add($this->createModel($modelClass, $modelProperties));
+            $model = $this->createModel($modelClass, $modelProperties);
+            if ($model != null)
+                $models->add($model);
         }
         return $models;
     }
