@@ -224,11 +224,11 @@ abstract class ModelManager extends ApplicationComponent
     protected function getModel ($modelClassName, $id, $connectionName="main")
     {
         $model = null;
-        $modelFields = $this->getConnection($connectionName)->createQuery($this->getModelTable($modelClassName))->addWhere($this->getModelIdField($modelClassName), "=", $id)->getFirst();
+        $modelFields = $this->getConnection($connectionName)->createQuery($this->getModelEntityName($modelClassName))->addWhere($this->getModelIdAttribute($modelClassName), "=", $id)->getFirst();
         if (!empty($modelFields))
         {
             $model = new $modelClassName;
-            $this->setModelFields($model, $modelFields);
+            $this->setModelAttributes($model, $modelFields);
         }
         return $model;
     }
@@ -236,11 +236,11 @@ abstract class ModelManager extends ApplicationComponent
     protected function getAllModels ($modelClassName, $connectionName="main")
     {
         $models = new Collection();
-        $modelsData = $this->getConnection($connectionName)->createQuery($this->getModelTable($modelClassName))->addOrderBy($this->getModelIdField($modelClassName))->get();
+        $modelsData = $this->getConnection($connectionName)->createQuery($this->getModelEntityName($modelClassName))->addOrderBy($this->getModelIdAttribute($modelClassName))->get();
         foreach ($modelsData as $modelFields)
         {
             $model = new $modelClassName;
-            $this->setModelFields($model, $modelFields);
+            $this->setModelAttributes($model, $modelFields);
             $models->add($model);
         }
         return $models;
@@ -249,28 +249,28 @@ abstract class ModelManager extends ApplicationComponent
     protected function insertModel (Model $model, $connectionName="main")
     {
         $modelClassName = get_class($model);
-        $modelFields = $this->getModelFields($model);
-        $modelIdField = $this->getModelIdField($modelClassName);
+        $modelFields = $this->getModelAttributes($model);
+        $modelIdField = $this->getModelIdAttribute($modelClassName);
         unset($modelFields[$modelIdField]);
-        $this->getConnection($connectionName)->createQuery($this->getModelTable($modelClassName))->insert($modelFields);
+        $this->getConnection($connectionName)->createQuery($this->getModelEntityName($modelClassName))->insert($modelFields);
     }
     
     protected function updateModel (Model $model, $connectionName="main")
     {
         $modelClassName = get_class($model);
-        $modelFields = $this->getModelFields($model);
-        $modelIdField = $this->getModelIdField($modelClassName);
+        $modelFields = $this->getModelAttributes($model);
+        $modelIdField = $this->getModelIdAttribute($modelClassName);
         $modelId = $modelFields[$modelIdField];
-        $savedModelFields = $this->getConnection($connectionName)->createQuery($this->getModelTable($modelClassName))->addWhere($modelIdField, "=", $modelId)->getFirst();
+        $savedModelFields = $this->getConnection($connectionName)->createQuery($this->getModelEntityName($modelClassName))->addWhere($modelIdField, "=", $modelId)->getFirst();
         $updateModelFields = array_diff_assoc($modelFields, $savedModelFields);
         if (!empty($updateModelFields))
-            $this->getConnection($connectionName)->createQuery($this->getModelTable($modelClassName))->addWhere($modelIdField, "=", $modelId)->update($updateModelFields);
+            $this->getConnection($connectionName)->createQuery($this->getModelEntityName($modelClassName))->addWhere($modelIdField, "=", $modelId)->update($updateModelFields);
     }
     
     protected function persistModel (Model $model, $connectionName="main")
     {
-        $modelFields = $this->getModelFields($model);
-        $modelIdField = $this->getModelIdField(get_class($model));
+        $modelFields = $this->getModelAttributes($model);
+        $modelIdField = $this->getModelIdAttribute(get_class($model));
         $modelId = $modelFields[$modelIdField];
         if (!empty($modelId))
         {
@@ -284,63 +284,62 @@ abstract class ModelManager extends ApplicationComponent
     
     protected function deleteModel (Model $model, $connectionName="main")
     {
-        $modelFields = $this->getModelFields($model);
-        $modelIdField = $this->getModelIdField(get_class($model));
+        $modelFields = $this->getModelAttributes($model);
+        $modelIdField = $this->getModelIdAttribute(get_class($model));
         $modelId = $modelFields[$modelIdField];
-        $this->getConnection($connectionName)->createQuery($this->getModelTable(get_class($model)))->addWhere($modelIdField, "=", $modelId)->delete();
+        $this->getConnection($connectionName)->createQuery($this->getModelEntityName(get_class($model)))->addWhere($modelIdField, "=", $modelId)->delete();
     }
     
     protected function completeModel (Model $model, $connectionName="main")
     {
         $modelClassName = get_class($model);
-        $modelFields = $this->getModelFields($model);
-        $modelIdField = $this->getModelIdField($modelClassName);
+        $modelFields = $this->getModelAttributes($model);
+        $modelIdField = $this->getModelIdAttribute($modelClassName);
         $modelId = $modelFields[$modelIdField];
-        $newModelFields = $this->getConnection($connectionName)->createQuery($this->getModelTable($modelClassName))->addWhere($modelIdField, "=", $modelId)->getFirst();
+        $newModelFields = $this->getConnection($connectionName)->createQuery($this->getModelEntityName($modelClassName))->addWhere($modelIdField, "=", $modelId)->getFirst();
         if (!empty($newModelFields))
-            $this->setModelFields($model, $newModelFields);
+            $this->setModelAttributes($model, $newModelFields);
     }
     
-    protected function getModelTable ($modelClassName)
+    protected function getModelEntityName ($modelClassName)
     {
-        $modelMetadata = $this->getModelMetadata($modelClassName);
-        return $modelMetadata->name;
+        return $this->getModelMetadata($modelClassName)->name;
     }
     
-    protected function getModelIdField ($modelClassName)
+    protected function getModelIdAttribute ($modelClassName)
     {
         return $this->getModelMetadata($modelClassName)->idAttribute;
     }   
     
-    protected function getModelFields (Model $model)
+    protected function getModelAttributes (Model $model)
+    {
+        $modelAttributes = [];
+        $modelMetadata = $this->getModelMetadata(get_class($model));
+        foreach ($modelMetadata->attributes as $attribute)
+        {
+            $modelAttributes[$attribute->name] = IntrospectionUtils::getPropertyValue($model, $attribute->propertyName);
+        }
+        return $modelAttributes;
+    }
+    
+    protected function setModelAttributes (Model $model, array $attributes)
     {
         $modelFields = [];
         $modelMetadata = $this->getModelMetadata(get_class($model));
         foreach ($modelMetadata->attributes as $attribute)
         {
-            $modelFields[$attribute->name] = IntrospectionUtils::getPropertyValue($model, $attribute->propertyName);
+            IntrospectionUtils::setPropertyValue($model, $attribute->propertyName, $attributes[$attribute->name]);
         }
         return $modelFields;
     }
     
-    protected function setModelFields (Model $model, array $fields)
-    {
-        $modelFields = [];
-        $modelMetadata = $this->getModelMetadata(get_class($model));
-        foreach ($modelMetadata->attributes as $attribute)
-        {
-            IntrospectionUtils::setPropertyValue($model, $attribute->propertyName, $fields[$attribute->name]);
-        }
-        return $modelFields;
-    }
-    
-    protected function createModelFromFields ($modelClassName, array $fields)
+    protected function createModelFromAttributes ($modelClassName, array $attributes)
     {
         $model = null;
-        if (!empty($fields))
+        if (!empty($attributes))
         {
             $model = new $modelClassName;
-            $this->setModelFields($model, $fields);
+            $this->setModelAttributes($model, $attributes);
         }
         return $model;
     }
@@ -348,17 +347,17 @@ abstract class ModelManager extends ApplicationComponent
     protected function getModelMetadata ($modelClassName)
     {
         if (empty(self::$modelMetadata[$modelClassName]))
-            self::$modelMetadata[$modelClassName] = $this->retrieveEntityMetadata($modelClassName);
+            self::$modelMetadata[$modelClassName] = $this->retrieveModelMetadata($modelClassName);
         return self::$modelMetadata[$modelClassName];
     }
     
-    protected function retrieveEntityMetadata ($entityClassName)
+    protected function retrieveModelMetadata ($modelClassName)
     {
         $entityMetadata = new stdClass();
-        $entityClass = new ReflectionAnnotatedClass($entityClassName);
+        $entityClass = new ReflectionAnnotatedClass($modelClassName);
         $entityAnnotation = $entityClass->getAnnotation(self::ANNOTATION_ENTITY);
         if ($entityAnnotation == null)
-            throw new Exception ("Entity class \"$entityClassName\" must have the \"" . self::ANNOTATION_ENTITY . "\" annotation");
+            throw new Exception ("Entity class \"$modelClassName\" must have the \"" . self::ANNOTATION_ENTITY . "\" annotation");
         $entityName = $entityAnnotation->getParameter(self::ANNOTATION_PARAMETER_NAME);
         if (empty($entityName))
             $entityName = strtolower($entityClass->getShortName());
