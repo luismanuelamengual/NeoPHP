@@ -21,6 +21,8 @@ abstract class ModelManager extends ApplicationComponent
     const ANNOTATION_PARAMETER_NAME = "name";
     
     private static $modelMetadata = [];
+    private static $connections = [];
+    private static $cacheConnections = [];
     
     public function __construct (MVCApplication $application)
     {
@@ -56,22 +58,86 @@ abstract class ModelManager extends ApplicationComponent
     }
     
     /**
+     * Obtiene una nueva conexión de base de datos en funcion del nombre especificado
+     * @param string $connectionName Nombre de la conexión que se desea obtener
+     * @return Connection conexión de base de datos
+     */
+    public function getConnection ($connectionName=null)
+    {
+        if (!isset($connectionName))
+            $connectionName = "main";
+        
+        if (!isset(self::$connections[$connectionName]))
+        {
+            if (!isset($this->getProperties()->connections))
+                throw new Exception ("Property \"connections\" not found !!");
+            
+            $connectionConfig = null; 
+            if (is_object($this->getProperties()->connections))
+            {
+                $connectionConfig = $this->getProperties()->connections->$connectionName;
+            }
+            else
+            {
+                foreach ($this->getProperties()->connections as $testConnectionProperty)
+                {
+                    if ($testConnectionProperty->name = $connectionName)
+                    {
+                        $connectionConfig = $testConnectionProperty;
+                        break;
+                    }
+                }
+            }
+            if (!isset($connectionConfig))
+                throw new Exception ("Connection \"$connectionName\" not found !!");
+
+            $connection = new Connection();
+            $connection->setLogger($this->getLogger());
+            $connection->setDriver($connectionConfig->driver);
+            $connection->setDatabase($connectionConfig->database);
+            $connection->setHost(isset($connectionConfig->host)? $connectionConfig->host : "localhost");
+            $connection->setPort(isset($connectionConfig->port)? $connectionConfig->port : "");
+            $connection->setUsername(isset($connectionConfig->username)? $connectionConfig->username : "");
+            $connection->setPassword(isset($connectionConfig->password)? $connectionConfig->password : "");
+            self::$connections[$connectionName] = $connection;
+        }
+        return self::$connections[$connectionName];
+    }
+    
+    /**
      * Obtiene el manejador de cache asociado a la aplicación
      * @return MemCache Manejador de cache
      */
-    protected final function getCacheManager ()
+    public function getCacheConnection ($connectionName=null)
     {
-        return $this->application->getCacheManager();
-    }
-
-    /**
-     * Obtiene la base de datos asociada
-     * @param $connectionName nombre de la base de datos
-     * @return Connection Base de datos
-     */
-    protected final function getConnection ($connectionName="main")
-    {
-        return $this->application->getConnection ($connectionName);
+        if (!isset($connectionName))
+            $connectionName = "main";
+        
+        if (!isset(self::$cacheConnections[$connectionName]))
+        {
+            $connectionConfig = null; 
+            if (isset($this->getProperties()->cacheConnections))
+            {
+                if (is_object($this->getProperties()->cacheConnections))
+                {
+                    $connectionConfig = $this->getProperties()->cacheConnections->$connectionName;
+                }
+                else
+                {
+                    foreach ($this->getProperties()->cacheConnections as $testConnectionProperty)
+                    {
+                        if ($testConnectionProperty->name = $connectionName)
+                        {
+                            $connectionConfig = $testConnectionProperty;
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            self::$cacheConnections[$connectionName] = (isset($connectionConfig))? (new MemCache($connectionConfig->host, $connectionConfig->port)) : (new MemCache());
+        }
+        return self::$cacheConnections[$connectionName];
     }
     
     /**
