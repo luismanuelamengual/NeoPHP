@@ -30,6 +30,9 @@ use NeoPHP\web\http\Session;
  */
 class WebApplication extends MVCApplication
 {
+    /**
+     * Metodo que se encarga de procesar una peticion HTTP
+     */
     public function handleRequest () 
     {
         $action = null;

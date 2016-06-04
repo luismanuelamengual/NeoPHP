@@ -7,8 +7,8 @@ use NeoPHP\app\Application;
 use NeoPHP\core\IllegalArgumentException;
 use NeoPHP\util\StringUtils;
 
-class MVCApplication extends Application 
-{ 
+abstract class MVCApplication extends Application 
+{
     private $routes = [];
     private $controllers = [];
     private $managers = [];
@@ -25,12 +25,12 @@ class MVCApplication extends Application
         }
     }
     
-    public function processAction ($action, $params=array())
+    protected function processAction ($action, array $parameters=[])
     {
         $actionExecuted = false;
         try
         {
-            $this->executeAction ($action, $params);
+            $this->executeAction ($action, $parameters);
             $actionExecuted = true;
         }
         catch (Exception $exception)
@@ -44,6 +44,11 @@ class MVCApplication extends Application
         return $actionExecuted;
     }
     
+    /**
+     * Agrega una nueva ruta para llegar a una acción de controlador
+     * @param type $path Ruta a procesar
+     * @param type $controllerClassName Controlador que debe tomar la ruta
+     */
     public function addRoute ($path, $controllerClassName)
     {
         $this->routes[$this->normalizePath($path)] = $controllerClassName;
@@ -85,9 +90,39 @@ class MVCApplication extends Application
     protected function getControllerForPath ($path)		
     {	
         $path = $this->normalizePath($path);
-        if (!isset($this->routes[$path]))
+        
+        $controllerClassName = null;
+        
+        if (isset($this->routes[$path]))
+        {
+            $controllerClassName = $this->routes[$path];
+        }
+        else if (isset($this->getProperties()->controllersNamespace))
+        {
+            $controllerPath = dirname($path);
+            $controllerName = basename($path);
+            if (empty($controllerName))
+                $controllerName = "main";
+            $controllerClassName = $this->getProperties()->controllersNamespace;
+            if ($controllerPath != "/")
+                $controllerClassName .= str_replace("/", "\\", $controllerPath);
+            $controllerClassName .= "\\";
+            $controllerClassName .= ucfirst($controllerName) . "Controller";
+        }
+        
+        if ($controllerClassName == null)
             throw new NoRouteException("No controller registered for path \"$path\". Add new route via method \"addRoute\"");
-        return $this->getController($this->routes[$path]);
+        
+        try
+        {
+            $controller = $this->getController($controllerClassName);
+        }
+        catch (Exception $ex)
+        {
+            throw new NoRouteException("Invalid or Non existent controller for className \"$controllerClassName\" Caused by: " . $ex->getMessage());
+        }
+        
+        return $controller;
     }
     
     /**
