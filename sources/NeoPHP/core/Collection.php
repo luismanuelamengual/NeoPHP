@@ -18,6 +18,14 @@ class Collection extends Object implements Arrayable, ArrayAccess, IteratorAggre
         $this->items = $items;
     }
     
+    public function each (callable $callback)
+    {
+        foreach($this->items as $item)
+        {
+            $callback($item);
+        }
+    }
+    
     public function put($key, $value)
     {
         $this->items[$key] = $value;
