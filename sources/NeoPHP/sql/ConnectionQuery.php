@@ -306,10 +306,10 @@ class ConnectionQuery
             $expressionTokens = [];
             foreach ($childFilters as $childFilter)
             {
-                $expressionTokens[] = $this->getFilterExpression($childFilter, $expressionTokens);
+                $expressionTokens[] = $this->getFilterExpression($childFilter, $bindings);
             }
             $expression .= "(";
-            $expression .= implode($filter->getConnector(), $expressionTokens);
+            $expression .= implode(" " . $filter->getConnector() . " ", $expressionTokens);
             $expression .= ")";
         }
         return $expression;
