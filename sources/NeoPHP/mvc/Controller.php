@@ -2,7 +2,9 @@
 
 namespace NeoPHP\mvc;
 
+use Exception;
 use NeoPHP\app\ApplicationComponent;
+use NeoPHP\core\Collection;
 use NeoPHP\core\IllegalArgumentException;
 use NeoPHP\mvc\Controller;
 use NeoPHP\mvc\ModelManager;
@@ -14,7 +16,6 @@ use NeoPHP\util\logging\Logger;
 use NeoPHP\util\properties\PropertiesManager;
 use ReflectionFunction;
 use ReflectionMethod;
-use Exception;
 
 abstract class Controller extends ApplicationComponent
 {
@@ -24,8 +25,6 @@ abstract class Controller extends ApplicationComponent
     public function __construct (MVCApplication $application)
     {
         parent::__construct($application);
-        if (isset($this->getProperties()->useControllerAnnotations))
-            $this->useAnnotations = $this->getProperties()->useControllerAnnotations;
     }
     
     /**
@@ -48,12 +47,12 @@ abstract class Controller extends ApplicationComponent
     
     /**
      * Obtiene el manejador de modelos
-     * @param string $managerClass
+     * @param string $modelClass
      * @return ModelManager Manejador de modelos
      */
-    protected final function getManager ($managerClass)
+    protected final function getManager ($modelClass)
     {
-        return $this->application->getManager($managerClass);
+        return $this->application->getManager($modelClass);
     }
     
     /**
@@ -223,5 +222,48 @@ abstract class Controller extends ApplicationComponent
             $parameterIndex++;
         }
         return call_user_func_array($callable, $callableParameters);
+    }
+    
+    /**
+     * Obtiene todos los modelos con las opciones establecidas
+     * @param type $modelClass Clase del modelo que se desea obtener
+     * @param ModelFilter $filters Filtros a aplicar para la obtención de los modelos
+     * @param array $sorters Ordenamientos a aplicar para los modelos
+     * @param array $parameters Parametros extra para la obtención de modelos
+     * @return Collection Lista de modelo obtenidos
+     */
+    protected final function retrieveModels ($modelClass, ModelFilter $filters=null, array $sorters=[], array $parameters=[])
+    {
+        return $this->getManager($modelClass)->retrieve($filters, $sorters, $parameters);
+    }
+    
+    /**
+     * Crea un modelo establecido
+     * @param Model $model modelo a crearse
+     * @return boolean Indica si se creo o no el modelo
+     */
+    protected final function createModel (Model $model)
+    {
+        return $this->getManager(get_class($model))->create($model);
+    }
+    
+    /**
+     * Actualiza un modelo
+     * @param Model $model modelo a actualizar
+     * @return boolean Indica si el modelo se actualizo o no
+     */
+    protected final function updateModel (Model $model)
+    {
+        return $this->getManager(get_class($model))->update($model);
+    }
+    
+    /**
+     * Borra un modelo
+     * @param Model $model modelo a borrar
+     * @return boolean indica si el modelo se borró o no
+     */
+    protected final function deleteModel (Model $model)
+    {
+        return $this->getManager(get_class($model))->delete($model);
     }
 }

@@ -12,6 +12,7 @@ abstract class MVCApplication extends Application
     private $routes = [];
     private $controllers = [];
     private $managers = [];
+    private $registeredManagers = [];
     
     public function __construct($basePath) 
     {   
@@ -47,11 +48,21 @@ abstract class MVCApplication extends Application
     /**
      * Agrega una nueva ruta para llegar a una acción de controlador
      * @param type $path Ruta a procesar
-     * @param type $controllerClassName Controlador que debe tomar la ruta
+     * @param type $controllerClass Controlador que debe tomar la ruta
      */
-    public function addRoute ($path, $controllerClassName)
+    public function addRoute ($path, $controllerClass)
     {
-        $this->routes[$this->normalizePath($path)] = $controllerClassName;
+        $this->routes[$this->normalizePath($path)] = $controllerClass;
+    }
+    
+    /**
+     * Registra un nuevo manager para un modelo de clase en particular
+     * @param type $modelClass Clase del modelo
+     * @param type $managerClass Clase del manager que lo va a manejar
+     */
+    public function registerManager ($modelClass, $managerClass)
+    {
+        $this->registeredManagers[$modelClass] = $managerClass;
     }
     
     protected function onActionError ($action, Exception $ex)
@@ -147,24 +158,27 @@ abstract class MVCApplication extends Application
     }
     
     /**
-     * Obtiene un manejador de modelos
-     * @param $managerClass Clase del manejador de modelos
+     * Obtiene un manejador de modelos a través de un modelo en particular 
+     * @param $modelClass Clase del modelo que maneja el manager
      * @return ModelManager Manejador de modelos
-     * @throws IllegalArgumentException
      */
-    public final function getManager ($managerClass)
+    public final function getManager ($modelClass)
     {
-        if (!isset($this->managers[$managerClass]))
+        if (!isset($this->managers[$modelClass]))
         {
-            if (!class_exists($managerClass))
-                throw new IllegalArgumentException("Manager \"$managerClass\" not found !!.");
-
-            if (!is_subclass_of($managerClass, ModelManager::class))
-                throw new IllegalArgumentException("Invalid manager class \"$controllerClass\". Make sure this extends ModelManager");
-        
-            $this->managers[$managerClass] = new $managerClass($this);
+            $manager = null;
+            if (isset($this->registeredManagers[$modelClass]))
+            {
+                $managerClassName = $this->registeredManagers[$modelClass];
+                $manager = new $managerClassName($this, $modelClass);
+            }
+            else
+            {
+                $manager = new DatabaseModelManager($this, $modelClass);
+            }
+            $this->managers[$modelClass] = $manager;
         }
-        return $this->managers[$managerClass];
+        return $this->managers[$modelClass];
     }
     
     /**
