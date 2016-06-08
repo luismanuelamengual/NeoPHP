@@ -287,7 +287,7 @@ class ConnectionQuery
         $expression = "";
         if ($filter instanceof ConnectionQueryColumnFilter)
         {
-            $bindingName = $this->getBindingName();
+            $bindingName = $this->getBindingName($bindings);
             $expression .= $filter->getProperty();
             $expression .= " ";
             $expression .= $filter->getOperator();
