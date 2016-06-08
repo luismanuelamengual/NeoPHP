@@ -83,93 +83,49 @@ class ConnectionQuery
     {
         return $this->addJoin($table, $sourceColumn, $destinationColumn, "RIGHT JOIN");
     }
-        
-    public function addWhere ($column, $operator, $value, $connector = "AND")
-    {
-        $conditionGroup = new ConnectionQueryConditionGroup();
-        $conditionGroup->addCondition($column, $operator, $value);
-        return $this->addWhereGroup($conditionGroup, $connector);
-    }
-    
-    public function addRawWhere ($expression, array $bindings = [], $connector = "AND")
-    {
-        $conditionGroup = new ConnectionQueryConditionGroup();
-        $conditionGroup->addRawCondition($expression, $bindings);
-        return $this->addWhereGroup($conditionGroup, $connector);
-    }
-    
-    public function addWhereGroup (ConnectionQueryConditionGroup $conditionGroup, $connector = "AND")
+       
+    public function getWhereClause ()
     {
         if (empty($this->sql->whereClause))
-            $this->sql->whereClause = new ConnectionQueryConditionGroup();
-        
-        if ($connector != $this->sql->whereClause->getConnector() && !$this->sql->whereClause->isEmpty())
-        {
-            $oldConnector = $this->sql->whereClause->getConnector();
-            $this->sql->whereClause->setConnector($connector);
-            if (sizeof($this->sql->whereClause->getConditions()) > 1)
-            {
-                $oldConditions = $this->sql->whereClause->getConditions();
-                $oldConditionsGroup = new ConnectionQueryConditionGroup($oldConnector);
-                $oldConditionsGroup->setConditions($oldConditions);
-                $this->sql->whereClause->clear();
-                $this->sql->whereClause->addConditionGroup($oldConditionsGroup);
-            }
-        }
-
-        if (sizeof($conditionGroup->getConditions()) > 1)
-        {
-            $this->sql->whereClause->addConditionGroup($conditionGroup);
-        }
-        else
-        {
-            $this->sql->whereClause->addConditions($conditionGroup->getConditions());
-        }
-        return $this;
+            $this->sql->whereClause = new ConnectionQueryFilterGroup();
+        return $this->sql->whereClause;
+    }
+    
+    public function addWhere ($column, $operator, $value=null)
+    {
+        return $this->getWhereClause()->addFilter(new ConnectionQueryColumnFilter($property, $operator, $value));
+    }
+    
+    public function addRawWhere ($expression, array $bindings = [])
+    {
+        return $this->getWhereClause()->addFilter(new ConnectionQueryRawFilter($expression, $bindings));
+    }
+    
+    public function addWhereGroup (ConnectionQueryFilterGroup $conditionGroup)
+    {
+        return $this->getWhereClause()->addFilter($conditionGroup);
+    }
+    
+    public function getHavingClause ()
+    {
+        if (empty($this->sql->havingClause))
+            $this->sql->havingClause = new ConnectionQueryFilterGroup();
+        return $this->sql->havingClause;
     }
     
     public function addHaving ($column, $operator, $value, $connector = "AND")
     {
-        $conditionGroup = new ConnectionQueryConditionGroup();
-        $conditionGroup->addCondition($column, $operator, $value);
-        return $this->addHavingGroup($conditionGroup, $connector);
+        return $this->getHavingClause()->addFilter(new ConnectionQueryColumnFilter($property, $operator, $value));
     }
     
     public function addRawHaving ($expression, array $bindings = [], $connector = "AND")
     {
-        $conditionGroup = new ConnectionQueryConditionGroup();
-        $conditionGroup->addRawCondition($expression, $bindings);
-        return $this->addHavingGroup($conditionGroup, $connector);
+        return $this->getHavingClause()->addFilter(new ConnectionQueryRawFilter($expression, $bindings));
     }
         
-    public function addHavingGroup (ConnectionQueryConditionGroup $conditionClause, $connector = "AND")
+    public function addHavingGroup (ConnectionQueryFilterGroup $conditionClause, $connector = "AND")
     {
-        if (empty($this->sql->havingClause))
-            $this->sql->havingClause = new ConnectionQueryConditionGroup();
-        
-        if ($connector != $this->sql->havingClause->getConnector() && !$this->sql->havingClause->isEmpty())
-        {
-            $oldConnector = $this->sql->havingClause->getConnector();
-            $this->sql->havingClause->setConnector($connector);
-            if (sizeof($this->sql->havingClause->getConditions()) > 1)
-            {
-                $oldConditions = $this->sql->havingClause->getConditions();
-                $oldConditionsGroup = new ConnectionQueryConditionGroup($oldConnector);
-                $oldConditionsGroup->setConditions($oldConditions);
-                $this->sql->havingClause->clear();
-                $this->sql->havingClause->addConditionGroup($oldConditionsGroup);
-            }
-        }
-
-        if (sizeof($conditionGroup->getConditions()) > 1)
-        {
-            $this->sql->havingClause->addConditionGroup($conditionGroup);
-        }
-        else
-        {
-            $this->sql->havingClause->addConditions($conditionGroup->getConditions());
-        }
-        return $this;
+        return $this->getHavingClause()->addFilter($conditionGroup);
     }
     
     public function addOrderBy ($fields, $direction="ASC")
@@ -220,14 +176,15 @@ class ConnectionQuery
     {
         $keys = [];
         $bindings = [];
-        $wildCards = [];
+        $values = [];
         foreach ($values as $field=>$fieldValue)
         {
             $keys[] = $field;
-            $bindings[] = $fieldValue;
-            $wildCards[] = "?";
+            $bindingName = $this->getBindingName($bindings);
+            $bindings[$bindingName] = $fieldValue;
+            $values[] = ":" . $bindingName;
         }        
-        $sql = "INSERT INTO " . $this->sql->table . " (" . implode(",", $keys) . ") VALUES (" . implode(",", $wildCards) . ")";
+        $sql = "INSERT INTO " . $this->sql->table . " (" . implode(",", $keys) . ") VALUES (" . implode(",", $values) . ")";
         return $this->connection->exec($sql, $bindings);
     }
     
@@ -237,13 +194,14 @@ class ConnectionQuery
         $bindings = [];
         foreach ($values as $field=>$fieldValue)
         {
-            $processedFields[] = $field . "=?";
-            $bindings[] = $fieldValue;
+            $bindingName = $this->getBindingName($bindings);
+            $processedFields[] = $field . " = :" . $bindingName;
+            $bindings[$bindingName] = $fieldValue;
         }
         $sql = "UPDATE " . $this->sql->table. " SET " . implode(",", $processedFields);
         if (!empty($this->sql->whereClause))
         {
-            $sql .= " WHERE " . $this->getConditionGroupExpression($this->sql->whereClause, $bindings);
+            $sql .= " WHERE " . $this->getFilterExpression($this->sql->whereClause, $bindings);
         }
         return $this->connection->exec($sql, $bindings);
     }
@@ -254,7 +212,7 @@ class ConnectionQuery
         $sql = "DELETE FROM " . $this->sql->table;
         if (!empty($this->sql->whereClause))
         {
-            $sql .= " WHERE " . $this->getConditionGroupExpression($this->sql->whereClause, $bindings);
+            $sql .= " WHERE " . $this->getFilterExpression($this->sql->whereClause, $bindings);
         }
         return $this->connection->exec($sql, $bindings);
     }
@@ -285,11 +243,11 @@ class ConnectionQuery
         }
         if (!empty($this->sql->whereClause))
         {
-            $sql .= " WHERE " . $this->getConditionGroupExpression($this->sql->whereClause, $bindings);
+            $sql .= " WHERE " . $this->getFilterExpression($this->sql->whereClause, $bindings);
         }
         if (!empty($this->sql->havingClause))
         {
-            $sql .= " HAVING " . $this->getConditionGroupExpression($this->sql->havingClause, $bindings);
+            $sql .= " HAVING " . $this->getFilterExpression($this->sql->havingClause, $bindings);
         }
         if (!empty($this->sql->groupByColumns))
         {
@@ -319,30 +277,40 @@ class ConnectionQuery
         return !empty($results)? reset($results) : null;
     }
     
-    private function getConditionGroupExpression (ConnectionQueryConditionGroup $conditionGroup, array &$bindings)
+    private function getBindingName (array $bindings = [])
+    {
+        return "param" . (sizeof($bindings)+1);
+    }
+    
+    private function getFilterExpression (ConnectionQueryFilter $filter, array &$bindings = [])
     {
         $expression = "";
-        foreach ($conditionGroup->getConditions() as $condition)
+        if ($filter instanceof ConnectionQueryColumnFilter)
         {
-            if (!empty($expression))
+            $bindingName = $this->getBindingName();
+            $expression .= $filter->getProperty();
+            $expression .= " ";
+            $expression .= $filter->getOperator();
+            $expression .= " ";
+            $expression .= " :" . $bindingName;
+            $bindings[$bindingName] = $filter->getValue();
+        }
+        else if ($filter instanceof ConnectionQueryRawFilter)
+        {
+            $expression = $filter->getFilter();
+            $bindings = array_merge($bindings, $filter->getBindings());
+        }
+        else if ($filter instanceof ConnectionQueryFilterGroup)
+        {
+            $childFilters = $filter->getFilters();
+            $expressionTokens = [];
+            foreach ($childFilters as $childFilter)
             {
-                $expression .= " " . $conditionGroup->getConnector() . " ";
+                $expressionTokens[] = $this->getFilterExpression($childFilter, $expressionTokens);
             }
-            
-            if ($condition instanceof ConnectionQueryConditionGroup)
-            {
-                $expression .= "(" . $this->getConditionGroupExpression($condition, $bindings) . ")";
-            }
-            else if (isset($condition["expression"]))
-            {
-                $expression .= $condition["expression"];
-                $bindings = array_merge($bindings, $condition["bindings"]);
-            }
-            else
-            {
-                $expression .= $condition["operand1"] . " " . $condition["operator"] . " ?";
-                $bindings[] = $condition["operand2"];
-            }
+            $expression .= "(";
+            $expression .= implode($filter->getConnector(), $expressionTokens);
+            $expression .= ")";
         }
         return $expression;
     }
