@@ -237,7 +237,7 @@ class DatabaseModelManager extends ModelManager
         return $updateResult;
     }
     
-    public function retrieve(ModelFilter $filters=null, array $sorters=[], array $parameters=[])
+    public function retrieve(ModelFilter $filters=null, ModelSorter $sorters=null, array $parameters=[])
     {
         $modelCollection = new Collection();
         $modelClass = $this->getModelClass();
@@ -258,11 +258,11 @@ class DatabaseModelManager extends ModelManager
                 $modelQuery->addWhereFilter($filter);
             }
         }
-        if (!empty($sorters))
+        if (isset($sorters))
         {
-            foreach ($sorters as $sorter)
+            foreach ($sorters->getSorters() as $sorter)
             {
-                $modelQuery->addOrderBy($sorter->getProperty(), $sorter->getDirection());
+                $modelQuery->addOrderBy($sorter->property, $sorter->direction);
             }
         }
         $modelResults = $modelQuery->get();

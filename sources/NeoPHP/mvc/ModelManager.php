@@ -63,11 +63,11 @@ abstract class ModelManager extends ApplicationComponent
      * Obtiene todos los modelos con las opciones establecidas
      * @param type $modelClass Clase del modelo que se desea obtener
      * @param ModelFilter $filters Filtros a aplicar para la obtención de los modelos
-     * @param array $sorters Ordenamientos a aplicar para los modelos
+     * @param ModelSorter $sorters Ordenamientos a aplicar para los modelos
      * @param array $parameters Parametros extra para la obtención de modelos
      * @return Collection Lista de modelo obtenidos
      */
-    protected final function retrieveModels ($modelClass, ModelFilter $filters=null, array $sorters=[], array $parameters=[])
+    protected final function retrieveModels ($modelClass, ModelFilter $filters=null, ModelSorter $sorters=null, array $parameters=[])
     {
         return $this->getManager($modelClass)->retrieve($filters, $sorters, $parameters);
     }
@@ -137,7 +137,7 @@ abstract class ModelManager extends ApplicationComponent
         return $models;
     }
     
-    public abstract function retrieve (ModelFilter $filters=null, array $sorters=[], array $parameters=[]);
+    public abstract function retrieve (ModelFilter $filters=null, ModelSorter $sorters=null, array $parameters=[]);
     public abstract function create (Model $model);
     public abstract function update (Model $model);
     public abstract function delete (Model $model);

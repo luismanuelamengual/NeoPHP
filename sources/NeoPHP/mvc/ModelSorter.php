@@ -2,27 +2,32 @@
 
 namespace NeoPHP\mvc;
 
+use stdClass;
+
 class ModelSorter
 {
     const DIRECTION_ASCENDING = "ASC";
     const DIRECTION_DESCENDING = "DESC";
     
-    private $property;
-    private $direction;
+    private $sorters;
     
-    public function __construct($property, $direction=self::DIRECTION_ASCENDING)
+    public function __construct ($property, $direction = self::DIRECTION_ASCENDING)
     {
-        $this->property = $property;
-        $this->direction = $direction;
+        $this->sorters = [];
+        if ($property != null)
+            $this->addSort($property, $direction);
     }
 
-    public function getProperty()
+    public function addSort ($property, $direction = self::DIRECTION_ASCENDING)
     {
-        return $this->property;
+        $sort = new stdClass();
+        $sort->property = $property;
+        $sort->direction = $direction;
+        $this->sorters[] = $sort;
     }
-
-    public function getDirection()
+    
+    public function getSorters ()
     {
-        return $this->direction;
+        return $this->sorters;
     }
 }
