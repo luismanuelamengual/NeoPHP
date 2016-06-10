@@ -93,7 +93,7 @@ class ConnectionQuery
     
     public function addWhere ($column, $operator, $value=null)
     {
-        return $this->addWhereFilter(new ConnectionQueryColumnFilter($property, $operator, $value));
+        return $this->addWhereFilter(new ConnectionQueryColumnFilter($column, $operator, $value));
     }
     
     public function addRawWhere ($expression, array $bindings = [])
@@ -103,7 +103,8 @@ class ConnectionQuery
     
     public function addWhereFilter (ConnectionQueryFilter $filter)
     {
-        return $this->getWhereClause()->addFilter($filter);
+        $this->getWhereClause()->addFilter($filter);
+        return $this;
     }
     
     public function getHavingClause ()
@@ -115,7 +116,7 @@ class ConnectionQuery
     
     public function addHaving ($column, $operator, $value, $connector = "AND")
     {
-        return $this->addHavingFilter(new ConnectionQueryColumnFilter($property, $operator, $value));
+        return $this->addHavingFilter(new ConnectionQueryColumnFilter($column, $operator, $value));
     }
     
     public function addRawHaving ($expression, array $bindings = [], $connector = "AND")
@@ -125,7 +126,8 @@ class ConnectionQuery
         
     public function addHavingFilter (ConnectionQueryFilter $filter)
     {
-        return $this->getHavingClause()->addFilter($filter);
+        $this->getHavingClause()->addFilter($filter);
+        return $this;
     }
     
     public function addOrderBy ($fields, $direction="ASC")
