@@ -10,6 +10,7 @@ class ConnectionQueryFilterGroup extends ConnectionQueryFilter
     public function __construct($connector = "AND")
     {
         $this->connector = $connector;
+        $this->filters = [];
     }
     
     public function getConnector()
@@ -30,5 +31,15 @@ class ConnectionQueryFilterGroup extends ConnectionQueryFilter
     public function addFilter (ConnectionQueryFilter $filter)
     {
         $this->filters[] = $filter;
+    }
+    
+    public function addColumnFilter ($column, $operator, $value=null)
+    {
+        $this->addFilter(new ConnectionQueryColumnFilter($column, $operator, $value));
+    }
+    
+    public function addRawFilter ($filter, array $bindings = [])
+    {
+        $this->addFilter(new ConnectionQueryRawFilter($filter, $bindings));
     }
 }

@@ -35,4 +35,9 @@ class ModelFilterGroup extends ModelFilter
     {
         $this->filters[] = $filter;
     }
+    
+    public function addPropertyFilter ($property, $operator, $values=null)
+    {
+        $this->addFilter (new PropertyModelFilter($property, $operator, $value));
+    }
 }
