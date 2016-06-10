@@ -174,7 +174,7 @@ abstract class MVCApplication extends Application
             }
             else
             {
-                $manager = new DatabaseModelManager($this, $modelClass);
+                $manager = new DefaultModelManager($this, $modelClass);
             }
             $this->managers[$modelClass] = $manager;
         }

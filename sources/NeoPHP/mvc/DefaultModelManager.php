@@ -13,7 +13,7 @@ use NeoPHP\sql\ConnectionQueryFilterGroup;
 use NeoPHP\util\IntrospectionUtils;
 use stdClass;
 
-class DatabaseModelManager extends ModelManager
+class DefaultModelManager extends ModelManager
 {
     const ANNOTATION_ENTITY = "entity";
     const ANNOTATION_ATTRIBUTE = "attribute";
