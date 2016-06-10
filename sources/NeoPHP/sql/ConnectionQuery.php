@@ -175,16 +175,16 @@ class ConnectionQuery
     public function insert ($values=null)
     {
         $keys = [];
-        $bindings = [];
-        $values = [];
+        $bindingSlots = [];
+        $bindings = [];   
         foreach ($values as $field=>$fieldValue)
         {
             $keys[] = $field;
             $bindingName = $this->getBindingName($bindings);
             $bindings[$bindingName] = $fieldValue;
-            $values[] = ":" . $bindingName;
-        }        
-        $sql = "INSERT INTO " . $this->sql->table . " (" . implode(",", $keys) . ") VALUES (" . implode(",", $values) . ")";
+            $bindingSlots[] = ":" . $bindingName;
+        }     
+        $sql = "INSERT INTO " . $this->sql->table . " (" . implode(",", $keys) . ") VALUES (" . implode(",", $bindingSlots) . ")";
         return $this->connection->exec($sql, $bindings);
     }
     

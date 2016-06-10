@@ -221,23 +221,21 @@ class Connection extends Object
             $this->logger->info("SQL: " . $sqlSentence);
         
         $queryStatement = false;
-        $sqlExecuted = false;
         if (empty($bindings))
         {
             $queryStatement = $this->getConnection()->query($sql);
-            $sqlExecuted = $queryStatement;
+            if (!$queryStatement)
+                throw new Exception ("Unable to execute sql \"" . $sqlSentence . "\" " . $this->getConnection()->errorInfo()[2]);
         }
         else
         {
             $queryStatement = $this->getConnection()->prepare($sql);
-            if ($queryStatement != false)
-                $sqlExecuted = $queryStatement->execute ($bindings);
-        }
-        
-        if ($sqlExecuted == false)
-        {
-            $errorData = $this->getConnection()->errorInfo();            
-            throw new Exception ("Unable to execute sql \"" . $sqlSentence . "\" " . $errorData[2]);
+            if ($queryStatement == false)
+                throw new Exception ("Unable to prepare sql statement \"" . $sqlSentence . "\"");
+            
+            $sqlExecuted = $queryStatement->execute ($bindings);
+            if (!$sqlExecuted)
+                throw new Exception ("Unable to execute prepared statement \"" . $sqlSentence . "\" " . $queryStatement->errorInfo()[2]);
         }
         return $queryStatement;
     }
@@ -249,28 +247,24 @@ class Connection extends Object
             $this->logger->info("SQL: " . $sqlSentence);
         
         $affectedRows = false;
-        $sqlExecuted = false;
         if (!$this->ignoreUpdates)
         {    
             if (empty($bindings))
             {
                 $affectedRows = $this->getConnection()->exec($sql);
-                $sqlExecuted = $affectedRows;
+                if (!$affectedRows)
+                    throw new Exception ("Unable to execute sql \"" . $sqlSentence . "\" " . $this->getConnection()->errorInfo()[2]);
             }
             else
             {
                 $preparedStatement = $this->getConnection()->prepare($sql);
-                if ($preparedStatement != false)
-                {
-                    $sqlExecuted = $preparedStatement->execute($bindings);
-                    $affectedRows = $preparedStatement->rowCount();
-                }
-            }
-            
-            if ($sqlExecuted == false)
-            {
-                $errorData = $this->getConnection()->errorInfo();
-                throw new Exception ("Unable to execute sql \"" . $sqlSentence . "\" " . $errorData[2]);
+                if ($preparedStatement == false)
+                    throw new Exception ("Unable to prepare sql statement \"" . $sqlSentence . "\"");
+                
+                $sqlExecuted = $preparedStatement->execute($bindings);
+                if (!$sqlExecuted)
+                    throw new Exception ("Unable to execute prepared statement \"" . $sqlSentence . "\" " . $preparedStatement->errorInfo()[2]);
+                $affectedRows = $preparedStatement->rowCount();   
             }
         }
         return $affectedRows;
