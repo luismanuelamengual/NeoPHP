@@ -91,6 +91,20 @@ class ConnectionQuery
         return $this->sql->whereClause;
     }
     
+    public function setWhereClause (ConnectionQueryFilter $filter)
+    {
+        if ($filter instanceof ConnectionQueryFilterGroup)
+        {
+            $this->sql->whereClause = $filter;
+        }
+        else
+        {
+            $whereClause = new ConnectionQueryFilterGroup();
+            $whereClause->addFilter($filter);
+            $this->sql->whereClause = $whereClause;
+        }
+    }
+    
     public function addWhere ($column, $operator, $value=null)
     {
         return $this->addWhereFilter(new ConnectionQueryColumnFilter($column, $operator, $value));
@@ -114,12 +128,26 @@ class ConnectionQuery
         return $this->sql->havingClause;
     }
     
-    public function addHaving ($column, $operator, $value, $connector = "AND")
+    public function setHavingClause (ConnectionQueryFilter $filter)
+    {
+        if ($filter instanceof ConnectionQueryFilterGroup)
+        {
+            $this->sql->havingClause = $filter;
+        }
+        else
+        {
+            $havingClause = new ConnectionQueryFilterGroup();
+            $havingClause->addFilter($filter);
+            $this->sql->havingClause = $havingClause;
+        }
+    }
+    
+    public function addHaving ($column, $operator, $value)
     {
         return $this->addHavingFilter(new ConnectionQueryColumnFilter($column, $operator, $value));
     }
     
-    public function addRawHaving ($expression, array $bindings = [], $connector = "AND")
+    public function addRawHaving ($expression, array $bindings = [])
     {
         return $this->addHavingFilter(new ConnectionQueryRawFilter($expression, $bindings));
     }

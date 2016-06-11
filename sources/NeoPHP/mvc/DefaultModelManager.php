@@ -250,19 +250,7 @@ class DefaultModelManager extends ModelManager
         $modelQuery = $this->getDatabase()->createQuery($this->getModelEntityName($modelClass));
         if (isset($filters))
         {
-            $filter = $this->getConnectionQueryFilter($filters);
-            if ($filter instanceof ConnectionQueryFilterGroup)
-            {
-                $modelQuery->getWhereClause()->setConnector($filter->getConnector());
-                foreach ($filter->getFilters() as $childFilter)
-                {
-                    $modelQuery->addWhereFilter($childFilter);
-                }
-            }
-            else
-            {
-                $modelQuery->addWhereFilter($filter);
-            }
+            $modelQuery->setWhereClause($this->getConnectionQueryFilter($filters));            
         }
         if (isset($sorters))
         {
