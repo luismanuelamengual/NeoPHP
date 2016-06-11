@@ -11,11 +11,9 @@ class ModelSorter
     
     private $sorters;
     
-    public function __construct ($property, $direction = self::DIRECTION_ASCENDING)
+    public function __construct ()
     {
         $this->sorters = [];
-        if ($property != null)
-            $this->addSort($property, $direction);
     }
 
     public function addSort ($property, $direction = self::DIRECTION_ASCENDING)

@@ -15,6 +15,9 @@ use stdClass;
 
 class DefaultModelManager extends ModelManager
 {
+    const PARAMETER_START = "start";
+    const PARAMETER_LIMIT = "limit";
+    
     const ANNOTATION_ENTITY = "entity";
     const ANNOTATION_ATTRIBUTE = "attribute";
     const ANNOTATION_ID = "id";
@@ -267,6 +270,14 @@ class DefaultModelManager extends ModelManager
             {
                 $modelQuery->addOrderBy($sorter->property, $sorter->direction);
             }
+        }
+        if (isset($parameters[self::PARAMETER_START]))
+        {
+            $modelQuery->setOffset($parameters[self::PARAMETER_START]);
+        }
+        if (isset($parameters[self::PARAMETER_LIMIT]))
+        {
+            $modelQuery->setLimit($parameters[self::PARAMETER_LIMIT]);
         }
         $modelResults = $modelQuery->get();
         foreach ($modelResults as $modelAttributes)
