@@ -113,41 +113,6 @@ abstract class ModelManager extends ApplicationComponent
     }
     
     /**
-     * Crea un modelo con las propiedades establecidas
-     * @param type $modelClass
-     * @param type $modelProperties
-     * @return Model Modelo creado
-     */
-    protected final function createModelByProperties ($modelClass, $modelProperties)
-    {
-        $model = null;
-        if ($modelProperties != null)
-        {
-            $model = new $modelClass;
-            $model->setFrom($modelProperties);
-        }
-        return $model;
-    }
-    
-    /**
-     * Crea una colección de modelos
-     * @param type $modelClass
-     * @param array $modelsProperties
-     * @return Collection Coleccion de modelos
-     */
-    protected final function createModelCollection ($modelClass, array $modelsProperties)
-    {
-        $models = new Collection();
-        foreach ($modelsProperties as $modelProperties)
-        {
-            $model = $this->createModel($modelClass, $modelProperties);
-            if ($model != null)
-                $models->add($model);
-        }
-        return $models;
-    }
-    
-    /**
      * Persiste un modelo en función del id del modelo, si no tiene id se creara
      * el modelo y si tiene se actualizará
      * @param Model $model Modelo a persistir
