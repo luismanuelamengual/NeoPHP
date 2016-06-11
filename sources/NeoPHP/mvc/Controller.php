@@ -238,6 +238,16 @@ abstract class Controller extends ApplicationComponent
     }
     
     /**
+     * Persiste un modelo
+     * @param Model $model modelo a persistir
+     * @return boolean indica si se persistió o no
+     */
+    protected final function persistModel (Model $model)
+    {
+        return $this->getManager(get_class($model))->persist($model);
+    }
+    
+    /**
      * Crea un modelo establecido
      * @param Model $model modelo a crearse
      * @return boolean Indica si se creo o no el modelo

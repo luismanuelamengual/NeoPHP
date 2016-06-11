@@ -73,6 +73,16 @@ abstract class ModelManager extends ApplicationComponent
     }
     
     /**
+     * Persiste un modelo
+     * @param Model $model modelo a persistir
+     * @return boolean indica si se persistió o no
+     */
+    protected final function persistModel (Model $model)
+    {
+        return $this->getManager(get_class($model))->persist($model);
+    }
+    
+    /**
      * Crea un modelo establecido
      * @param Model $model modelo a crearse
      * @return boolean Indica si se creo o no el modelo
@@ -135,6 +145,26 @@ abstract class ModelManager extends ApplicationComponent
                 $models->add($model);
         }
         return $models;
+    }
+    
+    /**
+     * Persiste un modelo en función del id del modelo, si no tiene id se creara
+     * el modelo y si tiene se actualizará
+     * @param Model $model Modelo a persistir
+     */
+    public function persist (Model $model)
+    {
+        $result = null;
+        $modelId = $model->getId();
+        if (isset($modelId))
+        {
+            $result = $this->update($model);
+        }
+        else
+        {
+            $result = $this->create($model);
+        }
+        return $result;
     }
     
     public abstract function retrieve (ModelFilter $filters=null, ModelSorter $sorters=null, array $parameters=[]);

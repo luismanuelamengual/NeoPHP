@@ -8,9 +8,9 @@ use NeoPHP\util\IntrospectionUtils;
 
 abstract class Model extends Object implements Arrayable
 {
-    public function __construct(array $properties = []) 
+    public function __construct($id=null) 
     {
-        $this->setFrom($properties);
+        $this->setId($id);
     }
     
     public function setFrom (array $properties = []) 
@@ -22,4 +22,7 @@ abstract class Model extends Object implements Arrayable
     {
         return IntrospectionUtils::getPropertyValues($this);
     }
+    
+    public abstract function getId ();
+    public abstract function setId ($id);
 }
