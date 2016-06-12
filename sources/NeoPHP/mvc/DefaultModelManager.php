@@ -5,6 +5,7 @@ namespace NeoPHP\mvc;
 use Exception;
 use MongoClient;
 use MongoDB;
+use MongoId;
 use NeoPHP\core\Collection;
 use NeoPHP\core\reflect\ReflectionAnnotatedClass;
 use NeoPHP\sql\Connection;
@@ -211,18 +212,38 @@ class DefaultModelManager extends ModelManager
     
     public function create(Model $model)
     {
+        $createResult = false;
         $modelAttributes = $this->getModelAttributes($model);
         $modelIdAttribute = $this->getModelIdAttribute();
         unset($modelAttributes[$modelIdAttribute]);
-        return $this->getDatabase()->createQuery($this->getModelEntityName())->insert($modelAttributes);
+        $database = $this->getDatabase();
+        if ($database instanceof Connection)
+        {
+            $createResult = $database->createQuery($this->getModelEntityName())->insert($modelAttributes);
+        }
+        else if ($database instanceof MongoDB)
+        {
+            $createResult = $database->selectCollection($this->getModelEntityName())->insert($modelAttributes);
+        }
+        return $createResult;
     }
 
     public function delete(Model $model)
     {
+        $deleteResult = false;
         $modelAttributes = $this->getModelAttributes($model);
         $modelIdAttribute = $this->getModelIdAttribute();
         $modelId = $modelAttributes[$modelIdAttribute];
-        return $this->getDatabase()->createQuery($this->getModelEntityName())->addWhere($modelIdAttribute, "=", $modelId)->delete();
+        $database = $this->getDatabase();
+        if ($database instanceof Connection)
+        {
+            $deleteResult = $database->createQuery($this->getModelEntityName())->addWhere($modelIdAttribute, "=", $modelId)->delete();
+        }
+        else if ($database instanceof MongoDB)
+        {
+            $deleteResult = $database->selectCollection($this->getModelEntityName())->remove(['_id'=>new MongoId($modelId)]);
+        }
+        return $deleteResult;
     }
 
     public function update(Model $model)
@@ -231,49 +252,88 @@ class DefaultModelManager extends ModelManager
         $modelAttributes = $this->getModelAttributes($model);
         $modelIdAttribute = $this->getModelIdAttribute();
         $modelId = $modelAttributes[$modelIdAttribute];
-        $modelQuery = $this->getDatabase()->createQuery($this->getModelEntityName())->addWhere($modelIdAttribute, "=", $modelId);
-        $savedModelAttributes = $modelQuery->getFirst();
-        if (isset($savedModelAttributes))
+        $database = $this->getDatabase();
+        if ($database instanceof Connection)
         {
-            $updateModelAttributes = array_diff_assoc($modelAttributes, $savedModelAttributes);
-            if (!empty($updateModelAttributes))
-                $updateResult = $modelQuery->update($updateModelAttributes);
+            $modelQuery = $database->createQuery($this->getModelEntityName())->addWhere($modelIdAttribute, "=", $modelId);
+            $savedModelAttributes = $modelQuery->getFirst();
+            if (isset($savedModelAttributes))
+            {
+                $updateModelAttributes = array_diff_assoc($modelAttributes, $savedModelAttributes);
+                if (!empty($updateModelAttributes))
+                    $updateResult = $modelQuery->update($updateModelAttributes);
+            }
+        }
+        else if ($database instanceof MongoDB)
+        {
+            $mongoCollection = $database->selectCollection($this->getModelEntityName());
+            $mongoId = new MongoId($modelId);
+            $document = $mongoCollection->findOne(['_id'=>$mongoId]);
+            if (isset($document))
+            {
+                $savedModelAttributes = $this->getAttributesFromDocument($document);
+                $updateModelAttributes = array_diff_assoc($modelAttributes, $savedModelAttributes);
+                if (!empty($updateModelAttributes))
+                    $updateResult = $mongoCollection->update (['_id'=>$mongoId], ['$set'=>$updateModelAttributes]);
+            }
         }
         return $updateResult;
     }
     
     public function retrieve(ModelFilter $filters=null, ModelSorter $sorters=null, array $parameters=[])
     {
+        $modelCollection = new Collection();
         $modelClass = $this->getModelClass();
-        $modelQuery = $this->getDatabase()->createQuery($this->getModelEntityName());
-        if (isset($filters))
+        $database = $this->getDatabase();
+        if ($database instanceof Connection)
         {
-            $modelQuery->setWhereClause($this->getConnectionQueryFilter($filters));            
-        }
-        if (isset($sorters))
-        {
-            foreach ($sorters->getSorters() as $sorter)
+            $modelQuery = $database->createQuery($this->getModelEntityName());
+            if (isset($filters))
             {
-                $modelQuery->addOrderBy($sorter->property, $sorter->direction);
+                $modelQuery->setWhereClause($this->getConnectionQueryFilter($filters));            
+            }
+            if (isset($sorters))
+            {
+                foreach ($sorters->getSorters() as $sorter)
+                {
+                    $modelQuery->addOrderBy($sorter->property, $sorter->direction);
+                }
+            }
+            if (isset($parameters[self::PARAMETER_START]))
+            {
+                $modelQuery->setOffset($parameters[self::PARAMETER_START]);
+            }
+            if (isset($parameters[self::PARAMETER_LIMIT]))
+            {
+                $modelQuery->setLimit($parameters[self::PARAMETER_LIMIT]);
+            }
+            $modelQuery->get(PDO::FETCH_ASSOC, function ($modelAttributes) use ($modelCollection) 
+            {
+                $modelCollection->add($this->createModelFromAttributes($modelAttributes));
+            });
+        }
+        else if ($database instanceof MongoDB)
+        {
+            $mongoCollection = $database->selectCollection($this->getModelEntityName());
+            $mongoCursor = $mongoCollection->find();
+            foreach ($mongoCursor as $document)
+            {
+                $modelCollection->add($this->createModelFromAttributes($this->getAttributesFromDocument($document)));
             }
         }
-        if (isset($parameters[self::PARAMETER_START]))
-        {
-            $modelQuery->setOffset($parameters[self::PARAMETER_START]);
-        }
-        if (isset($parameters[self::PARAMETER_LIMIT]))
-        {
-            $modelQuery->setLimit($parameters[self::PARAMETER_LIMIT]);
-        }
-        
-        $modelCollection = new Collection();
-        $modelQuery->get(PDO::FETCH_ASSOC, function ($modelAttributes) use ($modelCollection) 
-        {
-            $modelCollection->add($this->createModelFromAttributes($modelAttributes));
-        });
         return $modelCollection;
     }
     
+    protected function getAttributesFromDocument ($document)
+    {
+        $modelIdAttribute = $this->getModelIdAttribute();
+        $mongoId = $document["_id"];
+        $modelAttributes = $document;
+        unset($modelAttributes["_id"]);
+        $modelAttributes[$modelIdAttribute] = $mongoId;
+        return $modelAttributes;
+    }
+
     public function getConnectionQueryFilter (ModelFilter $modelFilter)
     {
         $filter = null;
