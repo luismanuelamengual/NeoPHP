@@ -11,6 +11,7 @@ use NeoPHP\sql\Connection;
 use NeoPHP\sql\ConnectionQueryColumnFilter;
 use NeoPHP\sql\ConnectionQueryFilterGroup;
 use NeoPHP\util\IntrospectionUtils;
+use PDO;
 use stdClass;
 
 class DefaultModelManager extends ModelManager
@@ -243,7 +244,6 @@ class DefaultModelManager extends ModelManager
     
     public function retrieve(ModelFilter $filters=null, ModelSorter $sorters=null, array $parameters=[])
     {
-        $modelCollection = new Collection();
         $modelClass = $this->getModelClass();
         $modelQuery = $this->getDatabase()->createQuery($this->getModelEntityName());
         if (isset($filters))
@@ -265,11 +265,12 @@ class DefaultModelManager extends ModelManager
         {
             $modelQuery->setLimit($parameters[self::PARAMETER_LIMIT]);
         }
-        $modelResults = $modelQuery->get();
-        foreach ($modelResults as $modelAttributes)
+        
+        $modelCollection = new Collection();
+        $modelQuery->get(PDO::FETCH_ASSOC, function ($modelAttributes) use ($modelCollection) 
         {
             $modelCollection->add($this->createModelFromAttributes($modelAttributes));
-        }
+        });
         return $modelCollection;
     }
     
