@@ -327,7 +327,7 @@ class DefaultModelManager extends ModelManager
     protected function getAttributesFromDocument ($document)
     {
         $modelIdAttribute = $this->getModelIdAttribute();
-        $mongoId = $document["_id"];
+        $mongoId = strval($document["_id"]);
         $modelAttributes = $document;
         unset($modelAttributes["_id"]);
         $modelAttributes[$modelIdAttribute] = $mongoId;
