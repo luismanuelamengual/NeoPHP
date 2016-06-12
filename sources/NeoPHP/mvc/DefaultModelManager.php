@@ -23,8 +23,9 @@ class DefaultModelManager extends ModelManager
     const ANNOTATION_ID = "id";
     const ANNOTATION_PARAMETER_NAME = "name";
     
-    private static $modelMetadata = [];
     private static $databases = [];
+    
+    private $modelMetadata;
     
     /**
      * Obtiene una nueva conexión de base de datos en funcion del nombre especificado
@@ -90,22 +91,20 @@ class DefaultModelManager extends ModelManager
     
     /**
      * Obtiene el nombre de la entidad asociada con el modelo
-     * @param string $modelClass Clase del modelo
      * @return string Nombre de entidad
      */
-    protected function getModelEntityName ($modelClass)
+    protected function getModelEntityName ()
     {
-        return $this->getModelMetadata($modelClass)->name;
+        return $this->getModelMetadata()->name;
     }
     
     /**
      * Obtiene el nombre del atributo marcado como ID en el modelo
-     * @param string $modelClass Clase del modelo
      * @return string nombre del atributo id del modelo
      */
-    protected function getModelIdAttribute ($modelClass)
+    protected function getModelIdAttribute ()
     {
-        return $this->getModelMetadata($modelClass)->idAttribute;
+        return $this->getModelMetadata()->idAttribute;
     }   
     
     /**
@@ -116,7 +115,7 @@ class DefaultModelManager extends ModelManager
     protected function getModelAttributes (Model $model)
     {
         $modelAttributes = [];
-        $modelMetadata = $this->getModelMetadata(get_class($model));
+        $modelMetadata = $this->getModelMetadata();
         foreach ($modelMetadata->attributes as $attribute)
         {
             $modelAttributes[$attribute->name] = IntrospectionUtils::getPropertyValue($model, $attribute->propertyName);
@@ -131,7 +130,7 @@ class DefaultModelManager extends ModelManager
      */
     protected function setModelAttributes (Model $model, array $attributes)
     {
-        $modelMetadata = $this->getModelMetadata(get_class($model));
+        $modelMetadata = $this->getModelMetadata();
         foreach ($modelMetadata->attributes as $attribute)
         {
             IntrospectionUtils::setPropertyValue($model, $attribute->propertyName, $attributes[$attribute->name]);
@@ -140,15 +139,15 @@ class DefaultModelManager extends ModelManager
     
     /**
      * Crea un modelo nuevo a traves de atributos
-     * @param string $modelClass Clase del modelo
      * @param array $attributes atributos a establecer
      * @return Model modelo creado
      */
-    protected function createModelFromAttributes ($modelClass, array $attributes)
+    protected function createModelFromAttributes (array $attributes)
     {
         $model = null;
         if (!empty($attributes))
         {
+            $modelClass = $this->getModelClass();
             $model = new $modelClass;
             $this->setModelAttributes($model, $attributes);
         }
@@ -157,23 +156,24 @@ class DefaultModelManager extends ModelManager
     
     /**
      * Obtiene metadatos de un modelo dado
-     * @param type $modelClass Clase del modelo
      * @return type Metadatos del modelo
      */
-    protected final function getModelMetadata ($modelClass)
+    protected final function getModelMetadata ()
     {
-        if (empty(self::$modelMetadata[$modelClass]))
-            self::$modelMetadata[$modelClass] = $this->retrieveModelMetadata($modelClass);
-        return self::$modelMetadata[$modelClass];
+        if (!isset($this->modelMetadata))
+        {
+            $this->modelMetadata = $this->retrieveModelMetadata();
+        }
+        return $this->modelMetadata;
     }
     
     /**
      * Obtiene de la clase del modelo los metadatos de entidad y atributos
-     * @param type $modelClass Clase del modelo
      * @throws Exception Error si no se puede obtener los valores
      */
-    private function retrieveModelMetadata ($modelClass)
+    protected function retrieveModelMetadata ()
     {
+        $modelClass = $this->getModelClass();
         $entityMetadata = new stdClass();
         $entityClass = new ReflectionAnnotatedClass($modelClass);
         $entityAnnotation = $entityClass->getAnnotation(self::ANNOTATION_ENTITY);
@@ -210,35 +210,32 @@ class DefaultModelManager extends ModelManager
     
     public function create(Model $model)
     {
-        $modelClass = get_class($model);
         $modelAttributes = $this->getModelAttributes($model);
-        $modelIdAttribute = $this->getModelIdAttribute($modelClass);
+        $modelIdAttribute = $this->getModelIdAttribute();
         unset($modelAttributes[$modelIdAttribute]);
-        return $this->getDatabase()->createQuery($this->getModelEntityName($modelClass))->insert($modelAttributes);
+        return $this->getDatabase()->createQuery($this->getModelEntityName())->insert($modelAttributes);
     }
 
     public function delete(Model $model)
     {
-        $modelClass = get_class($model);
         $modelAttributes = $this->getModelAttributes($model);
-        $modelIdAttribute = $this->getModelIdAttribute($modelClass);
+        $modelIdAttribute = $this->getModelIdAttribute();
         $modelId = $modelAttributes[$modelIdAttribute];
-        return $this->getDatabase()->createQuery($this->getModelEntityName($modelClass))->addWhere($modelIdAttribute, "=", $modelId)->delete();
+        return $this->getDatabase()->createQuery($this->getModelEntityName())->addWhere($modelIdAttribute, "=", $modelId)->delete();
     }
 
     public function update(Model $model)
     {
         $updateResult = false;
-        $modelClass = get_class($model);
         $modelAttributes = $this->getModelAttributes($model);
-        $modelIdAttribute = $this->getModelIdAttribute($modelClass);
+        $modelIdAttribute = $this->getModelIdAttribute();
         $modelId = $modelAttributes[$modelIdAttribute];
-        $savedModelAttributes = $this->getDatabase()->createQuery($this->getModelEntityName($modelClass))->addWhere($modelIdAttribute, "=", $modelId)->getFirst();
+        $savedModelAttributes = $this->getDatabase()->createQuery($this->getModelEntityName())->addWhere($modelIdAttribute, "=", $modelId)->getFirst();
         if (isset($savedModelAttributes))
         {
             $updateModelAttributes = array_diff_assoc($modelAttributes, $savedModelAttributes);
             if (!empty($updateModelAttributes))
-                $updateResult = $this->getDatabase()->createQuery($this->getModelEntityName($modelClass))->addWhere($modelIdAttribute, "=", $modelId)->update($updateModelAttributes);
+                $updateResult = $this->getDatabase()->createQuery($this->getModelEntityName())->addWhere($modelIdAttribute, "=", $modelId)->update($updateModelAttributes);
         }
         return $updateResult;
     }
@@ -247,7 +244,7 @@ class DefaultModelManager extends ModelManager
     {
         $modelCollection = new Collection();
         $modelClass = $this->getModelClass();
-        $modelQuery = $this->getDatabase()->createQuery($this->getModelEntityName($modelClass));
+        $modelQuery = $this->getDatabase()->createQuery($this->getModelEntityName());
         if (isset($filters))
         {
             $modelQuery->setWhereClause($this->getConnectionQueryFilter($filters));            
@@ -270,7 +267,7 @@ class DefaultModelManager extends ModelManager
         $modelResults = $modelQuery->get();
         foreach ($modelResults as $modelAttributes)
         {
-            $modelCollection->add($this->createModelFromAttributes($modelClass, $modelAttributes));
+            $modelCollection->add($this->createModelFromAttributes($modelAttributes));
         }
         return $modelCollection;
     }
@@ -278,7 +275,7 @@ class DefaultModelManager extends ModelManager
     public function getConnectionQueryFilter (ModelFilter $modelFilter)
     {
         $filter = null;
-        $modelMetadata = $this->getModelMetadata($this->getModelClass());
+        $modelMetadata = $this->getModelMetadata();
         
         if ($modelFilter instanceof PropertyModelFilter)
         {
