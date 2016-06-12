@@ -247,7 +247,7 @@ class ConnectionQuery
         return $this->connection->exec($sql, $bindings);
     }
     
-    public function get ($fetchType=PDO::FETCH_ASSOC)
+    public function get ($fetchType=PDO::FETCH_ASSOC, callable $fetchCallback=null)
     {
         $bindings = [];
         $sql = "";
@@ -297,13 +297,27 @@ class ConnectionQuery
         }
         
         $statement = $this->connection->query($sql, $bindings);
-        return $statement->fetchAll($fetchType);;
+        
+        $results = null;
+        if ($fetchCallback == null)
+        {
+            $results = $statement->fetchAll($fetchType);
+        }
+        else
+        {
+            $result = null;
+            while ($result = $statement->fetch($fetchType))
+            {
+                call_user_func_array($fetchCallback, [$result]);
+            }
+        }
+        return $results;
     }
     
-    public function getFirst ($fetchType=PDO::FETCH_ASSOC)
+    public function getFirst ($fetchType=PDO::FETCH_ASSOC, callable $fetchCallback=null)
     {
         $this->setLimit(1);
-        $results = $this->get($fetchType);
+        $results = $this->get($fetchType, $fetchCallback);
         return !empty($results)? reset($results) : null;
     }
     
