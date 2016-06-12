@@ -225,6 +225,16 @@ abstract class Controller extends ApplicationComponent
     }
     
     /**
+     * Obtiene un modelo a través de su id
+     * @param type $modelClass Clase del modelo que se desea obtener
+     * @param type $id Id del modelo
+     */
+    protected final function retrieveModel ($modelClass, $id)
+    {
+        return $this->getManager($modelClass)->retrieveById($id);
+    }
+    
+    /**
      * Obtiene todos los modelos con las opciones establecidas
      * @param type $modelClass Clase del modelo que se desea obtener
      * @param ModelFilter $filters Filtros a aplicar para la obtención de los modelos

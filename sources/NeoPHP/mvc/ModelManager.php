@@ -60,6 +60,16 @@ abstract class ModelManager extends ApplicationComponent
     }
     
     /**
+     * Obtiene un modelo a través de su id
+     * @param type $modelClass Clase del modelo que se desea obtener
+     * @param type $id Id del modelo
+     */
+    protected final function retrieveModel ($modelClass, $id)
+    {
+        return $this->getManager($modelClass)->retrieveById($id);
+    }
+    
+    /**
      * Obtiene todos los modelos con las opciones establecidas
      * @param type $modelClass Clase del modelo que se desea obtener
      * @param ModelFilter $filters Filtros a aplicar para la obtención de los modelos
@@ -117,7 +127,7 @@ abstract class ModelManager extends ApplicationComponent
      * el modelo y si tiene se actualizará
      * @param Model $model Modelo a persistir
      */
-    public function persist (Model $model)
+    public final function persist (Model $model)
     {
         $result = null;
         $modelId = $model->getId();
@@ -130,6 +140,22 @@ abstract class ModelManager extends ApplicationComponent
             $result = $this->create($model);
         }
         return $result;
+    }
+    
+    /**
+     * Obtiene un modelo a partir de su id
+     * @param type $id Id del modelo a obtener
+     * @return Model modelo obtenido
+     */
+    public final function retrieveById ($id)
+    {
+        $model = null;
+        $modelCollection =  $this->retrieve(new PropertyModelFilter("id", $id));
+        if ($modelCollection != null && $modelCollection instanceof Collection)
+        {
+            $model = $modelCollection->getFirst();
+        }
+        return $model;
     }
     
     public abstract function retrieve (ModelFilter $filters=null, ModelSorter $sorters=null, array $parameters=[]);
