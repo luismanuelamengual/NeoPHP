@@ -230,12 +230,13 @@ class DefaultModelManager extends ModelManager
         $modelAttributes = $this->getModelAttributes($model);
         $modelIdAttribute = $this->getModelIdAttribute();
         $modelId = $modelAttributes[$modelIdAttribute];
-        $savedModelAttributes = $this->getDatabase()->createQuery($this->getModelEntityName())->addWhere($modelIdAttribute, "=", $modelId)->getFirst();
+        $modelQuery = $this->getDatabase()->createQuery($this->getModelEntityName())->addWhere($modelIdAttribute, "=", $modelId);
+        $savedModelAttributes = $modelQuery->getFirst();
         if (isset($savedModelAttributes))
         {
             $updateModelAttributes = array_diff_assoc($modelAttributes, $savedModelAttributes);
             if (!empty($updateModelAttributes))
-                $updateResult = $this->getDatabase()->createQuery($this->getModelEntityName())->addWhere($modelIdAttribute, "=", $modelId)->update($updateModelAttributes);
+                $updateResult = $modelQuery->update($updateModelAttributes);
         }
         return $updateResult;
     }
