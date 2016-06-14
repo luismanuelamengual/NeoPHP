@@ -315,7 +315,31 @@ class DefaultModelManager extends ModelManager
         else if ($database instanceof MongoDB)
         {
             $mongoCollection = $database->selectCollection($this->getModelEntityName());
-            $mongoCursor = $mongoCollection->find();
+            $mongoQuery = [];
+            if (isset($filters))
+            {
+                $mongoQuery = array_merge($modelQuery, $this->getMongoQueryFilter($filters));
+            }
+            $mongoCursor = $mongoCollection->find($mongoQuery);
+            if (isset($sorters))
+            {
+                $sortFields = [];
+                foreach ($sorters->getSorters() as $sorter)
+                {
+                    $sortProperty = $sorter->property;
+                    $sortFields[$sortProperty] = $sorter->direction == "ASC"?1:-1;
+                }
+                $mongoCursor->sort($sortFields);
+            }
+            if (isset($parameters[self::PARAMETER_START]))
+            {
+                $mongoCursor->skip($parameters[self::PARAMETER_START]);
+            }
+            if (isset($parameters[self::PARAMETER_LIMIT]))
+            {
+                $mongoCursor->limit($parameters[self::PARAMETER_LIMIT]);
+            }
+            
             foreach ($mongoCursor as $document)
             {
                 $modelCollection->add($this->createModelFromAttributes($this->getAttributesFromDocument($document)));
@@ -334,6 +358,82 @@ class DefaultModelManager extends ModelManager
         return $modelAttributes;
     }
 
+    public function getMongoQueryFilter (ModelFilter $modelFilter)
+    {
+        $filter = null;
+        $modelMetadata = $this->getModelMetadata();
+        
+        if ($modelFilter instanceof PropertyModelFilter)
+        {
+            $propertyAttribute = null;
+            foreach ($modelMetadata->attributes as $attribute) 
+            {
+                if ($attribute->propertyName == $modelFilter->getProperty())
+                {
+                    $propertyAttribute = $attribute->name;
+                    break;
+                }
+            }
+            if ($propertyAttribute == null)
+            {
+                throw new Exception ("Property \"" . $modelFilter->getProperty() . "\" not found in Model \"" . $this->getModelClass() . "\" !!");
+            }
+            
+            $propertyOperator = PropertyModelFilter::OPERATOR_EQUALS;
+            $propertyValue = $modelFilter->getValue();
+            switch ($modelFilter->getOperator())
+            {
+                case PropertyModelFilter::OPERATOR_EQUALS: 
+                    $filter = [$propertyAttribute=>$propertyValue];
+                    break;
+                case PropertyModelFilter::OPERATOR_NOT_EQUALS: 
+                    $filter = [$propertyAttribute=>['$ne'=>$propertyValue]];
+                    break;
+                case PropertyModelFilter::OPERATOR_CONTAINS: 
+                    $filter = [$propertyAttribute=>['$regex'=>$propertyValue, '$options'=>'i']];
+                    break;
+                case PropertyModelFilter::OPERATOR_IN: 
+                    $filter = [$propertyAttribute=>['$in'=>$propertyValue]];
+                    break;
+                case PropertyModelFilter::OPERATOR_GREATER_THAN: 
+                    $filter = [$propertyAttribute=>['$gt'=>$propertyValue]];
+                    break;
+                case PropertyModelFilter::OPERATOR_GREATER_OR_EQUALS_THAN: 
+                    $filter = [$propertyAttribute=>['$gte'=>$propertyValue]];
+                    break;
+                case PropertyModelFilter::OPERATOR_LESS_THAN: 
+                    $filter = [$propertyAttribute=>['$lt'=>$propertyValue]];
+                    break;
+                case PropertyModelFilter::OPERATOR_LESS_OR_EQUALS_THAN: 
+                    $filter = [$propertyAttribute=>['$lte'=>$propertyValue]];
+                    break;
+            }
+        }
+        else if ($modelFilter instanceof ModelFilterGroup)
+        {
+            $filter = [];
+            
+            switch ($modelFilter->getConnector())
+            {
+                case ModelFilterGroup::CONNECTOR_AND: 
+                    $mongoFiltersConnector = '$and';
+                    break;
+                case ModelFilterGroup::CONNECTOR_OR:
+                    $mongoFiltersConnector = '$or';
+                    break;
+            }
+            
+            $mongoFilters = [];
+            foreach ($modelFilter->getFilters() as $childFilter)
+            {
+                $mongoFilters[] = $this->getMongoQueryFilter($childFilter);
+            }
+            $filters[$mongoFiltersConnector] = $mongoFilters;
+        }
+        
+        return $filter;
+    }
+    
     public function getConnectionQueryFilter (ModelFilter $modelFilter)
     {
         $filter = null;
