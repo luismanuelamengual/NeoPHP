@@ -1,14 +1,22 @@
 <?php
 
-namespace NeoPHP\mvc;
+namespace NeoPHP\mvc\manager;
 
 use NeoPHP\app\ApplicationComponent;
 use NeoPHP\core\Collection;
+use NeoPHP\mvc\Model;
+use NeoPHP\mvc\ModelFilter;
+use NeoPHP\mvc\ModelSorter;
+use NeoPHP\mvc\MVCApplication;
+use NeoPHP\mvc\PropertyModelFilter;
 use NeoPHP\util\logging\Logger;
 use NeoPHP\util\properties\PropertiesManager;
 
 abstract class ModelManager extends ApplicationComponent
 {
+    const PARAMETER_START = "start";
+    const PARAMETER_LIMIT = "limit";
+    
     private $modelClass;
     
     /**

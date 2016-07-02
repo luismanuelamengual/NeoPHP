@@ -5,6 +5,8 @@ namespace NeoPHP\mvc;
 use Exception;
 use NeoPHP\app\Application;
 use NeoPHP\core\IllegalArgumentException;
+use NeoPHP\mvc\manager\DefaultModelManager;
+use NeoPHP\mvc\manager\ModelManager;
 use NeoPHP\util\StringUtils;
 
 abstract class MVCApplication extends Application 
@@ -174,7 +176,15 @@ abstract class MVCApplication extends Application
             }
             else
             {
-                $manager = new DefaultModelManager($this, $modelClass);
+                if (isset($this->getProperties()->defaultModelManagerClass))
+                {
+                    $defaultManagerClassName = $this->getProperties()->defaultModelManagerClass;
+                    $manager = new $defaultManagerClassName($this, $modelClass);
+                }
+                else
+                {
+                    $manager = new DefaultModelManager($this, $modelClass);
+                }
             }
             $this->managers[$modelClass] = $manager;
         }
