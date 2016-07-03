@@ -158,7 +158,7 @@ abstract class ModelManager extends ApplicationComponent
     public final function retrieveById ($id)
     {
         $model = null;
-        $modelCollection =  $this->retrieve(new PropertyModelFilter("id", $id));
+        $modelCollection =  $this->retrieve(["id"=>$id]);
         if ($modelCollection != null && $modelCollection instanceof Collection)
         {
             $model = $modelCollection->getFirst();
