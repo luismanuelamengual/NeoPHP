@@ -10,8 +10,6 @@ class TemplateView extends View
     protected $parameters;
     protected $sections;
     protected $sectionsStack;
-    protected $templateEngines;
-    protected $registeredTemplateEngines;
     
     public function __construct (MVCApplication $application, $templateName, array $parameters = [])
     {
@@ -20,9 +18,6 @@ class TemplateView extends View
         $this->parameters = $parameters;
         $this->sections = [];
         $this->sectionsStack = [];
-        $this->templateEngines = [];
-        $this->registeredTemplateEngines = [];
-        $this->registeredTemplateEngines["blade"] = BladeTemplateEngine::class;
     }
     
     public function __get($name) 
@@ -115,7 +110,7 @@ class TemplateView extends View
         {
             $templatesPath = $resourcePath . DIRECTORY_SEPARATOR . "templates";
                 
-            foreach ($this->registeredTemplateEngines as $engineType=>$engineClassName) 
+            foreach ($this->application->getRegisteredTemplateEngines() as $engineType) 
             {
                 $engineTemplateFilename = $templatesPath . DIRECTORY_SEPARATOR . str_replace('.', DIRECTORY_SEPARATOR, $templateName) . "." . $engineType . ".php";
                 if (file_exists($engineTemplateFilename))
@@ -124,9 +119,7 @@ class TemplateView extends View
                     if (!file_exists($engineTemplateCacheFilename) || (filemtime($engineTemplateFilename) > filemtime($engineTemplateCacheFilename))) 
                     {
                         $contents = file_get_contents($engineTemplateFilename);
-                        if (!isset($this->templateEngines[$engineType]))
-                            $this->templateEngines[$engineType] = new $engineClassName;
-                        $compiledContents = $this->templateEngines[$engineType]->compile($contents);
+                        $compiledContents = $this->application->getTemplateEngine($engineType)->compile($contents);
 
                         try
                         {

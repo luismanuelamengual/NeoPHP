@@ -1,6 +1,6 @@
 <?php
 
-namespace NeoPHP\mvc;
+namespace NeoPHP\mvc\templateengine;
 
 use NeoPHP\core\Object;
 

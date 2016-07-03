@@ -7,6 +7,7 @@ use NeoPHP\app\Application;
 use NeoPHP\core\IllegalArgumentException;
 use NeoPHP\mvc\manager\DefaultModelManager;
 use NeoPHP\mvc\manager\ModelManager;
+use NeoPHP\mvc\templateengine\BladeTemplateEngine;
 use NeoPHP\util\StringUtils;
 
 abstract class MVCApplication extends Application 
@@ -14,7 +15,9 @@ abstract class MVCApplication extends Application
     private $routes = [];
     private $controllers = [];
     private $managers = [];
+    private $templateEngines = [];
     private $registeredManagers = [];
+    private $registeredTemplateEngines = [];
     
     public function __construct($basePath) 
     {   
@@ -26,6 +29,7 @@ abstract class MVCApplication extends Application
                 $this->addRoute($route->path, $route->controller);
             }
         }
+        $this->registerTemplateEngine("blade", BladeTemplateEngine::class);
     }
     
     protected function processAction ($action, array $parameters=[])
@@ -216,5 +220,38 @@ abstract class MVCApplication extends Application
     public function createTemplateView ($templateName, array $parameters = [])
     {
         return new TemplateView($this, $templateName, $parameters); 
+    }
+    
+    /**
+     * Registra un nuevo motor de templates para la aplicación
+     * @param type $name Nombre del motor
+     * @param type $templateEngineClass Clase del motor de templates
+     */
+    public function registerTemplateEngine ($name, $templateEngineClass)
+    {
+        $this->registeredTemplateEngines[$name] = $templateEngineClass;
+    }
+    
+    /**
+     * Obtiene una lista de todos los motores de templates registrados
+     * en la aplicación
+     */
+    public function getRegisteredTemplateEngines ()
+    {
+        return array_keys($this->registeredTemplateEngines);
+    }
+    
+    /**
+     * Obtiene un motor de templates para un nombre especificado
+     * @param string $name Nombre del motor de templates a obtener
+     */
+    public function getTemplateEngine ($name)
+    {
+        if (!isset($this->templateEngines[$name]))
+        {
+            $templateEngineClass = $this->registeredTemplateEngines[$name];
+            $this->templateEngines[$name] = new $templateEngineClass;
+        }
+        return $this->templateEngines[$name];
     }
 }
