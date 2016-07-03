@@ -18,6 +18,7 @@ abstract class MVCApplication extends Application
     private $templateEngines = [];
     private $registeredManagers = [];
     private $registeredTemplateEngines = [];
+    private $defaultManagerClass;
     
     public function __construct($basePath) 
     {   
@@ -180,19 +181,32 @@ abstract class MVCApplication extends Application
             }
             else
             {
-                if (isset($this->getProperties()->defaultModelManagerClass))
-                {
-                    $defaultManagerClassName = $this->getProperties()->defaultModelManagerClass;
-                    $manager = new $defaultManagerClassName($this, $modelClass);
-                }
-                else
-                {
-                    $manager = new DefaultModelManager($this, $modelClass);
-                }
+                $defaultManagerClass = $this->defaultManagerClass;
+                if (empty($defaultManagerClass))
+                    $defaultManagerClass = DefaultModelManager::class;
+                $manager = new $defaultManagerClass($this, $modelClass);
             }
             $this->managers[$modelClass] = $manager;
         }
         return $this->managers[$modelClass];
+    }
+    
+    /**
+     * Retorna la clase de manager de modelos x defecto
+     * @return string clase del manager por defecto
+     */
+    public function getDefaultManagerClass()
+    {
+        return $this->defaultManagerClass;
+    }
+
+    /**
+     * Establece la clase de manager x defecto
+     * @param string $defaultManagerClass Clase del manager x defecto
+     */
+    public function setDefaultManagerClass($defaultManagerClass)
+    {
+        $this->defaultManagerClass = $defaultManagerClass;
     }
     
     /**
