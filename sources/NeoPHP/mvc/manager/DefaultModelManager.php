@@ -5,12 +5,7 @@ namespace NeoPHP\mvc\manager;
 use Exception;
 use NeoPHP\core\Collection;
 use NeoPHP\mvc\Model;
-use NeoPHP\mvc\ModelFilter;
-use NeoPHP\mvc\ModelFilterGroup;
-use NeoPHP\mvc\ModelSorter;
-use NeoPHP\mvc\PropertyModelFilter;
 use NeoPHP\sql\Connection;
-use NeoPHP\sql\ConnectionQueryColumnFilter;
 use NeoPHP\sql\ConnectionQueryFilterGroup;
 use PDO;
 
@@ -100,20 +95,27 @@ class DefaultModelManager extends EntityModelManager
         return $updateResult;
     }
     
-    public function retrieve(ModelFilter $filters=null, ModelSorter $sorters=null, array $parameters=[])
+    public function retrieve(array $filters=[], array $sorters=[], array $parameters=[])
     {
         $modelCollection = new Collection();
         $modelClass = $this->getModelClass();
         $modelQuery = $this->getConnection()->createQuery($this->getModelEntityName());
-        if (isset($filters))
+        if (!empty($filters))
         {
             $modelQuery->setWhereClause($this->getConnectionQueryFilter($filters));            
         }
         if (isset($sorters))
         {
-            foreach ($sorters->getSorters() as $sorter)
+            foreach ($sorters as $sorter)
             {
-                $modelQuery->addOrderBy($sorter->property, $sorter->direction);
+                if (is_array($sorter))
+                {
+                    $modelQuery->addOrderBy($sorter[0], $sorter[1]);
+                }
+                else
+                {
+                    $modelQuery->addOrderBy($sorter);
+                }
             }
         }
         if (isset($parameters[self::PARAMETER_START]))
@@ -131,75 +133,53 @@ class DefaultModelManager extends EntityModelManager
         return $modelCollection;
     }
     
-    public function getConnectionQueryFilter (ModelFilter $modelFilter)
+    public function getConnectionQueryFilter (array $modelFilter = [])
     {
-        $filter = null;
-        $modelMetadata = $this->getModelMetadata();
+        $filter = new ConnectionQueryFilterGroup();
         
-        if ($modelFilter instanceof PropertyModelFilter)
+        foreach ($modelFilter as $property => $value) 
         {
-            $propertyAttribute = null;
-            foreach ($modelMetadata->attributes as $attribute) 
+            if (is_numeric($property) && is_array($value))
             {
-                if ($attribute->propertyName == $modelFilter->getProperty())
+                $filter->addFilter($this->getConnectionQueryFilter($value));
+            }
+            else
+            {
+                if ($property == '$connector')
                 {
-                    $propertyAttribute = $attribute->name;
-                    break;
+                    $filter->setConnector($value);
                 }
-            }
-            if ($propertyAttribute == null)
-            {
-                throw new Exception ("Property \"" . $modelFilter->getProperty() . "\" not found in Model \"" . $this->getModelClass() . "\" !!");
-            }
-            
-            $propertyOperator = PropertyModelFilter::OPERATOR_EQUALS;
-            $propertyValue = $modelFilter->getValue();
-            switch ($modelFilter->getOperator())
-            {
-                case PropertyModelFilter::OPERATOR_EQUALS: 
-                    $propertyOperator = "="; 
-                    break;
-                case PropertyModelFilter::OPERATOR_NOT_EQUALS: 
-                    $propertyOperator = "!="; 
-                    break;
-                case PropertyModelFilter::OPERATOR_CONTAINS: 
-                    $propertyOperator = "like"; 
-                    $propertyValue = "%$propertyValue%";
-                    break;
-                case PropertyModelFilter::OPERATOR_IN: 
-                    $propertyOperator = "in"; 
-                    break;
-                case PropertyModelFilter::OPERATOR_GREATER_THAN: 
-                    $propertyOperator = ">"; 
-                    break;
-                case PropertyModelFilter::OPERATOR_GREATER_OR_EQUALS_THAN: 
-                    $propertyOperator = ">="; 
-                    break;
-                case PropertyModelFilter::OPERATOR_LESS_THAN: 
-                    $propertyOperator = "<"; 
-                    break;
-                case PropertyModelFilter::OPERATOR_LESS_OR_EQUALS_THAN: 
-                    $propertyOperator = "<="; 
-                    break;
-            }
-            
-            $filter = new ConnectionQueryColumnFilter($propertyAttribute, $propertyOperator, $propertyValue);
-        }
-        else if ($modelFilter instanceof ModelFilterGroup)
-        {
-            $filter = new ConnectionQueryFilterGroup();
-            switch ($modelFilter->getConnector())
-            {
-                case ModelFilterGroup::CONNECTOR_AND: 
-                    $filter->setConnector("AND");
-                    break;
-                case ModelFilterGroup::CONNECTOR_OR:
-                    $filter->setConnector("OR");
-                    break;                
-            }
-            foreach ($modelFilter->getFilters() as $childFilter)
-            {
-                $filter->addFilter($this->getConnectionQueryFilter($childFilter));
+                else
+                {
+                    $attribute = $this->getModelAttribute($property);
+                    if ($attribute != null)
+                    {
+                        if (!is_array($value))
+                        {
+                            $filter->addColumnFilter($attribute, "=", $value);
+                        }
+                        else
+                        {
+                            foreach ($value as $command => $attributeValue)
+                            {
+                                switch ($command)
+                                {
+                                    case '$eq': $filter->addColumnFilter($attribute, "=", $value); break;
+                                    case '$dt': $filter->addColumnFilter($attribute, "!=", $value); break;
+                                    case '$ct': $filter->addColumnFilter($attribute, "like", "%$value%"); break;
+                                    case '$gt': $filter->addColumnFilter($attribute, ">", $value); break;
+                                    case '$gte': $filter->addColumnFilter($attribute, ">=", $value); break;
+                                    case '$lt': $filter->addColumnFilter($attribute, "<", $value); break;
+                                    case '$lte': $filter->addColumnFilter($attribute, "<=", $value); break;
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception ("Property \"" . $property . "\" not found in Model \"" . $this->getModelClass() . "\" !!");
+                    }
+                }
             }
         }
         return $filter;

@@ -242,7 +242,7 @@ abstract class Controller extends ApplicationComponent
      * @param array $parameters Parametros extra para la obtención de modelos
      * @return Collection Lista de modelo obtenidos
      */
-    protected final function retrieveModels ($modelClass, ModelFilter $filters=null, ModelSorter $sorters=null, array $parameters=[])
+    protected final function retrieveModels ($modelClass, array $filters=[], array $sorters=[], array $parameters=[])
     {
         return $this->getManager($modelClass)->retrieve($filters, $sorters, $parameters);
     }

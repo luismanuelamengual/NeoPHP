@@ -34,6 +34,24 @@ abstract class EntityModelManager extends ModelManager
     {
         return $this->getModelMetadata()->idAttribute;
     }   
+  
+    /**
+     * Obtiene el nombre del atribute que corresponde on la propiedad
+     * @return string nombre del atributo
+     */
+    protected function getModelAttribute ($propertyName)
+    {
+        $attribute = null;
+        foreach ($this->getModelMetadata()->attributes as $attribute) 
+        {
+            if ($attribute->propertyName == $propertyName)
+            {
+                $attribute = $attribute->name;
+                break;
+            }
+        }
+        return $attribute;
+    }
     
     /**
      * Obtiene todos los atributos con sus valores del modelo
@@ -50,7 +68,7 @@ abstract class EntityModelManager extends ModelManager
         }
         return $modelAttributes;
     }
-    
+  
     /**
      * Establece al modelo los atributos especificados
      * @param Model $model Modelo a establecer atributos
