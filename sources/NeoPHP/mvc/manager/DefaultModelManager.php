@@ -62,7 +62,6 @@ class DefaultModelManager extends EntityModelManager
     
     public function create(Model $model)
     {
-        $createResult = false;
         $modelAttributes = $this->getModelAttributes($model);
         $modelIdAttribute = $this->getModelIdAttribute();
         unset($modelAttributes[$modelIdAttribute]);
@@ -71,7 +70,6 @@ class DefaultModelManager extends EntityModelManager
 
     public function delete(Model $model)
     {
-        $deleteResult = false;
         $modelAttributes = $this->getModelAttributes($model);
         $modelIdAttribute = $this->getModelIdAttribute();
         $modelId = $modelAttributes[$modelIdAttribute];

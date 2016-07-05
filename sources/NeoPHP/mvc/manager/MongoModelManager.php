@@ -3,14 +3,12 @@
 namespace NeoPHP\mvc\manager;
 
 use Exception;
+use MongoDB\Driver\BulkWrite;
 use MongoDB\Driver\Manager;
-use MongoId;
+use MongoDB\Driver\Query;
+use MongoDB\BSON\ObjectID;
 use NeoPHP\core\Collection;
 use NeoPHP\mvc\Model;
-use NeoPHP\mvc\ModelFilter;
-use NeoPHP\mvc\ModelFilterGroup;
-use NeoPHP\mvc\ModelSorter;
-use NeoPHP\mvc\PropertyModelFilter;
 
 class MongoModelManager extends EntityModelManager
 {
@@ -52,168 +50,102 @@ class MongoModelManager extends EntityModelManager
 
             $mongoHost = isset($connectionConfig->host)? $connectionConfig->host : "localhost";
             $mongoPort = isset($connectionConfig->port)? $connectionConfig->port : 27017;
-            self::$managers[$connectionName] = new Manager("mongodb://$mongoHost:$mongoPort");
+            $mongoManager = new Manager("mongodb://$mongoHost:$mongoPort");
+            $mongoManager->defaultDatabase = $connectionConfig->database;
+            self::$managers[$connectionName] = $mongoManager;
         }
         return self::$managers[$connectionName];
     }
     
     public function create(Model $model)
     {
-        $createResult = false;
+        $mongoManager = $this->getMongoManager();
         $modelAttributes = $this->getModelAttributes($model);
         $modelIdAttribute = $this->getModelIdAttribute();
         unset($modelAttributes[$modelIdAttribute]);
-        return $this->getMongoManager()->selectCollection($this->getModelEntityName())->insert($modelAttributes);
+        $bulk = new BulkWrite();
+        $bulk->insert($modelAttributes);
+        return $mongoManager->executeBulkWrite($mongoManager->defaultDatabase . "." . $this->getModelEntityName(), $bulk);
     }
 
     public function delete(Model $model)
     {
-        $deleteResult = false;
-        $modelAttributes = $this->getModelAttributes($model);
-        $modelIdAttribute = $this->getModelIdAttribute();
-        $modelId = $modelAttributes[$modelIdAttribute];
-        return $this->getMongoManager()->selectCollection($this->getModelEntityName())->remove(['_id'=>new MongoId($modelId)]);
+        $mongoManager = $this->getMongoManager();
+        $bulk = new BulkWrite();
+        $bulk->delete(["_id"=>new ObjectID($model->getId())]);
+        return $mongoManager->executeBulkWrite($mongoManager->defaultDatabase . "." . $this->getModelEntityName(), $bulk);
     }
 
     public function update(Model $model)
     {
-        $updateResult = false;
+        $mongoManager = $this->getMongoManager();
         $modelAttributes = $this->getModelAttributes($model);
         $modelIdAttribute = $this->getModelIdAttribute();
-        $modelId = $modelAttributes[$modelIdAttribute];
-        $mongoCollection = $this->getMongoManager()->selectCollection($this->getModelEntityName());
-        $mongoId = new MongoId($modelId);
-        $document = $mongoCollection->findOne(['_id'=>$mongoId]);
-        if (isset($document))
-        {
-            $savedModelAttributes = $this->getAttributesFromDocument($document);
-            $updateModelAttributes = array_diff_assoc($modelAttributes, $savedModelAttributes);
-            if (!empty($updateModelAttributes))
-                $updateResult = $mongoCollection->update (['_id'=>$mongoId], ['$set'=>$updateModelAttributes]);
-        }
-        return $updateResult;
+        unset($modelAttributes[$modelIdAttribute]);
+        $bulk = new BulkWrite();
+        $bulk->update(["_id"=>new ObjectID($model->getId())], $modelAttributes);
+        return $mongoManager->executeBulkWrite($mongoManager->defaultDatabase . "." . $this->getModelEntityName(), $bulk);
     }
     
-    public function retrieve(ModelFilter $filters=null, ModelSorter $sorters=null, array $parameters=[])
+    public function retrieve(array $filters=[], array $sorters=[], array $parameters=[])
     {
+        $mongoManager = $this->getMongoManager();
         $modelCollection = new Collection();
         $modelClass = $this->getModelClass();
-        $mongoCollection = $this->getMongoManager()->selectCollection($this->getModelEntityName());
-        $mongoQuery = [];
+        $mongoFilters = [];
         if (isset($filters))
         {
-            $mongoQuery = array_merge($modelQuery, $this->getMongoQueryFilter($filters));
+            $mongoFilters = $this->getMongoQueryFilter($filters);
         }
-        $mongoCursor = $mongoCollection->find($mongoQuery);
-        if (isset($sorters))
-        {
-            $sortFields = [];
-            foreach ($sorters->getSorters() as $sorter)
-            {
-                $sortProperty = $sorter->property;
-                $sortFields[$sortProperty] = $sorter->direction == "ASC"?1:-1;
-            }
-            $mongoCursor->sort($sortFields);
-        }
-        if (isset($parameters[self::PARAMETER_START]))
-        {
-            $mongoCursor->skip($parameters[self::PARAMETER_START]);
-        }
-        if (isset($parameters[self::PARAMETER_LIMIT]))
-        {
-            $mongoCursor->limit($parameters[self::PARAMETER_LIMIT]);
-        }
-
+        $mongoQuery = new Query($mongoFilters);
+        $mongoCursor = $mongoManager->executeQuery ($mongoManager->defaultDatabase . "." . $this->getModelEntityName(), $mongoQuery);
         foreach ($mongoCursor as $document)
         {
-            $modelCollection->add($this->createModelFromAttributes($this->getAttributesFromDocument($document)));
+            $modelAttributes = $this->getAttributesFromDocument($document);
+            $modelCollection->add($this->createModelFromAttributes($modelAttributes));
         }
         return $modelCollection;
     }
     
     protected function getAttributesFromDocument ($document)
     {
+        $modelAttributes = (array)$document;   
+        $mongoId = strval($modelAttributes["_id"]);
         $modelIdAttribute = $this->getModelIdAttribute();
-        $mongoId = strval($document["_id"]);
-        $modelAttributes = $document;
         unset($modelAttributes["_id"]);
         $modelAttributes[$modelIdAttribute] = $mongoId;
         return $modelAttributes;
     }
 
-    public function getMongoQueryFilter (ModelFilter $modelFilter)
+    public function getMongoQueryFilter (array $modelFilter = [])
     {
-        $filter = null;
-        $modelMetadata = $this->getModelMetadata();
+        $filter = [];
         
-        if ($modelFilter instanceof PropertyModelFilter)
+        foreach ($modelFilter as $property => $value) 
         {
-            $propertyAttribute = null;
-            foreach ($modelMetadata->attributes as $attribute) 
+            if (is_numeric($property) && is_array($value))
             {
-                if ($attribute->propertyName == $modelFilter->getProperty())
+                $filter->addFilter($this->getConnectionQueryFilter($value));
+            }
+            else
+            {
+                if ($property == '$connector')
                 {
-                    $propertyAttribute = $attribute->name;
-                    break;
+                }
+                else
+                {
+                    $attribute = $this->getModelAttribute($property);
+                    if ($attribute != null)
+                    {
+                        $filter[$attribute] = $value;
+                    }
+                    else
+                    {
+                        throw new Exception ("Property \"" . $property . "\" not found in Model \"" . $this->getModelClass() . "\" !!");
+                    }
                 }
             }
-            if ($propertyAttribute == null)
-            {
-                throw new Exception ("Property \"" . $modelFilter->getProperty() . "\" not found in Model \"" . $this->getModelClass() . "\" !!");
-            }
-            
-            $propertyOperator = PropertyModelFilter::OPERATOR_EQUALS;
-            $propertyValue = $modelFilter->getValue();
-            switch ($modelFilter->getOperator())
-            {
-                case PropertyModelFilter::OPERATOR_EQUALS: 
-                    $filter = [$propertyAttribute=>$propertyValue];
-                    break;
-                case PropertyModelFilter::OPERATOR_NOT_EQUALS: 
-                    $filter = [$propertyAttribute=>['$ne'=>$propertyValue]];
-                    break;
-                case PropertyModelFilter::OPERATOR_CONTAINS: 
-                    $filter = [$propertyAttribute=>['$regex'=>$propertyValue, '$options'=>'i']];
-                    break;
-                case PropertyModelFilter::OPERATOR_IN: 
-                    $filter = [$propertyAttribute=>['$in'=>$propertyValue]];
-                    break;
-                case PropertyModelFilter::OPERATOR_GREATER_THAN: 
-                    $filter = [$propertyAttribute=>['$gt'=>$propertyValue]];
-                    break;
-                case PropertyModelFilter::OPERATOR_GREATER_OR_EQUALS_THAN: 
-                    $filter = [$propertyAttribute=>['$gte'=>$propertyValue]];
-                    break;
-                case PropertyModelFilter::OPERATOR_LESS_THAN: 
-                    $filter = [$propertyAttribute=>['$lt'=>$propertyValue]];
-                    break;
-                case PropertyModelFilter::OPERATOR_LESS_OR_EQUALS_THAN: 
-                    $filter = [$propertyAttribute=>['$lte'=>$propertyValue]];
-                    break;
-            }
         }
-        else if ($modelFilter instanceof ModelFilterGroup)
-        {
-            $filter = [];
-            
-            switch ($modelFilter->getConnector())
-            {
-                case ModelFilterGroup::CONNECTOR_AND: 
-                    $mongoFiltersConnector = '$and';
-                    break;
-                case ModelFilterGroup::CONNECTOR_OR:
-                    $mongoFiltersConnector = '$or';
-                    break;
-            }
-            
-            $mongoFilters = [];
-            foreach ($modelFilter->getFilters() as $childFilter)
-            {
-                $mongoFilters[] = $this->getMongoQueryFilter($childFilter);
-            }
-            $filters[$mongoFiltersConnector] = $mongoFilters;
-        }
-        
         return $filter;
     }
 }
