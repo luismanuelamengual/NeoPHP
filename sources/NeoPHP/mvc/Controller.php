@@ -225,13 +225,23 @@ abstract class Controller extends ApplicationComponent
     }
     
     /**
+     * Crea un modelo a traves de sus propiedades
+     * @param type $modelClass Clase del modelo que se desea obtener
+     * @param type $properties propiedades del modelos
+     */
+    protected final function createModel ($modelClass, array $properties = [])
+    {
+        return $this->getManager($modelClass)->create($properties);
+    }
+    
+    /**
      * Obtiene un modelo a través de su id
      * @param type $modelClass Clase del modelo que se desea obtener
      * @param type $id Id del modelo
      */
-    protected final function retrieveModel ($modelClass, $id)
+    protected final function findModel ($modelClass, $id)
     {
-        return $this->getManager($modelClass)->retrieveById($id);
+        return $this->getManager($modelClass)->findById($id);
     }
     
     /**
@@ -242,9 +252,9 @@ abstract class Controller extends ApplicationComponent
      * @param array $parameters Parametros extra para la obtención de modelos
      * @return Collection Lista de modelo obtenidos
      */
-    protected final function retrieveModels ($modelClass, array $filters=[], array $sorters=[], array $parameters=[])
+    protected final function findModels ($modelClass, array $filters=[], array $sorters=[], array $parameters=[])
     {
-        return $this->getManager($modelClass)->retrieve($filters, $sorters, $parameters);
+        return $this->getManager($modelClass)->find($filters, $sorters, $parameters);
     }
     
     /**
@@ -252,9 +262,9 @@ abstract class Controller extends ApplicationComponent
      * @param Model $model modelo a crearse
      * @return boolean Indica si se creo o no el modelo
      */
-    protected final function createModel (Model $model)
+    protected final function insertModel (Model $model)
     {
-        return $this->getManager(get_class($model))->create($model);
+        return $this->getManager(get_class($model))->insert($model);
     }
     
     /**
@@ -272,8 +282,8 @@ abstract class Controller extends ApplicationComponent
      * @param Model $model modelo a borrar
      * @return boolean indica si el modelo se borró o no
      */
-    protected final function deleteModel (Model $model)
+    protected final function removeModel (Model $model)
     {
-        return $this->getManager(get_class($model))->delete($model);
+        return $this->getManager(get_class($model))->remove($model);
     }
 }

@@ -60,7 +60,7 @@ class DefaultModelManager extends EntityModelManager
         return self::$connections[$connectionName];
     }
     
-    public function create(Model $model)
+    public function insert(Model $model)
     {
         $modelAttributes = $this->getModelAttributes($model);
         $modelIdAttribute = $this->getModelIdAttribute();
@@ -68,7 +68,7 @@ class DefaultModelManager extends EntityModelManager
         return $this->getConnection()->createQuery($this->getModelEntityName())->insert($modelAttributes);
     }
 
-    public function delete(Model $model)
+    public function remove(Model $model)
     {
         $modelAttributes = $this->getModelAttributes($model);
         $modelIdAttribute = $this->getModelIdAttribute();
@@ -93,7 +93,7 @@ class DefaultModelManager extends EntityModelManager
         return $updateResult;
     }
     
-    public function retrieve(array $filters=[], array $sorters=[], array $parameters=[])
+    public function find(array $filters=[], array $sorters=[], array $parameters=[])
     {
         $modelCollection = new Collection();
         $modelClass = $this->getModelClass();
