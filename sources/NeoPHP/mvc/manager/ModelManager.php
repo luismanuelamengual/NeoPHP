@@ -68,21 +68,11 @@ abstract class ModelManager extends ApplicationComponent
     }
     
     /**
-     * Crea un modelo a traves de sus propiedades
-     * @param type $modelClass Clase del modelo que se desea obtener
-     * @param type $properties propiedades del modelos
-     */
-    protected final function createModel ($modelClass, array $properties = [])
-    {
-        return $this->getManager($modelClass)->create($properties);
-    }
-    
-    /**
      * Obtiene un modelo a través de su id
      * @param type $modelClass Clase del modelo que se desea obtener
      * @param type $id Id del modelo
      */
-    protected final function findModel ($modelClass, $id)
+    protected final function findModel ($modelClass, $id, array $options=[])
     {
         return $this->getManager($modelClass)->findById($id);
     }
@@ -92,12 +82,12 @@ abstract class ModelManager extends ApplicationComponent
      * @param type $modelClass Clase del modelo que se desea obtener
      * @param ModelFilter $filters Filtros a aplicar para la obtención de los modelos
      * @param ModelSorter $sorters Ordenamientos a aplicar para los modelos
-     * @param array $parameters Parametros extra para la obtención de modelos
+     * @param array $options Parametros extra para la obtención de modelos
      * @return Collection Lista de modelo obtenidos
      */
-    protected final function findModels ($modelClass, array $filters=[], array $sorters=[], array $parameters=[])
+    protected final function findModels ($modelClass, array $filters=[], array $sorters=[], array $options=[])
     {
-        return $this->getManager($modelClass)->find($filters, $sorters, $parameters);
+        return $this->getManager($modelClass)->find($filters, $sorters, $options);
     }
     
     /**
@@ -105,9 +95,9 @@ abstract class ModelManager extends ApplicationComponent
      * @param Model $model modelo a crearse
      * @return boolean Indica si se creo o no el modelo
      */
-    protected final function insertModel (Model $model)
+    protected final function insertModel (Model $model, array $options=[])
     {
-        return $this->getManager(get_class($model))->insert($model);
+        return $this->getManager(get_class($model))->insert($model, $options);
     }
     
     /**
@@ -115,9 +105,9 @@ abstract class ModelManager extends ApplicationComponent
      * @param Model $model modelo a actualizar
      * @return boolean Indica si el modelo se actualizo o no
      */
-    protected final function updateModel (Model $model)
+    protected final function updateModel (Model $model, array $options=[])
     {
-        return $this->getManager(get_class($model))->update($model);
+        return $this->getManager(get_class($model))->update($model, $options);
     }
     
     /**
@@ -125,9 +115,9 @@ abstract class ModelManager extends ApplicationComponent
      * @param Model $model modelo a borrar
      * @return boolean indica si el modelo se borró o no
      */
-    protected final function removeModel (Model $model)
+    protected final function removeModel (Model $model, array $options=[])
     {
-        return $this->getManager(get_class($model))->remove($model);
+        return $this->getManager(get_class($model))->remove($model, $options);
     }
     
     /**
@@ -135,15 +125,25 @@ abstract class ModelManager extends ApplicationComponent
      * @param type $id Id del modelo a obtener
      * @return Model modelo obtenido
      */
-    public final function findById ($id)
+    public final function findById ($id, array $options=[])
     {
         $model = null;
-        $modelCollection =  $this->find(["id"=>$id]);
+        $modelCollection =  $this->find(["id"=>$id],[],[],$options);
         if ($modelCollection != null && $modelCollection instanceof Collection)
         {
             $model = $modelCollection->getFirst();
         }
         return $model;
+    }
+    
+    /**
+     * Crea un modelo a traves de sus propiedades
+     * @param type $modelClass Clase del modelo que se desea obtener
+     * @param type $properties propiedades del modelos
+     */
+    protected final function createModel ($modelClass, array $properties = [])
+    {
+        return $this->getManager($modelClass)->create($properties);
     }
     
     /**
@@ -159,8 +159,8 @@ abstract class ModelManager extends ApplicationComponent
         return $model;
     }
     
-    public abstract function find (array $filters=[], array $sorters=[], array $parameters=[]);
-    public abstract function insert (Model $model);
-    public abstract function update (Model $model);
-    public abstract function remove (Model $model);
+    public abstract function find (array $filters=[], array $sorters=[], array $options=[]);
+    public abstract function insert (Model $model, array $options=[]);
+    public abstract function update (Model $model, array $options=[]);
+    public abstract function remove (Model $model, array $options=[]);
 }

@@ -18,7 +18,7 @@ class DefaultModelManager extends EntityModelManager
      * @param string $connectionName Nombre de la conexión que se desea obtener
      * @return Connection conexión de datos
      */
-    protected function getConnection ($connectionName=null)
+    protected final function getConnection ($connectionName=null)
     {
         if (!isset($connectionName))
             $connectionName = isset($this->getProperties()->defaultConnection)? $this->getProperties()->defaultConnection : "main";
@@ -60,7 +60,7 @@ class DefaultModelManager extends EntityModelManager
         return self::$connections[$connectionName];
     }
     
-    public function insert(Model $model)
+    public function insert(Model $model, array $options = [])
     {
         $modelAttributes = $this->getModelAttributes($model);
         $modelIdAttribute = $this->getModelIdAttribute();
@@ -68,7 +68,7 @@ class DefaultModelManager extends EntityModelManager
         return $this->getConnection()->createQuery($this->getModelEntityName())->insert($modelAttributes);
     }
 
-    public function remove(Model $model)
+    public function remove(Model $model, array $options = [])
     {
         $modelAttributes = $this->getModelAttributes($model);
         $modelIdAttribute = $this->getModelIdAttribute();
@@ -76,7 +76,7 @@ class DefaultModelManager extends EntityModelManager
         return $this->getConnection()->createQuery($this->getModelEntityName())->addWhere($modelIdAttribute, "=", $modelId)->delete();
     }
 
-    public function update(Model $model)
+    public function update(Model $model, array $options = [])
     {
         $updateResult = false;
         $modelAttributes = $this->getModelAttributes($model);
@@ -93,7 +93,7 @@ class DefaultModelManager extends EntityModelManager
         return $updateResult;
     }
     
-    public function find(array $filters=[], array $sorters=[], array $parameters=[])
+    public function find(array $filters=[], array $sorters=[], array $options=[])
     {
         $modelCollection = new Collection();
         $modelClass = $this->getModelClass();
@@ -116,13 +116,13 @@ class DefaultModelManager extends EntityModelManager
                 }
             }
         }
-        if (isset($parameters[self::PARAMETER_START]))
+        if (isset($options[self::PARAMETER_START]))
         {
-            $modelQuery->setOffset($parameters[self::PARAMETER_START]);
+            $modelQuery->setOffset($options[self::PARAMETER_START]);
         }
-        if (isset($parameters[self::PARAMETER_LIMIT]))
+        if (isset($options[self::PARAMETER_LIMIT]))
         {
-            $modelQuery->setLimit($parameters[self::PARAMETER_LIMIT]);
+            $modelQuery->setLimit($options[self::PARAMETER_LIMIT]);
         }
         $modelQuery->get(PDO::FETCH_ASSOC, function ($modelAttributes) use ($modelCollection) 
         {
@@ -131,7 +131,7 @@ class DefaultModelManager extends EntityModelManager
         return $modelCollection;
     }
     
-    public function getConnectionQueryFilter (array $modelFilter = [])
+    private function getConnectionQueryFilter (array $modelFilter = [])
     {
         $filter = new ConnectionQueryFilterGroup();
         

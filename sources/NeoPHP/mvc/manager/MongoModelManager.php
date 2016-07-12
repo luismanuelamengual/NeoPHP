@@ -57,7 +57,7 @@ class MongoModelManager extends EntityModelManager
         return self::$managers[$connectionName];
     }
     
-    public function insert(Model $model)
+    public function insert(Model $model, array $options = [])
     {
         $mongoManager = $this->getMongoManager();
         $modelAttributes = $this->getModelAttributes($model);
@@ -68,7 +68,7 @@ class MongoModelManager extends EntityModelManager
         return $mongoManager->executeBulkWrite($mongoManager->defaultDatabase . "." . $this->getModelEntityName(), $bulk);
     }
 
-    public function remove(Model $model)
+    public function remove(Model $model, array $options = [])
     {
         $mongoManager = $this->getMongoManager();
         $bulk = new BulkWrite();
@@ -76,7 +76,7 @@ class MongoModelManager extends EntityModelManager
         return $mongoManager->executeBulkWrite($mongoManager->defaultDatabase . "." . $this->getModelEntityName(), $bulk);
     }
 
-    public function update(Model $model)
+    public function update(Model $model, array $options = [])
     {
         $mongoManager = $this->getMongoManager();
         $modelAttributes = $this->getModelAttributes($model);
@@ -87,7 +87,7 @@ class MongoModelManager extends EntityModelManager
         return $mongoManager->executeBulkWrite($mongoManager->defaultDatabase . "." . $this->getModelEntityName(), $bulk);
     }
     
-    public function find(array $filters=[], array $sorters=[], array $parameters=[])
+    public function find(array $filters=[], array $sorters=[], array $options=[])
     {
         $mongoManager = $this->getMongoManager();
         $modelCollection = new Collection();
