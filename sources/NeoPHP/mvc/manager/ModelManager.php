@@ -4,6 +4,7 @@ namespace NeoPHP\mvc\manager;
 
 use NeoPHP\app\ApplicationComponent;
 use NeoPHP\core\Collection;
+use NeoPHP\core\reflect\ReflectionAnnotatedClass;
 use NeoPHP\mvc\Model;
 use NeoPHP\mvc\ModelFilter;
 use NeoPHP\mvc\ModelSorter;
@@ -11,31 +12,46 @@ use NeoPHP\mvc\MVCApplication;
 use NeoPHP\util\IntrospectionUtils;
 use NeoPHP\util\logging\Logger;
 use NeoPHP\util\properties\PropertiesManager;
+use ReflectionClass;
 
 abstract class ModelManager extends ApplicationComponent
 {
     const PARAMETER_START = "start";
     const PARAMETER_LIMIT = "limit";
     
+    private $modelClassName;
     private $modelClass;
     
     /**
      * Constructor del manager de modelos
      * @param MVCApplication $application Aplicación mvc al cual pertenece
-     * @param type $modelClass Clase de modelo con la que trabaja
+     * @param type $modelClassName Clase de modelo con la que trabaja
      */
-    public function __construct (MVCApplication $application, $modelClass)
+    public function __construct (MVCApplication $application, $modelClassName)
     {
         parent::__construct($application);
-        $this->modelClass = $modelClass;
+        $this->modelClassName = $modelClassName;
     }
     
     /**
      * Obtiene el nombre de la clase con la cual trabaja el manager
      * @return string Nombre de la clase de modelo con la que el manager trabaja
      */
+    protected final function getModelClassName ()
+    {
+        return $this->modelClassName;
+    }
+    
+    /**
+     * Obtiene el nombre de la clase con la cual trabaja el manager
+     * @return ReflectionAnnotatedClass Nombre de la clase de modelo con la que el manager trabaja
+     */
     protected final function getModelClass ()
     {
+        if (!isset($this->modelClass))
+        {
+            $this->modelClass = new ReflectionAnnotatedClass($this->modelClassName);
+        }
         return $this->modelClass;
     }
     
@@ -153,7 +169,7 @@ abstract class ModelManager extends ApplicationComponent
      */
     public function create (array $properties = [])
     {
-        $modelClass = $this->getModelClass();
+        $modelClass = $this->getModelClassName();
         $model = new $modelClass;
         IntrospectionUtils::setRecursivePropertyValues($model, $properties);
         return $model;

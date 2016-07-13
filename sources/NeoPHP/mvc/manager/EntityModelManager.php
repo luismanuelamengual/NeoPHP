@@ -3,9 +3,9 @@
 namespace NeoPHP\mvc\manager;
 
 use Exception;
-use NeoPHP\core\reflect\ReflectionAnnotatedClass;
 use NeoPHP\mvc\Model;
 use NeoPHP\util\IntrospectionUtils;
+use ReflectionClass;
 use stdClass;
 
 abstract class EntityModelManager extends ModelManager
@@ -54,6 +54,29 @@ abstract class EntityModelManager extends ModelManager
     }
     
     /**
+     * Obtiene la clase de la propiedad especificada
+     * @param string $propertyName Nombre de la propiedad
+     * @return ReflectionClass Clase de la propiedad
+     */
+    private function getModelPropertyClass ($propertyName)
+    {
+        $propertyClass = null;
+        $propertyNameSetMethod = "set" . ucfirst($propertyName);
+        $modelClass = $this->getModelClass();
+        if ($modelClass->hasMethod($propertyNameSetMethod))
+        {
+            $modelPropertyMethod = $modelClass->getMethod($propertyNameSetMethod);
+            $modelPropertyMethodParameters = $modelPropertyMethod->getParameters();
+            if (sizeof($modelPropertyMethodParameters) == 1)
+            {
+                $modelPropertyMethodParameter = $modelPropertyMethodParameters[0];
+                $propertyClass = $modelPropertyMethodParameter->getClass();
+            }
+        }
+        return $propertyClass;
+    }
+    
+    /**
      * Obtiene todos los atributos con sus valores del modelo
      * @param Model $model Modelo a obtener sus atributos
      * @return array Lista de atributos del modelo
@@ -64,7 +87,16 @@ abstract class EntityModelManager extends ModelManager
         $modelMetadata = $this->getModelMetadata();
         foreach ($modelMetadata->attributes as $attribute)
         {
-            $modelAttributes[$attribute->name] = IntrospectionUtils::getPropertyValue($model, $attribute->propertyName);
+            $modelValue = IntrospectionUtils::getPropertyValue($model, $attribute->propertyName);
+            $propertyClass = $this->getModelPropertyClass($attribute->propertyName);
+            if ($propertyClass != null)   
+            {
+                if ($propertyClass->isSubclassOf(Model::class))
+                {
+                    $modelValue = $modelValue->getId();
+                }
+            }
+            $modelAttributes[$attribute->name] = $modelValue;
         }
         return $modelAttributes;
     }
@@ -79,7 +111,17 @@ abstract class EntityModelManager extends ModelManager
         $modelMetadata = $this->getModelMetadata();
         foreach ($modelMetadata->attributes as $attribute)
         {
-            IntrospectionUtils::setPropertyValue($model, $attribute->propertyName, $attributes[$attribute->name]);
+            $modelValue = $attributes[$attribute->name];
+            $propertyClass = $this->getModelPropertyClass($attribute->propertyName);
+            if ($propertyClass != null)   
+            {
+                if ($propertyClass->isSubclassOf(Model::class))
+                {
+                    $propertyClassName = $propertyClass->getName();
+                    $modelValue = new $propertyClassName($modelValue); 
+                }
+            }
+            IntrospectionUtils::setPropertyValue($model, $attribute->propertyName, $modelValue);
         }
     }
     
@@ -93,7 +135,7 @@ abstract class EntityModelManager extends ModelManager
         $model = null;
         if (!empty($attributes))
         {
-            $modelClass = $this->getModelClass();
+            $modelClass = $this->getModelClassName();
             $model = new $modelClass;
             $this->setModelAttributes($model, $attributes);
         }
@@ -119,9 +161,9 @@ abstract class EntityModelManager extends ModelManager
      */
     protected function retrieveModelMetadata ()
     {
-        $modelClass = $this->getModelClass();
+        $modelClass = $this->getModelClassName();
         $entityMetadata = new stdClass();
-        $entityClass = new ReflectionAnnotatedClass($modelClass);
+        $entityClass = $this->getModelClass();
         $entityAnnotation = $entityClass->getAnnotation(self::ANNOTATION_ENTITY);
         if ($entityAnnotation == null)
             throw new Exception ("Entity class \"$modelClass\" must have the \"" . self::ANNOTATION_ENTITY . "\" annotation");

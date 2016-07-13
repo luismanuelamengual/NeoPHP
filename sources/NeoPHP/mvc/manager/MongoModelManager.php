@@ -91,7 +91,7 @@ class MongoModelManager extends EntityModelManager
     {
         $mongoManager = $this->getMongoManager();
         $modelCollection = new Collection();
-        $modelClass = $this->getModelClass();
+        $modelClass = $this->getModelClassName();
         $mongoFilters = [];
         if (isset($filters))
         {
@@ -141,7 +141,7 @@ class MongoModelManager extends EntityModelManager
                     }
                     else
                     {
-                        throw new Exception ("Property \"" . $property . "\" not found in Model \"" . $this->getModelClass() . "\" !!");
+                        throw new Exception ("Property \"" . $property . "\" not found in Model \"" . $this->getModelClassName() . "\" !!");
                     }
                 }
             }

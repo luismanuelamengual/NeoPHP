@@ -96,11 +96,11 @@ class DefaultModelManager extends EntityModelManager
     public function find(array $filters=[], array $sorters=[], array $options=[])
     {
         $modelCollection = new Collection();
-        $modelClass = $this->getModelClass();
+        $modelClass = $this->getModelClassName();
         $modelQuery = $this->getConnection()->createQuery($this->getModelEntityName());
         if (!empty($filters))
         {
-            $modelQuery->setWhereClause($this->getConnectionQueryFilter($filters));            
+            $modelQuery->setWhereClause($this->getConnectionQueryFilter($filters));
         }
         if (isset($sorters))
         {
@@ -175,7 +175,7 @@ class DefaultModelManager extends EntityModelManager
                     }
                     else
                     {
-                        throw new Exception ("Property \"" . $property . "\" not found in Model \"" . $this->getModelClass() . "\" !!");
+                        throw new Exception ("Property \"" . $property . "\" not found in Model \"" . $this->getModelClassName() . "\" !!");
                     }
                 }
             }
