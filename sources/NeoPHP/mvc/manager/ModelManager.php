@@ -13,6 +13,7 @@ use NeoPHP\util\IntrospectionUtils;
 use NeoPHP\util\logging\Logger;
 use NeoPHP\util\properties\PropertiesManager;
 use ReflectionClass;
+use Throwable;
 
 abstract class ModelManager extends ApplicationComponent
 {
@@ -171,7 +172,13 @@ abstract class ModelManager extends ApplicationComponent
     {
         $modelClass = $this->getModelClassName();
         $model = new $modelClass;
-        IntrospectionUtils::setRecursivePropertyValues($model, $properties);
+        foreach ($properties as $property => $value)
+        {
+            try
+            {
+                IntrospectionUtils::setRecursivePropertyValue($model, $property, $value);
+            } catch (Throwable $ex) {}
+        }
         return $model;
     }
     

@@ -93,19 +93,22 @@ abstract class EntityModelManager extends ModelManager
         foreach ($modelMetadata->attributes as $attribute)
         {
             $modelValue = IntrospectionUtils::getPropertyValue($model, $attribute->propertyName);
-            $propertyClass = $this->getModelPropertyClass($attribute->propertyName);
-            if ($propertyClass != null)   
+            if ($modelValue != null)
             {
-                if ($propertyClass->isSubclassOf(Model::class))
+                $propertyClass = $this->getModelPropertyClass($attribute->propertyName);
+                if ($propertyClass != null)   
                 {
-                    $modelValue = $modelValue->getId();
+                    if ($propertyClass->isSubclassOf(Model::class))
+                    {
+                        $modelValue = $modelValue->getId();
+                    }
+                    else if ($propertyClass->isSubclassOf(DateTimeInterface::class))
+                    {
+                        $modelValue = $modelValue->format(isset($attribute->format)? $attribute->format : self::DEFAULT_DATE_FORMAT);
+                    }
                 }
-                else if ($propertyClass->isSubclassOf(DateTimeInterface::class))
-                {
-                    $modelValue = $modelValue->format(isset($attribute->format)? $attribute->format : self::DEFAULT_DATE_FORMAT);
-                }
+                $modelAttributes[$attribute->name] = $modelValue;
             }
-            $modelAttributes[$attribute->name] = $modelValue;
         }
         return $modelAttributes;
     }
@@ -121,20 +124,23 @@ abstract class EntityModelManager extends ModelManager
         foreach ($modelMetadata->attributes as $attribute)
         {
             $modelValue = $attributes[$attribute->name];
-            $propertyClass = $this->getModelPropertyClass($attribute->propertyName);
-            if ($propertyClass != null)   
+            if (isset($modelValue))
             {
-                if ($propertyClass->isSubclassOf(Model::class))
+                $propertyClass = $this->getModelPropertyClass($attribute->propertyName);
+                if ($propertyClass != null)   
                 {
-                    $propertyClassName = $propertyClass->getName();
-                    $modelValue = new $propertyClassName($modelValue); 
+                    if ($propertyClass->isSubclassOf(Model::class))
+                    {
+                        $propertyClassName = $propertyClass->getName();
+                        $modelValue = new $propertyClassName($modelValue); 
+                    }
+                    else if ($propertyClass->isSubclassOf(DateTimeInterface::class))
+                    {   
+                        $modelValue = DateTime::createFromFormat(isset($attribute->format)? $attribute->format : self::DEFAULT_DATE_FORMAT, $modelValue); 
+                    }
                 }
-                else if ($propertyClass->isSubclassOf(DateTimeInterface::class))
-                {   
-                    $modelValue = DateTime::createFromFormat(isset($attribute->format)? $attribute->format : self::DEFAULT_DATE_FORMAT, $modelValue); 
-                }
+                IntrospectionUtils::setPropertyValue($model, $attribute->propertyName, $modelValue);
             }
-            IntrospectionUtils::setPropertyValue($model, $attribute->propertyName, $modelValue);
         }
     }
     
