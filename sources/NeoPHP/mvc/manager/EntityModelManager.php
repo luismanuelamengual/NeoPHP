@@ -2,6 +2,8 @@
 
 namespace NeoPHP\mvc\manager;
 
+use DateTime;
+use DateTimeInterface;
 use Exception;
 use NeoPHP\mvc\Model;
 use NeoPHP\util\IntrospectionUtils;
@@ -14,6 +16,9 @@ abstract class EntityModelManager extends ModelManager
     const ANNOTATION_ATTRIBUTE = "attribute";
     const ANNOTATION_ID = "id";
     const ANNOTATION_PARAMETER_NAME = "name";
+    const ANNOTATION_PARAMETER_FORMAT = "format";
+    
+    const DEFAULT_DATE_FORMAT = "Y-m-d H:i:s";
     
     private $modelMetadata;
     
@@ -95,6 +100,10 @@ abstract class EntityModelManager extends ModelManager
                 {
                     $modelValue = $modelValue->getId();
                 }
+                else if ($propertyClass->isSubclassOf(DateTimeInterface::class))
+                {
+                    $modelValue = $modelValue->format(isset($attribute->format)? $attribute->format : self::DEFAULT_DATE_FORMAT);
+                }
             }
             $modelAttributes[$attribute->name] = $modelValue;
         }
@@ -119,6 +128,10 @@ abstract class EntityModelManager extends ModelManager
                 {
                     $propertyClassName = $propertyClass->getName();
                     $modelValue = new $propertyClassName($modelValue); 
+                }
+                else if ($propertyClass->isSubclassOf(DateTimeInterface::class))
+                {   
+                    $modelValue = DateTime::createFromFormat(isset($attribute->format)? $attribute->format : self::DEFAULT_DATE_FORMAT, $modelValue); 
                 }
             }
             IntrospectionUtils::setPropertyValue($model, $attribute->propertyName, $modelValue);
@@ -183,6 +196,11 @@ abstract class EntityModelManager extends ModelManager
                 if (empty($attributeName))
                     $attributeName = strtolower($property->getName());
                 $attribute->name = $attributeName;
+                $attributeFormat = $attributeAnnotation->getParameter(self::ANNOTATION_PARAMETER_FORMAT);
+                if (!empty($attributeFormat))
+                {
+                    $attribute->format = $attributeFormat;
+                }
                 $attribute->propertyName = $property->getName();
                 $entityMetadata->attributes[] = $attribute;
                 
