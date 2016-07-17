@@ -238,23 +238,22 @@ abstract class Controller extends ApplicationComponent
      * Obtiene un modelo a través de su id
      * @param type $modelClass Clase del modelo que se desea obtener
      * @param type $id Id del modelo
+     * @param array $options Parametros extra para la obtención de modelos
      */
-    protected final function findModel ($modelClass, $id)
+    protected final function findModel ($modelClass, $id, array $options=[])
     {
-        return $this->getManager($modelClass)->findById($id);
+        return $this->getManager($modelClass)->findById($id, $options);
     }
     
     /**
      * Obtiene todos los modelos con las opciones establecidas
      * @param type $modelClass Clase del modelo que se desea obtener
-     * @param ModelFilter $filters Filtros a aplicar para la obtención de los modelos
-     * @param ModelSorter $sorters Ordenamientos a aplicar para los modelos
-     * @param array $parameters Parametros extra para la obtención de modelos
+     * @param array $options Parametros extra para la obtención de modelos
      * @return Collection Lista de modelo obtenidos
      */
-    protected final function findModels ($modelClass, array $filters=[], array $sorters=[], array $parameters=[])
+    protected final function findModels ($modelClass, array $options=[])
     {
-        return $this->getManager($modelClass)->find($filters, $sorters, $parameters);
+        return $this->getManager($modelClass)->find($options);
     }
     
     /**
@@ -262,7 +261,7 @@ abstract class Controller extends ApplicationComponent
      * @param Model $model modelo a crearse
      * @return boolean Indica si se creo o no el modelo
      */
-    protected final function insertModel (Model $model)
+    protected final function insertModel (Model $model, array $options=[])
     {
         return $this->getManager(get_class($model))->insert($model);
     }
@@ -272,7 +271,7 @@ abstract class Controller extends ApplicationComponent
      * @param Model $model modelo a actualizar
      * @return boolean Indica si el modelo se actualizo o no
      */
-    protected final function updateModel (Model $model)
+    protected final function updateModel (Model $model, array $options=[])
     {
         return $this->getManager(get_class($model))->update($model);
     }
@@ -282,7 +281,7 @@ abstract class Controller extends ApplicationComponent
      * @param Model $model modelo a borrar
      * @return boolean indica si el modelo se borró o no
      */
-    protected final function removeModel (Model $model)
+    protected final function removeModel (Model $model, array $options=[])
     {
         return $this->getManager(get_class($model))->remove($model);
     }

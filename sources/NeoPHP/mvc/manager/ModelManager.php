@@ -16,8 +16,10 @@ use ReflectionClass;
 
 abstract class ModelManager extends ApplicationComponent
 {
-    const PARAMETER_START = "start";
-    const PARAMETER_LIMIT = "limit";
+    const OPTION_FILTERS = "filters";
+    const OPTION_SORTERS = "sorters";
+    const OPTION_START = "start";
+    const OPTION_LIMIT = "limit";
     
     private $modelClassName;
     private $modelClass;
@@ -90,20 +92,18 @@ abstract class ModelManager extends ApplicationComponent
      */
     protected final function findModel ($modelClass, $id, array $options=[])
     {
-        return $this->getManager($modelClass)->findById($id);
+        return $this->getManager($modelClass)->findById($id, $options);
     }
     
     /**
      * Obtiene todos los modelos con las opciones establecidas
      * @param type $modelClass Clase del modelo que se desea obtener
-     * @param ModelFilter $filters Filtros a aplicar para la obtención de los modelos
-     * @param ModelSorter $sorters Ordenamientos a aplicar para los modelos
      * @param array $options Parametros extra para la obtención de modelos
      * @return Collection Lista de modelo obtenidos
      */
-    protected final function findModels ($modelClass, array $filters=[], array $sorters=[], array $options=[])
+    protected final function findModels ($modelClass, array $options=[])
     {
-        return $this->getManager($modelClass)->find($filters, $sorters, $options);
+        return $this->getManager($modelClass)->find($options);
     }
     
     /**
@@ -144,7 +144,7 @@ abstract class ModelManager extends ApplicationComponent
     public final function findById ($id, array $options=[])
     {
         $model = null;
-        $modelCollection =  $this->find(["id"=>$id],[],[],$options);
+        $modelCollection =  $this->find(array_merge($options, [self::OPTION_FILTERS=>["id"=>$id]]));
         if ($modelCollection != null && $modelCollection instanceof Collection)
         {
             $model = $modelCollection->getFirst();
@@ -175,7 +175,7 @@ abstract class ModelManager extends ApplicationComponent
         return $model;
     }
     
-    public abstract function find (array $filters=[], array $sorters=[], array $options=[]);
+    public abstract function find (array $options=[]);
     public abstract function insert (Model $model, array $options=[]);
     public abstract function update (Model $model, array $options=[]);
     public abstract function remove (Model $model, array $options=[]);

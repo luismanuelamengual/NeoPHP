@@ -87,15 +87,15 @@ class MongoModelManager extends EntityModelManager
         return $mongoManager->executeBulkWrite($mongoManager->defaultDatabase . "." . $this->getModelEntityName(), $bulk);
     }
     
-    public function find(array $filters=[], array $sorters=[], array $options=[])
+    public function find(array $options=[])
     {
         $mongoManager = $this->getMongoManager();
         $modelCollection = new Collection();
         $modelClass = $this->getModelClassName();
         $mongoFilters = [];
-        if (isset($filters))
+        if (isset($options[self::OPTION_FILTERS]))
         {
-            $mongoFilters = $this->getMongoQueryFilter($filters);
+            $mongoFilters = $this->getMongoQueryFilter($options[self::OPTION_FILTERS]);
         }
         $mongoQuery = new Query($mongoFilters);
         $mongoCursor = $mongoManager->executeQuery ($mongoManager->defaultDatabase . "." . $this->getModelEntityName(), $mongoQuery);

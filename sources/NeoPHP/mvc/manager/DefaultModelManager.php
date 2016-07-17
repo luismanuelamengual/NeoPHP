@@ -93,17 +93,18 @@ class DefaultModelManager extends EntityModelManager
         return $updateResult;
     }
     
-    public function find(array $filters=[], array $sorters=[], array $options=[])
+    public function find(array $options=[])
     {
         $modelCollection = new Collection();
         $modelClass = $this->getModelClassName();
         $modelQuery = $this->getConnection()->createQuery($this->getModelEntityName());
-        if (!empty($filters))
+        if (isset($options[self::OPTION_FILTERS]))
         {
-            $modelQuery->setWhereClause($this->getConnectionQueryFilter($filters));
+            $modelQuery->setWhereClause($this->getConnectionQueryFilter($options[self::OPTION_FILTERS]));
         }
-        if (isset($sorters))
+        if (isset($options[self::OPTION_SORTERS]))
         {
+            $sorters = $options[self::OPTION_SORTERS];
             foreach ($sorters as $sorter)
             {
                 if (is_array($sorter))
@@ -116,11 +117,11 @@ class DefaultModelManager extends EntityModelManager
                 }
             }
         }
-        if (isset($options[self::PARAMETER_START]))
+        if (isset($options[self::OPTION_START]))
         {
             $modelQuery->setOffset($options[self::PARAMETER_START]);
         }
-        if (isset($options[self::PARAMETER_LIMIT]))
+        if (isset($options[self::OPTION_LIMIT]))
         {
             $modelQuery->setLimit($options[self::PARAMETER_LIMIT]);
         }
