@@ -13,6 +13,16 @@ class Parameters
         return self::$instance;
     }
     
+    public function __get($name)
+    {
+        return $this->get($name);
+    }
+    
+    public function __isset($name)
+    {
+        return $this->has($name);
+    }
+    
     public function get ($name=null)
     {
         return $name == null? $_REQUEST : (isset($_REQUEST[$name]) ? $_REQUEST[$name] : null);
