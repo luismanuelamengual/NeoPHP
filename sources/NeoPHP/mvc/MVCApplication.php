@@ -2,7 +2,7 @@
 
 namespace NeoPHP\mvc;
 
-use Exception;
+use Throwable;
 use NeoPHP\app\Application;
 use NeoPHP\core\IllegalArgumentException;
 use NeoPHP\mvc\manager\DefaultModelManager;
@@ -41,13 +41,13 @@ abstract class MVCApplication extends Application
             $this->executeAction ($action, $parameters);
             $actionExecuted = true;
         }
-        catch (Exception $exception)
+        catch (Throwable $exception)
         {
             try 
             {
                 $this->onActionError ($action, $exception);
             } 
-            catch (Exception $error) {}
+            catch (Throwable $error) {}
         }
         return $actionExecuted;
     }
@@ -72,7 +72,7 @@ abstract class MVCApplication extends Application
         $this->registeredManagers[$modelClass] = $managerClass;
     }
     
-    protected function onActionError ($action, Exception $ex)
+    protected function onActionError ($action, Throwable $ex)
     {
         $this->getLogger()->error($ex);
     }
@@ -135,7 +135,7 @@ abstract class MVCApplication extends Application
         {
             $controller = $this->getController($controllerClassName);
         }
-        catch (Exception $ex)
+        catch (Throwable $ex)
         {
             throw new NoRouteException("Invalid or Non existent controller for className \"$controllerClassName\" Caused by: " . $ex->getMessage());
         }

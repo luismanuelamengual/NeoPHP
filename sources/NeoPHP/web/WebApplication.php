@@ -2,7 +2,7 @@
 
 namespace NeoPHP\web;
 
-use Exception;
+use Throwable;
 use NeoPHP\mvc\MVCApplication;
 use NeoPHP\mvc\NoRouteException;
 use NeoPHP\util\StringUtils;
@@ -49,7 +49,7 @@ class WebApplication extends MVCApplication
         $this->processAction($action, Request::getInstance()->getParameters()->get());
     }
     
-    protected function onActionError ($action, Exception $ex)
+    protected function onActionError ($action, Throwable $ex)
     {
         $response = new Response();
         if ($ex instanceof NoRouteException)

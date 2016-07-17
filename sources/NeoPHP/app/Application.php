@@ -2,7 +2,6 @@
 
 namespace NeoPHP\app;
 
-use ErrorException;
 use NeoPHP\util\logging\handler\FileHandler;
 use NeoPHP\util\logging\Logger;
 use NeoPHP\util\translation\Translator;
@@ -14,10 +13,7 @@ abstract class Application extends ApplicationContext
     public function __construct ($basePath)
     {
         parent::__construct($basePath);
-        $this->storagePath = (isset($this->getProperties()->storagePath))? $this->getProperties()->storagePath : $this->basePath . DIRECTORY_SEPARATOR . "storage";    
-        
-        //Instalar el handler de errores de la aplicación
-        set_error_handler(function($errno, $errstr, $errfile, $errline) { throw new ErrorException($errstr, $errno, 0, $errfile, $errline); }, E_ALL);
+        $this->storagePath = (isset($this->getProperties()->storagePath))? $this->getProperties()->storagePath : $this->basePath . DIRECTORY_SEPARATOR . "storage"; 
     }
     
     /**

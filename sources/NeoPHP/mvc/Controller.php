@@ -2,7 +2,7 @@
 
 namespace NeoPHP\mvc;
 
-use Exception;
+use Throwable;
 use NeoPHP\app\ApplicationComponent;
 use NeoPHP\core\Collection;
 use NeoPHP\core\IllegalArgumentException;
@@ -92,7 +92,7 @@ abstract class Controller extends ApplicationComponent
      * @param string $action Acción a ejecutar
      * @param array $parameters Parámetros de la acción
      * @return type Resultado de la ejecución
-     * @throws Exception Error en la ejecución de la acción
+     * @throws Throwable Error en la ejecución de la acción
      */    
     public function executeAction ($action, array $parameters = [])
     {
@@ -108,7 +108,7 @@ abstract class Controller extends ApplicationComponent
                 $response = $this->onAfterAction ($action, $parameters, $response);
             }
         }
-        catch (Exception $ex)
+        catch (Throwable $ex)
         {
             if (method_exists($this, "onActionError"))
                 $this->onActionError($action, $ex);
