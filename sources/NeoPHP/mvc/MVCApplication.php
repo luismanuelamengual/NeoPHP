@@ -2,13 +2,13 @@
 
 namespace NeoPHP\mvc;
 
-use Throwable;
 use NeoPHP\app\Application;
 use NeoPHP\core\IllegalArgumentException;
 use NeoPHP\mvc\manager\DefaultModelManager;
 use NeoPHP\mvc\manager\ModelManager;
-use NeoPHP\mvc\templateengine\BladeTemplateEngine;
 use NeoPHP\util\StringUtils;
+use NeoPHP\util\templating\BladeTemplateEngine;
+use Throwable;
 
 abstract class MVCApplication extends Application 
 {

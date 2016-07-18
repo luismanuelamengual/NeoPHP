@@ -1,6 +1,6 @@
 <?php
 
-namespace NeoPHP\mvc\templateengine;
+namespace NeoPHP\util\templating;
 
 use Closure;
 
