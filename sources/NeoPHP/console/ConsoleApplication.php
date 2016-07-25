@@ -21,11 +21,6 @@ class ConsoleApplication extends Application
         set_time_limit(0);
     }
     
-    public function getConsoleManager()
-    {
-        return $this->consoleManager;
-    }
-    
     public function close ()
     {
         $this->running = false;
@@ -33,15 +28,21 @@ class ConsoleApplication extends Application
     
     public function start() 
     {
-        parent::onStarted();
         $this->running = true;
         while ($this->running)
-            $this->onIdle();
+        {
+            $this->enterCommand();
+        }
         $this->stop();
     }
     
-    public function onIdle() 
+    protected function enterCommand() 
     {
         $this->consoleManager->enterCommand();
     } 
+    
+    public function addConsoleListener (ConsoleListener $listener)
+    {
+        $this->consoleManager->addConsoleListener($listener);
+    }
 }
