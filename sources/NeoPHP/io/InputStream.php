@@ -10,5 +10,3 @@ abstract class InputStream
     public abstract function reset();
     public abstract function close();
 }
-
-?>

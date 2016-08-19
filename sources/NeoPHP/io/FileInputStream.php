@@ -6,7 +6,7 @@ use Exception;
 
 class FileInputStream extends InputStream
 {
-    private $resource;
+    protected $resource;
     
     public function __construct($file)
     {
@@ -23,7 +23,7 @@ class FileInputStream extends InputStream
             throw new IOException("Error reading file inputStream");
         return $buffer;
     }
-
+    
     public function availiable()
     {
         return !feof($this->resource);
@@ -45,5 +45,3 @@ class FileInputStream extends InputStream
         $this->resource = null;
     }
 }
-
-?>

@@ -6,7 +6,7 @@ class FilterOutputStream extends OutputStream
 {
     protected $out;
     
-    function __construct(OutputStream $out)
+    public function __construct(OutputStream $out)
     {
         $this->out = $out;
     }
@@ -27,5 +27,3 @@ class FilterOutputStream extends OutputStream
         $this->out->close();
     }
 }
-
-?>

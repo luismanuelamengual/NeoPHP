@@ -6,13 +6,10 @@ use NeoPHP\app\ApplicationComponent;
 use NeoPHP\core\Collection;
 use NeoPHP\core\reflect\ReflectionAnnotatedClass;
 use NeoPHP\mvc\Model;
-use NeoPHP\mvc\ModelFilter;
-use NeoPHP\mvc\ModelSorter;
 use NeoPHP\mvc\MVCApplication;
 use NeoPHP\util\IntrospectionUtils;
 use NeoPHP\util\logging\Logger;
 use NeoPHP\util\properties\PropertiesManager;
-use ReflectionClass;
 use Throwable;
 
 abstract class ModelManager extends ApplicationComponent
@@ -21,6 +18,7 @@ abstract class ModelManager extends ApplicationComponent
     const OPTION_SORTERS = "sorters";
     const OPTION_START = "start";
     const OPTION_LIMIT = "limit";
+    const OPTION_COMPLETE = "complete";
     
     private $modelClassName;
     private $modelClass;

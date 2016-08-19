@@ -8,5 +8,3 @@ abstract class OutputStream
     public abstract function flush();
     public abstract function close();
 }
-
-?>

@@ -3,23 +3,7 @@
 namespace NeoPHP\io;
 
 class PrintStream extends FilterOutputStream
-{
-    public function __construct($outputStream)
-    {
-        if (!($outputStream instanceof OutputStream))
-        {
-            if (($outputStream instanceof File) || is_file($outputStream))
-            {
-                $outputStream = new FileOutputStream($outputStream);
-            }
-            else
-            {
-                throw new Exception("OutputStream needed for a PrintStream");
-            }
-        }
-        parent::__construct($outputStream);
-    }
-    
+{      
     public function printb ($buffer)
     {
         $this->out->write($buffer);
@@ -37,5 +21,3 @@ class PrintStream extends FilterOutputStream
         $this->out->write(vsprintf($format, $arguments));
     }
 }
-
-?>

@@ -35,5 +35,3 @@ class FileOutputStream extends OutputStream
         $this->resource = null;
     }
 }
-
-?>

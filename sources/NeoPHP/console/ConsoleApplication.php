@@ -4,13 +4,17 @@ namespace NeoPHP\console;
 
 use Exception;
 use NeoPHP\app\Application;
+use NeoPHP\core\System;
+use NeoPHP\io\InputStream;
+use NeoPHP\io\OutputStream;
 
 class ConsoleApplication extends Application
 {
     private $running = false;
-    private $stream;
     private $prompt;
     private $commandExecutors;
+    private $inputStream;
+    private $outputStream; 
     
     public function __construct($basePath) 
     {
@@ -37,11 +41,6 @@ class ConsoleApplication extends Application
         $this->onStopped();
     }
     
-    public function setBlocking ($blocking)
-    {
-        stream_set_blocking($this->getStream(), $blocking);
-    }
-    
     public function setPrompt ($prompt)
     {
         $this->prompt = $prompt;
@@ -52,38 +51,30 @@ class ConsoleApplication extends Application
         return $this->prompt;
     }
     
-    private function getStream ()
-    {
-        if ($this->stream == null)
-            $this->stream = fopen('php://stdin', 'r');
-        return $this->stream;
-    }
-    
     private function displayPrompt ()
     {
         echo $this->getPrompt();
     }
     
+    public function readLine ()
+    {
+        $line = "";
+        while ($this->getInputStream()->availiable())
+        {
+            $read = $this->getInputStream()->read();
+            if ($read == "\n")
+                break;
+            $line .= $read;
+        }
+        return $line;
+    }
+    
     private function enterCommand ()
     {
         $this->displayPrompt();
-        $commandEntered = false;
-        while (!$commandEntered)
-            $commandEntered = $this->checkCommand();
-    }
-    
-    private function checkCommand ()
-    {
-        $commandReceived = false;
-        $line = fgets($this->getStream());
-        if ($line != false)
-        {
-            $tokens = $this->parseCommand($line);
-            if (sizeof($tokens) > 0)            
-                $this->onCommandEntered($tokens[0], array_slice ($tokens, 1));
-            $commandReceived = true;
-        }
-        return $commandReceived;
+        $tokens = $this->parseCommand($this->readLine());
+        if (sizeof($tokens) > 0)            
+            $this->onCommandEntered($tokens[0], array_slice ($tokens, 1));
     }
     
     private function parseCommand ($str)
@@ -145,6 +136,30 @@ class ConsoleApplication extends Application
             unset($this->commandExecutors[$index]);
     }
     
+    public function getInputStream ()
+    {
+        if ($this->inputStream == null) 
+            $this->inputStream = System::in();
+        return $this->inputStream;
+    }
+
+    public function getOutputStream ()
+    {
+        if ($this->outputStream == null) 
+            $this->outputStream = System::out();
+        return $this->outputStream;
+    }
+
+    public function setInputStream (InputStream $inputStream)
+    {
+        $this->inputStream = $inputStream;
+    }
+
+    public function setOutputStream (OutputStream $outputStream)
+    {
+        $this->outputStream = $outputStream;
+    }
+
     protected function onStarted ()
     {
     }
