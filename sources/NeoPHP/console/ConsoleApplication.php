@@ -53,26 +53,13 @@ class ConsoleApplication extends Application
     
     private function displayPrompt ()
     {
-        echo $this->getPrompt();
-    }
-    
-    public function readLine ()
-    {
-        $line = "";
-        while ($this->getInputStream()->availiable())
-        {
-            $read = $this->getInputStream()->read();
-            if ($read == "\n")
-                break;
-            $line .= $read;
-        }
-        return $line;
+        $this->getOutputStream()->printb($this->getPrompt());
     }
     
     private function enterCommand ()
     {
         $this->displayPrompt();
-        $tokens = $this->parseCommand($this->readLine());
+        $tokens = $this->parseCommand($this->getInputStream()->read(1000));
         if (sizeof($tokens) > 0)            
             $this->onCommandEntered($tokens[0], array_slice ($tokens, 1));
     }

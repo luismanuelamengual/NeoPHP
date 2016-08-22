@@ -16,7 +16,7 @@ class FileInputStream extends InputStream
             throw new IOException("Error opening inputStrem from file \"$filename\"");
     }
     
-    public function read($length=1)
+    public function read($length=0)
     {
         $buffer = fread($this->resource, $length);
         if ($buffer === false)
