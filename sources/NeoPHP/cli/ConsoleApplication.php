@@ -1,26 +1,18 @@
 <?php
 
-namespace NeoPHP\console;
+namespace NeoPHP\cli;
 
-use Exception;
-use NeoPHP\app\Application;
-use NeoPHP\core\System;
-use NeoPHP\io\InputStream;
-use NeoPHP\io\OutputStream;
+use NeoPHP\cli\CLIApplication;
 
-class ConsoleApplication extends Application
+class ConsoleApplication extends CLIApplication
 {
     private $running = false;
     private $prompt;
-    private $commandExecutors;
-    private $inputStream;
-    private $outputStream; 
     
     public function __construct($basePath) 
     {
         parent::__construct($basePath);
         set_time_limit(0);
-        $this->commandExecutors = [];
         $this->prompt = "$ ";
     }
     
@@ -32,13 +24,12 @@ class ConsoleApplication extends Application
         {
             $this->enterCommand();
         }
-        $this->stop();
+        $this->onStopped();
     }
     
     public function stop ()
     {
         $this->running = false;
-        $this->onStopped();
     }
     
     public function setPrompt ($prompt)
@@ -51,17 +42,12 @@ class ConsoleApplication extends Application
         return $this->prompt;
     }
     
-    private function displayPrompt ()
-    {
-        $this->getOutputStream()->printb($this->getPrompt());
-    }
-    
     private function enterCommand ()
     {
-        $this->displayPrompt();
+        $this->getOutputStream()->printb($this->getPrompt());
         $tokens = $this->parseCommand($this->getInputStream()->read(1000));
-        if (sizeof($tokens) > 0)            
-            $this->onCommandEntered($tokens[0], array_slice ($tokens, 1));
+        if (sizeof($tokens) > 0)  
+            $this->processCommand($tokens[0], array_slice ($tokens, 1));
     }
     
     private function parseCommand ($str)
@@ -109,61 +95,9 @@ class ConsoleApplication extends Application
         if ($tokenStart != -1 && !$inCommaToken)
             $tokens[] = trim(substr($str, $tokenStart));
         return $tokens;
-    } 
-    
-    public function registerCommandExecutor (ConsoleCommandExecutor $commandExecutors)
-    {
-        $this->commandExecutors[] = $commandExecutors;
     }
     
-    public function unregisterCommandExecutor (ConsoleListener $commandExecutor)
-    {
-        $index = array_search ($commandExecutor, $this->commandExecutors);
-        if ($index != false)
-            unset($this->commandExecutors[$index]);
-    }
-    
-    public function getInputStream ()
-    {
-        if ($this->inputStream == null) 
-            $this->inputStream = System::in();
-        return $this->inputStream;
-    }
 
-    public function getOutputStream ()
-    {
-        if ($this->outputStream == null) 
-            $this->outputStream = System::out();
-        return $this->outputStream;
-    }
-
-    public function setInputStream (InputStream $inputStream)
-    {
-        $this->inputStream = $inputStream;
-    }
-
-    public function setOutputStream (OutputStream $outputStream)
-    {
-        $this->outputStream = $outputStream;
-    }
-
-    protected function onStarted ()
-    {
-    }
-    
-    protected function onStopped ()
-    {
-    }
-    
-    protected function onCommandEntered ($command, array $parameters = [])
-    {
-        foreach ($this->commandExecutors as $commandExecutor)
-        {
-            try 
-            { 
-                $commandExecutor->onCommandEntered ($this, $command, $parameters);
-            }
-            catch (Exception $ex) {}
-        }
-    }
+    protected function onStarted () {}
+    protected function onStopped () {}
 }
