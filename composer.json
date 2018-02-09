@@ -1,0 +1,32 @@
+{
+  "name": "neogroup/neophp",
+  "description": "The NeoPHP Framework.",
+  "keywords": ["framework", "neo", "php"],
+  "license": "Apache",
+  "homepage": "https://github.com/luismanuelamengual/NeoPHP",
+  "authors":
+  [
+    {
+      "name": "Luis Manuel Amengual",
+      "email": "luismanuelamengual@gmail.com"
+    }
+  ],
+  "require": {
+    "php": ">=7.0",
+    "league/flysystem": "~1.0",
+    "monolog/monolog": "~1.12"
+  },
+  "autoload": {
+    "files": [
+      "src/NeoPHP/util/helpers.php"
+    ],
+    "psr-4": {
+      "NeoPHP\\": "src/NeoPHP/"
+    }
+  },
+  "config": {
+    "sort-packages": true
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}
