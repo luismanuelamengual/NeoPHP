@@ -1,6 +1,6 @@
 <?php
 
-namespace NeoPHP\Core;
+namespace NeoPHP\Utils;
 
 use NeoPHP\FileSystem\FileInputStream;
 use NeoPHP\FileSystem\FileOutputStream;
@@ -10,7 +10,7 @@ use NeoPHP\FileSystem\PrintStream;
  * Class System
  * @package NeoPHP\Core
  */
-abstract class System {
+abstract class SystemUtils {
 
     private static $in;
     private static $out;

@@ -1,6 +1,6 @@
 <?php
 
-namespace NeoPHP\util;
+namespace NeoPHP\Utils;
 
 abstract class StringUtils {
 

@@ -1,11 +1,10 @@
 <?php
 
-namespace NeoPHP\util;
+namespace NeoPHP\Messages;
 
 use Exception;
-use NeoPHP\core\Object;
 
-class Messages extends Object {
+class Messages {
 
     private $language;
     private $resourcePaths;
@@ -65,7 +64,8 @@ class Messages extends Object {
                         if (!empty($dictionaryData) && !empty($dictionaryData[$language]))
                             foreach ($dictionaryData[$language] as $newDictionaryKey => $newDictionaryText)
                                 $this->dictionary[$language][$dictionaryName . "." . $newDictionaryKey] = $newDictionaryText;
-                    } catch (Exception $ex) {
+                    }
+                    catch (Exception $ex) {
                         throw new Exception("Resource file \"$dictionaryFilename\" could not be parsed");
                     }
                     $dictionaryFileFound = true;
