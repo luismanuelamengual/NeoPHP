@@ -1,9 +1,9 @@
 <?php
 
-namespace NeoPHP\web\http;
+namespace NeoPHP\Http;
 
-final class Request
-{
+final class Request {
+
     const METHOD_GET = "GET";
     const METHOD_PUT = "PUT";
     const METHOD_POST = "POST";
@@ -11,125 +11,100 @@ final class Request
     const METHOD_HEAD = "HEAD";
     const METHOD_OPTIONS = "OPTIONS";
     const METHOD_PATCH = "PATCH";
-    
+
     private static $instance;
 
-    public static function getInstance()
-    {
+    public static function getInstance() {
         if (!isset(self::$instance))
             self::$instance = new self;
         return self::$instance;
     }
-    
-    public function getParameters()
-    {
+
+    public function getParameters() {
         return Parameters::getInstance();
     }
-    
-    public function getHeaders()
-    {
+
+    public function getHeaders() {
         return RequestHeaders::getInstance();
     }
-    
-    public function getCookies()
-    {
+
+    public function getCookies() {
         return Cookies::getInstance();
     }
-    
-    public function getSession()
-    {
+
+    public function getSession() {
         return Session::getInstance();
     }
-    
-    public function getServer()
-    {
+
+    public function getServer() {
         return Server::getInstance();
     }
-    
-    public function getFiles ()
-    {
+
+    public function getFiles() {
         return $_FILES;
     }
-    
-    public function getContent ()
-    {
+
+    public function getContent() {
         return @file_get_contents("php://input");
     }
-    
-    public function getMethod ()
-    {
+
+    public function getMethod() {
         return $_SERVER["REQUEST_METHOD"];
     }
-    
-    public function isMethod ($method)
-    {
-        return is_array($method)? in_array($this->getMethod(), $method) : $this->getMethod() == $method;
+
+    public function isMethod($method) {
+        return is_array($method) ? in_array($this->getMethod(), $method) : $this->getMethod() == $method;
     }
-    
-    public function isGet ()
-    {
+
+    public function isGet() {
         return $this->isMethod(self::METHOD_GET);
     }
-    
-    public function isPost ()
-    {
+
+    public function isPost() {
         return $this->isMethod(self::METHOD_POST);
     }
-    
-    public function isPut ()
-    {
+
+    public function isPut() {
         return $this->isMethod(self::METHOD_PUT);
     }
-    
-    public function isDelete ()
-    {
+
+    public function isDelete() {
         return $this->isMethod(self::METHOD_DELETE);
     }
-    
-    public function getScheme ()
-    {
+
+    public function getScheme() {
         return $this->isSecureRequest() ? "https" : "http";
     }
-    
-    public function isAjax ()
-    {
+
+    public function isAjax() {
         return $_SERVER["HTTP_X_REQUESTED_WITH"] == "XMLHttpRequest";
     }
-    
-    public function isSecureRequest ()
-    {
+
+    public function isSecureRequest() {
         return (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443;
     }
-    
-    public function getServerAddress ()
-    {
+
+    public function getServerAddress() {
         return $_SERVER["SERVER_ADDR"];
     }
-    
-    public function getServerName ()
-    {
+
+    public function getServerName() {
         return $_SERVER["SERVER_NAME"];
     }
-    
-    public function getHttpHost ()
-    {
+
+    public function getHttpHost() {
         return $_SERVER["HTTP_HOST"];
     }
-    
-    public function getClientAddress ($trustForwardedHeader=false)
-    {
+
+    public function getClientAddress($trustForwardedHeader = false) {
         return $trustForwardedHeader === true ? $_SERVER["HTTP_X_FORWARDED_FOR"] : $_SERVER["REMOTE_ADDR"];
     }
-    
-    public function getUri ()
-    {
+
+    public function getUri() {
         return $_SERVER["REQUEST_URI"];
     }
-    
-    public function getUserAgent ()
-    {
+
+    public function getUserAgent() {
         return $_SERVER["HTTP_USER_AGENT"];
     }
 }
-
-?>

@@ -1,6 +1,6 @@
 <?php
 
-namespace NeoPHP\web\http;
+namespace NeoPHP\Http;
 
 class RedirectResponse extends Response
 {
