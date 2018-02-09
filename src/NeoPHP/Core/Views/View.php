@@ -1,6 +1,6 @@
 <?php
 
-namespace NeoPHP\mvc\views;
+namespace NeoPHP\Core\Views;
 
 use NeoPHP\mvc\MVCApplication;
 
