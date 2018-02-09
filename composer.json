@@ -2,7 +2,7 @@
   "name": "neogroup/neophp",
   "description": "The NeoPHP Framework.",
   "keywords": ["framework", "neo", "php"],
-  "license": "Apache",
+  "license": "MIT",
   "homepage": "https://github.com/luismanuelamengual/NeoPHP",
   "authors":
   [
