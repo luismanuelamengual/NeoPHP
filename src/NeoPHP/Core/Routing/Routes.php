@@ -51,12 +51,12 @@ abstract class Routes {
             }
             if ($route == null) {
                 if (array_key_exists(self::ROUTE_PARAMETER_WILDCARD, $routeIndex)) {
-                    $route = self::findRouteInIndex($routeIndex[self::ROUTE_PARAMETER_WILDCARD], $method);
+                    $route = self::findRouteInIndex($routeIndex[self::ROUTE_PARAMETER_WILDCARD], $method, $pathParts);
                 }
             }
             if ($route == null) {
                 if (array_key_exists(self::ROUTE_GENERIC_PATH, $routeIndex)) {
-                    $route = self::findRouteInIndex($routeIndex[self::ROUTE_GENERIC_PATH], $method,$pathParts);
+                    $route = self::findRouteInIndex($routeIndex[self::ROUTE_GENERIC_PATH], $method);
                 }
             }
         }
