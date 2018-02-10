@@ -2,6 +2,8 @@
 
 namespace NeoPHP\Core;
 
+use stdClass;
+
 /**
  * Class System
  * @package NeoPHP\Core
@@ -16,16 +18,14 @@ abstract class System {
     /**
      * @return mixed
      */
-    public static function getBasePath()
-    {
+    public static function getBasePath() {
         return self::$basePath;
     }
 
     /**
      * @param mixed $basePath
      */
-    public static function setBasePath($basePath)
-    {
+    public static function setBasePath($basePath) {
         self::$basePath = $basePath;
     }
 
@@ -55,18 +55,19 @@ abstract class System {
      * Creates the system properties
      */
     private static function createProperties() {
+        $properties = null;
         $filename = self::getBasePath() . DIRECTORY_SEPARATOR . self::PROPERTIES_FILENAME . ".php";
         if (file_exists($filename)) {
-            self::$properties = include $filename;
+            $properties = include $filename;
         }
         else {
             $filename = self::getBasePath() . DIRECTORY_SEPARATOR . self::PROPERTIES_FILENAME . ".ini";
             if (file_exists($filename)) {
                 $propertiesArray = @parse_ini_file($filename);
-                self::$properties = new stdclass;
+                $properties = new stdclass;
                 $prev = null;
                 foreach ($propertiesArray as $key => $value) {
-                    $c = self::$properties;
+                    $c = $properties;
                     foreach (explode(".", $key) as $key) {
                         if (!isset($c->$key))
                             $c->$key = new stdClass;
@@ -79,11 +80,13 @@ abstract class System {
             else {
                 $filename = self::getBasePath() . DIRECTORY_SEPARATOR . self::PROPERTIES_FILENAME . ".json";
                 if (file_exists($filename)) {
-                    self::$properties = json_decode(@file_get_contents($filename));
-                } else {
-                    self::$properties = [];
+                    $properties = json_decode(@file_get_contents($filename));
+                }
+                else {
+                    $properties = new stdClass();
                 }
             }
         }
+        return $properties;
     }
 }
