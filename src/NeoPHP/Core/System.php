@@ -16,17 +16,17 @@ abstract class System {
     private static $properties;
 
     /**
+     * @param $basePath
+     */
+    public static function init($basePath) {
+        self::$basePath = $basePath;
+    }
+
+    /**
      * @return mixed
      */
     public static function getBasePath() {
         return self::$basePath;
-    }
-
-    /**
-     * @param mixed $basePath
-     */
-    public static function setBasePath($basePath) {
-        self::$basePath = $basePath;
     }
 
     /**
