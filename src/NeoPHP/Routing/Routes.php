@@ -286,6 +286,7 @@ abstract class Routes {
                 }
                 echo "ERROR: " . $ex->getMessage();
                 echo "<pre>";
+                echo "## " . $ex->getFile() . "(" . $ex->getLine() . ")<br>";
                 echo print_r($ex->getTraceAsString(), true);
                 echo "</pre>";
             }
