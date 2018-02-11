@@ -108,31 +108,21 @@ abstract class Routes {
     /**
      * @param $routeIndex
      * @param $method
-     * @param $path
-     * @return null
-     */
-    private static function findRoutes (&$routeIndex, $method, $path) {
-        return self::findRoutesInIndex($routeIndex, $method, self::getPathParts($path));
-    }
-
-    /**
-     * @param $routeIndex
-     * @param $method
      * @param array $pathParts
      * @return null
      */
-    private static function findRoutesInIndex (&$routeIndex, $method, $pathParts = []) {
+    private static function findRoutes (&$routeIndex, $method, $pathParts = []) {
         $routes = [];
         $pathPart = array_shift($pathParts);
         if ($pathPart != null) {
             if (array_key_exists(self::ROUTE_GENERIC_PATH, $routeIndex)) {
-                $routes = array_merge($routes, self::findRoutesInIndex($routeIndex[self::ROUTE_GENERIC_PATH], $method));
+                $routes = array_merge($routes, self::findRoutes($routeIndex[self::ROUTE_GENERIC_PATH], $method));
             }
             if (array_key_exists(self::ROUTE_PARAMETER_WILDCARD, $routeIndex)) {
-                $routes = array_merge($routes, self::findRoutesInIndex($routeIndex[self::ROUTE_PARAMETER_WILDCARD], $method, $pathParts));
+                $routes = array_merge($routes, self::findRoutes($routeIndex[self::ROUTE_PARAMETER_WILDCARD], $method, $pathParts));
             }
             if (array_key_exists($pathPart, $routeIndex)) {
-                $routes = array_merge($routes, self::findRoutesInIndex($routeIndex[$pathPart], $method, $pathParts));
+                $routes = array_merge($routes, self::findRoutes($routeIndex[$pathPart], $method, $pathParts));
             }
         }
         else {
@@ -199,18 +189,19 @@ abstract class Routes {
      */
     public static function handleRequest () {
         $path = self::getRequestPath();
+        $pathParts = self::getPathParts($path);
         $method = $_SERVER["REQUEST_METHOD"];
         try {
-            $routes = self::findRoutes(self::$routes, $method, $path);
+            $routes = self::findRoutes(self::$routes, $method, $pathParts);
             if (!empty($routes)) {
-                $beforeRoutes = self::findRoutes(self::$beforeRoutes, $method, $path);
+                $beforeRoutes = self::findRoutes(self::$beforeRoutes, $method, $pathParts);
                 foreach ($beforeRoutes as $route) {
                     self::executeAction($route[2]);
                 }
                 foreach ($routes as $route) {
                     self::executeAction($route[2]);
                 }
-                $afterRoutes = self::findRoutes(self::$afterRoutes, $method, $path);
+                $afterRoutes = self::findRoutes(self::$afterRoutes, $method, $pathParts);
                 foreach ($afterRoutes as $route) {
                     self::executeAction($route[2]);
                 }
@@ -222,7 +213,7 @@ abstract class Routes {
         catch (\Throwable $ex) {
             $exceptionHandled = false;
             try {
-                $errorRoutes = self::findRoutes(self::$errorRoutes, $method, $path);
+                $errorRoutes = self::findRoutes(self::$errorRoutes, $method, $pathParts);
                 if (!empty($errorRoutes)) {
                     foreach ($errorRoutes as $route) {
                         self::executeAction($route[2]);
