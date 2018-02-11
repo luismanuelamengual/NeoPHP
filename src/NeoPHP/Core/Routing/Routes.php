@@ -2,6 +2,8 @@
 
 namespace NeoPHP\Core\Routing;
 
+use NeoPHP\Http\Response;
+
 /**
  * Class Routes
  * @package NeoPHP\Core\Routing
@@ -188,15 +190,67 @@ abstract class Routes {
     }
 
     /**
+     * @param $action
+     */
+    private static function executeAction ($action) {
+        echo "Execute: $action<br>";
+    }
+
+    /**
      *
      */
     public static function handleRequest () {
         $path = self::getRequestPath();
         $method = $_SERVER["REQUEST_METHOD"];
-        $routes = self::findRoutes(self::$routes, $method, $path);
+        try {
+            $routes = self::findRoutes(self::$routes, $method, $path);
+            if (!empty($routes)) {
+                $beforeRoutes = self::findRoutes(self::$beforeRoutes, $method, $path);
+                foreach ($beforeRoutes as $route) {
+                    self::executeAction($route[2]);
+                }
+                foreach ($routes as $route) {
+                    self::executeAction($route[2]);
+                }
+                $afterRoutes = self::findRoutes(self::$afterRoutes, $method, $path);
+                foreach ($afterRoutes as $route) {
+                    self::executeAction($route[2]);
+                }
+            }
+            else {
+                throw new RouteNotFoundException("Route \"$path\" not found !!");
+            }
+        }
+        catch (\Throwable $ex) {
+            $exceptionHandled = false;
+            try {
+                $errorRoutes = self::findRoutes(self::$errorRoutes, $method, $path);
+                if (!empty($errorRoutes)) {
+                    foreach ($errorRoutes as $route) {
+                        self::executeAction($route[2]);
+                    }
+                    $exceptionHandled = true;
+                }
+            }
+            catch (\Throwable $ex1) {
+            }
 
-        echo "<pre>";
-        print_r ($routes);
-        echo "</pre>";
+            if (!$exceptionHandled) {
+                $response = new Response();
+                if ($ex instanceof RouteNotFoundException) {
+                    $response->setStatusCode(404);
+                }
+                else {
+                    $response->setStatusCode(500);
+                }
+                $responseContent = "";
+                $responseContent .= "ERROR: " . $ex->getMessage();
+                $responseContent .= "<pre>";
+                $responseContent .= print_r($ex->getTraceAsString(), true);
+                $responseContent .= "</pre>";
+                $response->setContent($responseContent);
+                $response->send();
+            }
+        }
     }
 }
