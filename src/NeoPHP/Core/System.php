@@ -2,6 +2,7 @@
 
 namespace NeoPHP\Core;
 
+use NeoPHP\Routing\RouteNotFoundException;
 use stdClass;
 
 /**
@@ -20,6 +21,8 @@ abstract class System {
      */
     public static function init($basePath) {
         self::$basePath = $basePath;
+        set_exception_handler([__CLASS__, "handleException"]);
+        set_error_handler([__CLASS__, "handleException"]);
     }
 
     /**
@@ -88,5 +91,27 @@ abstract class System {
             }
         }
         return $properties;
+    }
+
+    /**
+     * @param $ex
+     */
+    public static function handleException($ex) {
+        if (php_sapi_name() === 'cli') {
+            echo "ERROR: " . $ex->getMessage();
+        }
+        else {
+            if ($ex instanceof RouteNotFoundException) {
+                http_response_code(404);
+            }
+            else {
+                http_response_code(500);
+            }
+            echo "ERROR: " . $ex->getMessage();
+            echo "<pre>";
+            echo "## " . $ex->getFile() . "(" . $ex->getLine() . ")<br>";
+            echo print_r($ex->getTraceAsString(), true);
+            echo "</pre>";
+        }
     }
 }

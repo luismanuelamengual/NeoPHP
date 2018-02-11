@@ -235,6 +235,7 @@ abstract class Routes {
 
     /**
      *
+     * @throws \Throwable
      */
     public static function handleRequest() {
         $path = self::getRequestPath();
@@ -264,31 +265,14 @@ abstract class Routes {
             }
         }
         catch (\Throwable $ex) {
-            $exceptionHandled = false;
-            try {
-                $errorRoutes = self::findRoutes(self::$errorRoutes, $method, $pathParts);
-                if (!empty($errorRoutes)) {
-                    foreach ($errorRoutes as $route) {
-                        self::executeRoute($route[1], [$ex]);
-                    }
-                    $exceptionHandled = true;
+            $errorRoutes = self::findRoutes(self::$errorRoutes, $method, $pathParts);
+            if (!empty($errorRoutes)) {
+                foreach ($errorRoutes as $route) {
+                    self::executeRoute($route[1], [$ex]);
                 }
             }
-            catch (\Throwable $ex1) {
-            }
-
-            if (!$exceptionHandled) {
-                if ($ex instanceof RouteNotFoundException) {
-                    http_response_code(404);
-                }
-                else {
-                    http_response_code(500);
-                }
-                echo "ERROR: " . $ex->getMessage();
-                echo "<pre>";
-                echo "## " . $ex->getFile() . "(" . $ex->getLine() . ")<br>";
-                echo print_r($ex->getTraceAsString(), true);
-                echo "</pre>";
+            else {
+                throw $ex;
             }
         }
     }
