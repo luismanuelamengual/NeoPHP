@@ -1,6 +1,7 @@
 <?php
 
 namespace NeoPHP\Core\Routing;
+use Exception;
 
 /**
  * Class Routes
@@ -179,9 +180,19 @@ abstract class Routes {
 
     /**
      * @param $action
+     * @throws Exception
      */
     private static function executeAction ($action) {
-        echo "Execute: $action<br>";
+        $actionParts = explode("@", $action);
+        $controllerClass = $actionParts[0];
+        $controllerMethod = sizeof($actionParts) > 1? $actionParts[1] : "index";
+        $controller = new $controllerClass;
+        if (method_exists($controller, $controllerMethod)) {
+            call_user_func(array($controller, $controllerMethod));
+        }
+        else {
+            throw new Exception ("Method \"$controllerMethod\" not found in controller \"$controllerClass\" !!");
+        }
     }
 
     /**
