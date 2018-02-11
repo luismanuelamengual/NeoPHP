@@ -93,7 +93,7 @@ abstract class Routes {
      * @param $path
      * @param $action
      */
-    private static function addRoute (&$routesCollection, $method, $path, $action) {
+    private static function addRoute(&$routesCollection, $method, $path, $action) {
         $pathParts = self::getPathParts($path);
         foreach ($pathParts as $pathPart) {
             $pathIndex = null;
@@ -114,7 +114,7 @@ abstract class Routes {
      * @param array $pathParts
      * @return null
      */
-    private static function findRoutes (&$routeIndex, $method, $pathParts = []) {
+    private static function findRoutes(&$routeIndex, $method, $pathParts = []) {
         $routes = [];
         $pathPart = array_shift($pathParts);
         if ($pathPart != null) {
@@ -173,7 +173,7 @@ abstract class Routes {
     /**
      * @return bool|string
      */
-    private static function getRequestPath () {
+    private static function getRequestPath() {
         $path = "";
         if (!empty($_SERVER["REDIRECT_URL"])) {
             $path = $_SERVER["REDIRECT_URL"];
@@ -189,7 +189,7 @@ abstract class Routes {
      * @param $route
      * @throws Exception
      */
-    private static function executeRoute ($pathParts, $route) {
+    private static function executeRoute($pathParts, $route) {
         $routePath = $route[0];
         $routeAction = $route[1];
         $routeParameters = [];
@@ -210,7 +210,7 @@ abstract class Routes {
     /**
      *
      */
-    public static function handleRequest () {
+    public static function handleRequest() {
         $path = self::getRequestPath();
         $pathParts = self::getPathParts($path);
         $method = $_SERVER["REQUEST_METHOD"];
