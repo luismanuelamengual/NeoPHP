@@ -1,6 +1,6 @@
 <?php
 
-namespace NeoPHP\Core\Routing;
+namespace NeoPHP\Routing;
 
 use NeoPHP\Core\Controllers\Controllers;
 
