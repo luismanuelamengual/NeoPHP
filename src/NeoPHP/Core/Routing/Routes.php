@@ -2,8 +2,6 @@
 
 namespace NeoPHP\Core\Routing;
 
-use NeoPHP\Http\Response;
-
 /**
  * Class Routes
  * @package NeoPHP\Core\Routing
@@ -236,20 +234,16 @@ abstract class Routes {
             }
 
             if (!$exceptionHandled) {
-                $response = new Response();
                 if ($ex instanceof RouteNotFoundException) {
-                    $response->setStatusCode(404);
+                    http_response_code(404);
                 }
                 else {
-                    $response->setStatusCode(500);
+                    http_response_code(500);
                 }
-                $responseContent = "";
-                $responseContent .= "ERROR: " . $ex->getMessage();
-                $responseContent .= "<pre>";
-                $responseContent .= print_r($ex->getTraceAsString(), true);
-                $responseContent .= "</pre>";
-                $response->setContent($responseContent);
-                $response->send();
+                echo "ERROR: " . $ex->getMessage();
+                echo "<pre>";
+                echo print_r($ex->getTraceAsString(), true);
+                echo "</pre>";
             }
         }
     }
