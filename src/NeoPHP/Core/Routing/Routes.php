@@ -2,7 +2,6 @@
 
 namespace NeoPHP\Core\Routing;
 
-use Exception;
 use NeoPHP\Core\Controllers\Controllers;
 
 /**
@@ -200,14 +199,17 @@ abstract class Routes {
     /**
      * @param $routeAction
      * @param $routeParameters
+     * @return mixed|null
      */
     private static function executeRoute($routeAction, $routeParameters) {
+        $response = null;
         if (is_callable($routeAction)) {
-            call_user_func_array($routeAction, $routeParameters);
+            $response = call_user_func_array($routeAction, $routeParameters);
         }
         else {
-            Controllers::execute($routeAction, $routeParameters);
+            $response = Controllers::execute($routeAction, $routeParameters);
         }
+        return $response;
     }
 
     /**
@@ -243,14 +245,14 @@ abstract class Routes {
             if (!empty($routes)) {
                 $beforeRoutes = self::findRoutes(self::$beforeRoutes, $method, $pathParts);
                 foreach ($beforeRoutes as $route) {
-                    self::executeRoute($route[1], self::getRouteParameters($route[0],$pathParts));
+                    self::executeRoute($route[1], self::getRouteParameters($route[0], $pathParts));
                 }
                 foreach ($routes as $route) {
-                    self::executeRoute($route[1], self::getRouteParameters($route[0],$pathParts));
+                    self::executeRoute($route[1], self::getRouteParameters($route[0], $pathParts));
                 }
                 $afterRoutes = self::findRoutes(self::$afterRoutes, $method, $pathParts);
                 foreach ($afterRoutes as $route) {
-                    self::executeRoute($route[1], self::getRouteParameters($route[0],$pathParts));
+                    self::executeRoute($route[1], self::getRouteParameters($route[0], $pathParts));
                 }
             }
             else {
