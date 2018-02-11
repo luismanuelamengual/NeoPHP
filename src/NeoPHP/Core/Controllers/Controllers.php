@@ -1,6 +1,7 @@
 <?php
 
 namespace NeoPHP\Core\Controllers;
+
 use Exception;
 
 /**
@@ -8,6 +9,19 @@ use Exception;
  * @package NeoPHP\mvc\controllers
  */
 abstract class Controllers {
+
+    private static $controllers = [];
+
+    /**
+     * @param $controllerClass
+     * @return mixed
+     */
+    public static function getController($controllerClass) {
+        if (!isset(self::$controllers[$controllerClass])) {
+            self::$controllers[$controllerClass] = new $controllerClass;
+        }
+        return self::$controllers[$controllerClass];
+    }
 
     /**
      * @param $action
@@ -19,8 +33,8 @@ abstract class Controllers {
         $result = null;
         $actionParts = explode("@", $action);
         $controllerClass = $actionParts[0];
-        $controllerMethodName = sizeof($actionParts) > 1? $actionParts[1] : "index";
-        $controller = new $controllerClass;
+        $controllerMethodName = sizeof($actionParts) > 1 ? $actionParts[1] : "index";
+        $controller = self::getController($controllerClass);
         if (method_exists($controller, $controllerMethodName)) {
             $controllerMethodParams = [];
             $controllerMethod = new \ReflectionMethod($controller, $controllerMethodName);
@@ -35,7 +49,7 @@ abstract class Controllers {
                 }
                 $controllerMethodParams[] = $parameterValue;
             }
-            $result = call_user_func_array([$controller,$controllerMethodName], $controllerMethodParams);
+            $result = call_user_func_array([$controller, $controllerMethodName], $controllerMethodParams);
         }
         else {
             throw new Exception ("Method \"$controllerMethodName\" not found in controller \"$controllerClass\" !!");
