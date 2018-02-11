@@ -201,7 +201,7 @@ abstract class Routes {
      * @param $routeParameters
      * @return mixed|null
      */
-    private static function executeRoute($routeAction, $routeParameters) {
+    private static function executeRoute($routeAction, array $routeParameters = []) {
         $response = null;
         if (is_callable($routeAction)) {
             $response = call_user_func_array($routeAction, $routeParameters);
@@ -245,14 +245,18 @@ abstract class Routes {
             if (!empty($routes)) {
                 $beforeRoutes = self::findRoutes(self::$beforeRoutes, $method, $pathParts);
                 foreach ($beforeRoutes as $route) {
-                    self::executeRoute($route[1], self::getRouteParameters($route[0], $pathParts));
+                    self::executeRoute($route[1]);
                 }
+                $result = null;
                 foreach ($routes as $route) {
-                    self::executeRoute($route[1], self::getRouteParameters($route[0], $pathParts));
+                    $routeResult = self::executeRoute($route[1], self::getRouteParameters($route[0], $pathParts));
+                    if (!empty($routeResult)) {
+                        $result = $routeResult;
+                    }
                 }
                 $afterRoutes = self::findRoutes(self::$afterRoutes, $method, $pathParts);
                 foreach ($afterRoutes as $route) {
-                    self::executeRoute($route[1], self::getRouteParameters($route[0], $pathParts));
+                    self::executeRoute($route[1], [&$result]);
                 }
             }
             else {

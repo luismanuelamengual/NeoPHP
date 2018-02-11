@@ -38,16 +38,21 @@ abstract class Controllers {
         if (method_exists($controller, $controllerMethodName)) {
             $controllerMethodParams = [];
             $controllerMethod = new \ReflectionMethod($controller, $controllerMethodName);
+            $parameterIndex = 0;
             foreach ($controllerMethod->getParameters() as $parameter) {
                 $parameterName = $parameter->getName();
                 $parameterValue = null;
                 if (array_key_exists($parameterName, $parameters)) {
                     $parameterValue = $parameters[$parameterName];
                 }
+                else if (array_key_exists($parameterIndex, $parameters)) {
+                    $parameterValue = $parameters[$parameterIndex];
+                }
                 else if ($parameter->isOptional()) {
                     $parameterValue = $parameter->getDefaultValue();
                 }
                 $controllerMethodParams[] = $parameterValue;
+                $parameterIndex++;
             }
             $result = call_user_func_array([$controller, $controllerMethodName], $controllerMethodParams);
         }
