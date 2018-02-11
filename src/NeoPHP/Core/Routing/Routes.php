@@ -185,6 +185,7 @@ abstract class Routes {
     }
 
     /**
+     * @param $pathParts
      * @param $route
      * @throws Exception
      */
