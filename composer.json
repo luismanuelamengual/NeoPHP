@@ -18,11 +18,8 @@
     "nesbot/carbon": "~1.20"
   },
   "autoload": {
-    "files": [
-      "src/NeoPHP/Support/Functions.php"
-    ],
     "psr-4": {
-      "NeoPHP\\": "src/NeoPHP/"
+      "": "src/"
     }
   },
   "config": {
