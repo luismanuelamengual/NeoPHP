@@ -88,6 +88,19 @@ abstract class Routes {
     }
 
     /**
+     * @param $resourcePath
+     * @param $controllerClass
+     */
+    public static function resource($resourcePath, $controllerClass) {
+        $normalizedResourcePath = self::normalizePath($resourcePath);
+        self::addRoute(self::$routes, "GET", $normalizedResourcePath, $controllerClass . "@getResources");
+        self::addRoute(self::$routes, "GET", $normalizedResourcePath . self::ROUTE_PATH_SEPARATOR . ":id", $controllerClass . "@getResource");
+        self::addRoute(self::$routes, "POST", $normalizedResourcePath . self::ROUTE_PATH_SEPARATOR . ":id", $controllerClass . "@updateResource");
+        self::addRoute(self::$routes, "PUT", $normalizedResourcePath, $controllerClass . "@createResource");
+        self::addRoute(self::$routes, "DELETE", $normalizedResourcePath . self::ROUTE_PATH_SEPARATOR . ":id", $controllerClass . "@deleteResource");
+    }
+
+    /**
      * @param $routesCollection
      * @param $method
      * @param $path
