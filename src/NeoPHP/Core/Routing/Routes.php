@@ -28,7 +28,7 @@ abstract class Routes {
      * @param $action
      */
     public static function before($path, $action) {
-        self::addRoute(self::$beforeRoutes, null, $path, $action);
+        self::addRoute(self::$beforeRoutes, "ANY", $path, $action);
     }
 
     /**
@@ -36,7 +36,7 @@ abstract class Routes {
      * @param $action
      */
     public static function after($path, $action) {
-        self::addRoute(self::$afterRoutes, null, $path, $action);
+        self::addRoute(self::$afterRoutes, "ANY", $path, $action);
     }
 
     /**
@@ -44,7 +44,7 @@ abstract class Routes {
      * @param $action
      */
     public static function error($path, $action) {
-        self::addRoute(self::$errorRoutes, null, $path, $action);
+        self::addRoute(self::$errorRoutes, "ANY", $path, $action);
     }
 
     /**
@@ -198,13 +198,24 @@ abstract class Routes {
     }
 
     /**
-     * @param $pathParts
-     * @param $route
-     * @throws Exception
+     * @param $routeAction
+     * @param $routeParameters
      */
-    private static function executeRoute($pathParts, $route) {
-        $routePath = $route[0];
-        $routeAction = $route[1];
+    private static function executeRoute($routeAction, $routeParameters) {
+        if (is_callable($routeAction)) {
+            call_user_func_array($routeAction, $routeParameters);
+        }
+        else {
+            Controllers::execute($routeAction, $routeParameters);
+        }
+    }
+
+    /**
+     * @param $routePath
+     * @param $pathParts
+     * @return array
+     */
+    private static function getRouteParameters($routePath, $pathParts) {
         $routeParameters = [];
         if (strpos($routePath, ':')) {
             $routePathParts = self::getPathParts($routePath);
@@ -217,7 +228,7 @@ abstract class Routes {
                 }
             }
         }
-        Controllers::execute($routeAction, $routeParameters);
+        return $routeParameters;
     }
 
     /**
@@ -232,14 +243,14 @@ abstract class Routes {
             if (!empty($routes)) {
                 $beforeRoutes = self::findRoutes(self::$beforeRoutes, $method, $pathParts);
                 foreach ($beforeRoutes as $route) {
-                    self::executeRoute($pathParts, $route);
+                    self::executeRoute($route[1], self::getRouteParameters($route[0],$pathParts));
                 }
                 foreach ($routes as $route) {
-                    self::executeRoute($pathParts, $route);
+                    self::executeRoute($route[1], self::getRouteParameters($route[0],$pathParts));
                 }
                 $afterRoutes = self::findRoutes(self::$afterRoutes, $method, $pathParts);
                 foreach ($afterRoutes as $route) {
-                    self::executeRoute($pathParts, $route);
+                    self::executeRoute($route[1], self::getRouteParameters($route[0],$pathParts));
                 }
             }
             else {
@@ -252,7 +263,7 @@ abstract class Routes {
                 $errorRoutes = self::findRoutes(self::$errorRoutes, $method, $pathParts);
                 if (!empty($errorRoutes)) {
                     foreach ($errorRoutes as $route) {
-                        self::executeRoute($pathParts, $route);
+                        self::executeRoute($route[1], [$ex]);
                     }
                     $exceptionHandled = true;
                 }
