@@ -2,6 +2,10 @@
 
 namespace NeoPHP\Core\Routing;
 
+/**
+ * Class Routes
+ * @package NeoPHP\Core\Routing
+ */
 abstract class Routes {
 
     const ROUTES_KEY = "__routes";
@@ -12,15 +16,80 @@ abstract class Routes {
     const ROUTE_PATH_SEPARATOR = "/";
 
     private static $routes = [];
+    private static $beforeRoutes = [];
+    private static $afterRoutes = [];
+    private static $errorRoutes = [];
 
+    /**
+     * @param $path
+     * @param $action
+     */
+    public static function before($path, $action) {
+        self::addRoute(self::$beforeRoutes, null, $path, $action);
+    }
+
+    /**
+     * @param $path
+     * @param $action
+     */
+    public static function after($path, $action) {
+        self::addRoute(self::$afterRoutes, null, $path, $action);
+    }
+
+    /**
+     * @param $path
+     * @param $action
+     */
+    public static function error($path, $action) {
+        self::addRoute(self::$errorRoutes, null, $path, $action);
+    }
+
+    /**
+     * @param $path
+     * @param $action
+     */
     public static function get($path, $action) {
         self::addRoute(self::$routes, "GET", $path, $action);
     }
 
+    /**
+     * @param $path
+     * @param $action
+     */
     public static function post($path, $action) {
         self::addRoute(self::$routes, "POST", $path, $action);
     }
 
+    /**
+     * @param $path
+     * @param $action
+     */
+    public static function put($path, $action) {
+        self::addRoute(self::$routes, "PUT", $path, $action);
+    }
+
+    /**
+     * @param $path
+     * @param $action
+     */
+    public static function delete($path, $action) {
+        self::addRoute(self::$routes, "DELETE", $path, $action);
+    }
+
+    /**
+     * @param $path
+     * @param $action
+     */
+    public static function request($path, $action) {
+        self::addRoute(self::$routes, null, $path, $action);
+    }
+
+    /**
+     * @param $routesCollection
+     * @param $method
+     * @param $path
+     * @param $action
+     */
     private static function addRoute (&$routesCollection, $method, $path, $action) {
         $pathParts = self::getPathParts($path);
         foreach ($pathParts as $pathPart) {
@@ -36,12 +105,22 @@ abstract class Routes {
         $routesCollection[self::ROUTES_KEY][] = [$method, $path, $action];
     }
 
-    private static function findRoute (&$routesCollection, $method, $path) {
-        $pathParts = self::getPathParts($path);
-        $route = self::findRouteInIndex($routesCollection, $method, $pathParts);
-        return $route;
+    /**
+     * @param $routeIndex
+     * @param $method
+     * @param $path
+     * @return null
+     */
+    private static function findRoute (&$routeIndex, $method, $path) {
+        return self::findRouteInIndex($routeIndex, $method, self::getPathParts($path));
     }
 
+    /**
+     * @param $routeIndex
+     * @param $method
+     * @param array $pathParts
+     * @return null
+     */
     private static function findRouteInIndex (&$routeIndex, $method, $pathParts = []) {
         $route = null;
         $pathPart = array_shift($pathParts);
@@ -82,19 +161,41 @@ abstract class Routes {
         return $route;
     }
 
+    /**
+     * @param $path
+     * @return string
+     */
     private static function normalizePath($path) {
         return trim($path, "/");
     }
 
+    /**
+     * @param $path
+     * @return array
+     */
     private static function getPathParts($path) {
         return explode("/", self::normalizePath($path));
     }
 
-    public static function handleRequest ($path) {
-        $route = self::findRoute(self::$routes, "GET", $path);
+    /**
+     * @return bool|string
+     */
+    private static function getRequestPath () {
+        $path = "";
+        if (!empty($_SERVER["REDIRECT_URL"])) {
+            $path = $_SERVER["REDIRECT_URL"];
+            if (!empty($_SERVER["CONTEXT_PREFIX"])) {
+                $path = substr($path, strlen($_SERVER["CONTEXT_PREFIX"]));
+            }
+        }
+        return $path;
+    }
 
-        echo "<pre>";
-        print_r ($route);
-        echo "</pre>";
+    /**
+     *
+     */
+    public static function handleRequest () {
+        $path = self::getRequestPath();
+        echo "path: $path";
     }
 }
