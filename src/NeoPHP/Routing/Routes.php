@@ -2,7 +2,7 @@
 
 namespace NeoPHP\Routing;
 
-use NeoPHP\Core\Controllers\Controllers;
+use NeoPHP\Core\Application;
 
 /**
  * Class Routes
@@ -198,8 +198,9 @@ abstract class Routes {
 
     /**
      * @param $routeAction
-     * @param $routeParameters
+     * @param array $routeParameters
      * @return mixed|null
+     * @throws \Exception
      */
     private static function executeRoute($routeAction, array $routeParameters = []) {
         $response = null;
@@ -207,7 +208,7 @@ abstract class Routes {
             $response = call_user_func_array($routeAction, $routeParameters);
         }
         else {
-            $response = Controllers::execute($routeAction, $routeParameters);
+            $response = Application::execute($routeAction, $routeParameters);
         }
         return $response;
     }
