@@ -15,7 +15,8 @@
     "php": ">=7.0",
     "league/flysystem": "~1.0",
     "monolog/monolog": "~1.12",
-    "nesbot/carbon": "~1.20"
+    "nesbot/carbon": "~1.20",
+    "filp/whoops": "^2.1.4"
   },
   "autoload": {
     "psr-4": {
