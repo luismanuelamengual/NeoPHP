@@ -3,6 +3,7 @@
 namespace NeoPHP\Core;
 
 use ErrorException;
+use NeoPHP\Config\Properties;
 use NeoPHP\Routing\RouteNotFoundException;
 
 /**
@@ -20,9 +21,16 @@ abstract class Application {
     public static function init($basePath) {
         self::$basePath = $basePath;
         self::$configPath = self::$basePath . DIRECTORY_SEPARATOR . "config";
-        $whoops = new \Whoops\Run;
-        $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
-        $whoops->register();
+
+        if (Properties::get("app.debug") === true) {
+            $whoops = new \Whoops\Run;
+            $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
+            $whoops->register();
+        }
+        else {
+            set_error_handler([__CLASS__, "handleError"], E_ALL | E_STRICT);
+            set_exception_handler([__CLASS__, "handleException"]);
+        }
     }
 
     /**
