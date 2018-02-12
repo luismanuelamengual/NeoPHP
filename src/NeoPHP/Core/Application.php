@@ -19,11 +19,15 @@ abstract class Application {
 
     /**
      * @param $basePath
+     * @throws Exception
      */
     public static function init($basePath) {
+
+        //register paths
         self::$basePath = $basePath;
         self::$configPath = self::$basePath . DIRECTORY_SEPARATOR . "config";
 
+        //register error handlers
         if (Properties::get("app.debug") === true) {
             $whoops = new \Whoops\Run;
             $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
@@ -32,6 +36,12 @@ abstract class Application {
         else {
             set_error_handler([__CLASS__, "handleError"], E_ALL | E_STRICT);
             set_exception_handler([__CLASS__, "handleException"]);
+        }
+
+        //execute boot actions
+        $bootActions = Properties::get("app.bootActions", []);
+        foreach ($bootActions as $bootAction) {
+            self::execute($bootAction);
         }
     }
 
@@ -55,7 +65,7 @@ abstract class Application {
      * @return mixed|null
      * @throws Exception
      */
-    public static function execute($action, array $parameters) {
+    public static function execute($action, array $parameters = []) {
         $result = null;
         $actionParts = explode("@", $action);
         $controllerClass = $actionParts[0];
