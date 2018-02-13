@@ -10,24 +10,32 @@ use NeoPHP\Core\Application;
  */
 abstract class Routes {
 
-    const ROUTES_KEY = "__routes";
-
     const ROUTE_GENERIC_PATH = "*";
     const ROUTE_PARAMETER_PREFIX = ":";
     const ROUTE_PARAMETER_WILDCARD = "%";
     const ROUTE_PATH_SEPARATOR = "/";
 
+    private static $requestPath;
+    private static $requestPathParts = [];
     private static $routes = [];
     private static $beforeRoutes = [];
     private static $afterRoutes = [];
     private static $errorRoutes = [];
 
     /**
+     * Static initialization
+     */
+    private static function init() {
+        self::$requestPath = self::getRequestPath();
+        self::$requestPathParts = self::getPathParts(self::$requestPath);
+    }
+
+    /**
      * @param $path
      * @param $action
      */
     public static function before($path, $action) {
-        self::addRoute(self::$beforeRoutes, "ANY", $path, $action);
+        self::addRoute(self::$beforeRoutes, null, $path, $action);
     }
 
     /**
@@ -35,7 +43,7 @@ abstract class Routes {
      * @param $action
      */
     public static function after($path, $action) {
-        self::addRoute(self::$afterRoutes, "ANY", $path, $action);
+        self::addRoute(self::$afterRoutes, null, $path, $action);
     }
 
     /**
@@ -43,7 +51,7 @@ abstract class Routes {
      * @param $action
      */
     public static function error($path, $action) {
-        self::addRoute(self::$errorRoutes, "ANY", $path, $action);
+        self::addRoute(self::$errorRoutes, null, $path, $action);
     }
 
     /**
@@ -83,7 +91,7 @@ abstract class Routes {
      * @param $action
      */
     public static function any($path, $action) {
-        self::addRoute(self::$routes, "ANY", $path, $action);
+        self::addRoute(self::$routes, null, $path, $action);
     }
 
     /**
@@ -104,66 +112,41 @@ abstract class Routes {
      * @param $method
      * @param $path
      * @param $action
+     * @return bool
      */
     private static function addRoute(&$routesCollection, $method, $path, $action) {
-        $pathParts = self::getPathParts($path);
-        foreach ($pathParts as $pathPart) {
-            $pathIndex = null;
-            if ($pathPart[0] == self::ROUTE_PARAMETER_PREFIX) {
-                $pathIndex = self::ROUTE_PARAMETER_WILDCARD;
-            }
-            else {
-                $pathIndex = $pathPart;
-            }
-            $routesCollection = &$routesCollection[$pathIndex];
-        }
-        $routesCollection[self::ROUTES_KEY][$method] = [$path, $action];
-    }
-
-    /**
-     * @param $routeIndex
-     * @param $method
-     * @param array $pathParts
-     * @return null
-     */
-    private static function findRoutes(&$routeIndex, $method, $pathParts = []) {
-        $routes = [];
-        $pathPart = array_shift($pathParts);
-        if ($pathPart != null) {
-            if (array_key_exists(self::ROUTE_GENERIC_PATH, $routeIndex)) {
-                $routes = array_merge($routes, self::findRoutes($routeIndex[self::ROUTE_GENERIC_PATH], $method));
-            }
-            if (array_key_exists(self::ROUTE_PARAMETER_WILDCARD, $routeIndex)) {
-                $routes = array_merge($routes, self::findRoutes($routeIndex[self::ROUTE_PARAMETER_WILDCARD], $method, $pathParts));
-            }
-            if (array_key_exists($pathPart, $routeIndex)) {
-                $routes = array_merge($routes, self::findRoutes($routeIndex[$pathPart], $method, $pathParts));
-            }
-        }
-        else {
-            if (array_key_exists(self::ROUTE_GENERIC_PATH, $routeIndex)) {
-                $genericRoutesIndex = $routeIndex[self::ROUTE_GENERIC_PATH];
-                if (array_key_exists(self::ROUTES_KEY, $genericRoutesIndex)) {
-                    $availableRoutes = $genericRoutesIndex[self::ROUTES_KEY];
-                    if (array_key_exists($method, $availableRoutes)) {
-                        $routes[] = $availableRoutes[$method];
+        if ($method == null || $method == $_SERVER["REQUEST_METHOD"]) {
+            $routeParameters = [];
+            $pathParts = self::getPathParts($path);
+            for ($i = 0; $i < sizeof($pathParts); $i++) {
+                $pathPart = $pathParts[$i];
+                if ($pathPart == self::ROUTE_GENERIC_PATH) {
+                    $route = new \stdClass();
+                    $route->action = $action;
+                    $route->parameters = $routeParameters;
+                    $routesCollection[] = $route;
+                    return true;
+                }
+                if (!isset(self::$requestPathParts[$i])) {
+                    return false;
+                }
+                if ($pathPart != self::$requestPathParts[$i]) {
+                    if ($pathPart[0] == self::ROUTE_PARAMETER_PREFIX) {
+                        $routeParameters[substr($pathPart, 1)] = self::$requestPathParts[$i];
                     }
-                    else if (array_key_exists("ANY", $availableRoutes)) {
-                        $routes[] = $availableRoutes["ANY"];
+                    else {
+                        return false;
                     }
                 }
             }
-            if (array_key_exists(self::ROUTES_KEY, $routeIndex)) {
-                $availableRoutes = $routeIndex[self::ROUTES_KEY];
-                if (array_key_exists($method, $availableRoutes)) {
-                    $routes[] = $availableRoutes[$method];
-                }
-                else if (array_key_exists("ANY", $availableRoutes)) {
-                    $routes[] = $availableRoutes["ANY"];
-                }
+            if (!isset(self::$requestPathParts[$i])) {
+                $route = new \stdClass();
+                $route->action = $action;
+                $route->parameters = $routeParameters;
+                $routesCollection[] = $route;
+                return true;
             }
         }
-        return $routes;
     }
 
     /**
@@ -200,7 +183,6 @@ abstract class Routes {
      * @param $routeAction
      * @param array $routeParameters
      * @return mixed|null
-     * @throws \Exception
      */
     private static function executeRoute($routeAction, array $routeParameters = []) {
         $response = null;
@@ -214,62 +196,34 @@ abstract class Routes {
     }
 
     /**
-     * @param $routePath
-     * @param $pathParts
-     * @return array
-     */
-    private static function getRouteParameters($routePath, $pathParts) {
-        $routeParameters = [];
-        if (strpos($routePath, ':')) {
-            $routePathParts = self::getPathParts($routePath);
-            for ($i = 0; $i < sizeof($routePathParts); $i++) {
-                $routePathPart = $routePathParts[$i];
-                if ($routePathPart[0] == self::ROUTE_PARAMETER_PREFIX) {
-                    $parameterName = substr($routePathPart, 1);
-                    $parameterValue = $pathParts[$i];
-                    $routeParameters[$parameterName] = $parameterValue;
-                }
-            }
-        }
-        return $routeParameters;
-    }
-
-    /**
      *
      * @throws \Throwable
      */
     public static function handleRequest() {
-        $path = self::getRequestPath();
-        $pathParts = self::getPathParts($path);
-        $method = $_SERVER["REQUEST_METHOD"];
         try {
-            $routes = self::findRoutes(self::$routes, $method, $pathParts);
-            if (!empty($routes)) {
-                $beforeRoutes = self::findRoutes(self::$beforeRoutes, $method, $pathParts);
-                foreach ($beforeRoutes as $route) {
-                    self::executeRoute($route[1]);
+            if (!empty(self::$routes)) {
+                foreach (self::$beforeRoutes as $route) {
+                    self::executeRoute($route->action, $route->parameters);
                 }
                 $result = null;
-                foreach ($routes as $route) {
-                    $routeResult = self::executeRoute($route[1], self::getRouteParameters($route[0], $pathParts));
+                foreach (self::$routes as $route) {
+                    $routeResult = self::executeRoute($route->action, $route->parameters);
                     if (!empty($routeResult)) {
                         $result = $routeResult;
                     }
                 }
-                $afterRoutes = self::findRoutes(self::$afterRoutes, $method, $pathParts);
-                foreach ($afterRoutes as $route) {
-                    self::executeRoute($route[1], [&$result]);
+                foreach (self::$afterRoutes as $route) {
+                    self::executeRoute($route->action, [&$result]);
                 }
             }
             else {
-                throw new RouteNotFoundException("Route \"$path\" not found !!");
+                throw new RouteNotFoundException("Route \"" . self::$requestPath . "\" not found !!");
             }
         }
         catch (\Throwable $ex) {
-            $errorRoutes = self::findRoutes(self::$errorRoutes, $method, $pathParts);
-            if (!empty($errorRoutes)) {
-                foreach ($errorRoutes as $route) {
-                    self::executeRoute($route[1], [$ex]);
+            if (!empty(self::$errorRoutes)) {
+                foreach (self::$errorRoutes as $route) {
+                    self::executeRoute($route->action, [$ex]);
                 }
             }
             else {
@@ -278,3 +232,8 @@ abstract class Routes {
         }
     }
 }
+
+$routesClass = new \ReflectionClass(Routes::class);
+$initMethod = $routesClass->getMethod("init");
+$initMethod->setAccessible(true);
+$initMethod->invoke(null);
