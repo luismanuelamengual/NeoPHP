@@ -2,27 +2,41 @@
 
 namespace NeoPHP\Config;
 
-use NeoPHP\Core\Application;
-
 /**
- * Class Properties
+ * Class FilePropertiesManager
  * @package NeoPHP\Config
  */
-abstract class Properties {
+class FilePropertiesManager implements PropertiesManager {
 
-    private static $properties = [];
+    private $repositoryPath;
+    private $properties = [];
+
+    /**
+     * FilePropertiesManager constructor.
+     * @param string $repositoryPath
+     */
+    public function __construct(string $repositoryPath) {
+        $this->repositoryPath = $repositoryPath;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRepositoryPath(): string {
+        return $this->repositoryPath;
+    }
 
     /**
      * @param $key
      * @param null $defaultValue
      * @return array|mixed|null
      */
-    public static function get($key, $defaultValue = null) {
+    public function get($key, $defaultValue = null) {
         $keyTokens = explode(".", $key);
-        if (!isset(self::$properties[$keyTokens[0]])) {
-            self::loadPropertiesModule($keyTokens[0]);
+        if (!isset($this->properties[$keyTokens[0]])) {
+            $this->loadPropertiesModule($keyTokens[0]);
         }
-        $propertyValue = self::$properties;
+        $propertyValue = $this->properties;
         foreach ($keyTokens as $keyToken) {
             if (isset($propertyValue[$keyToken])) {
                 $propertyValue = $propertyValue[$keyToken];
@@ -39,9 +53,9 @@ abstract class Properties {
      * @param $key
      * @param $value
      */
-    public static function set($key, $value) {
+    public function set($key, $value) {
         $keyTokens = explode(".", $key);
-        $propertyKey = &self::$properties;
+        $propertyKey = &$this->properties;
         foreach ($keyTokens as $keyToken) {
             if (!isset($propertyKey[$keyToken])) {
                 $propertyKey[$keyToken] = [];
@@ -54,10 +68,10 @@ abstract class Properties {
     /**
      * @param $moduleName
      */
-    private static function loadPropertiesModule($moduleName) {
-        $moduleFileName = Application::getConfigPath() . DIRECTORY_SEPARATOR . $moduleName . ".php";
+    private function loadPropertiesModule($moduleName) {
+        $moduleFileName = $this->repositoryPath . DIRECTORY_SEPARATOR . $moduleName . ".php";
         if (file_exists($moduleFileName)) {
-            self::$properties[$moduleName] = @include_once($moduleFileName);
+            $this->properties[$moduleName] = @include_once($moduleFileName);
         }
     }
 }

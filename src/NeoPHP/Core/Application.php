@@ -4,8 +4,8 @@ namespace NeoPHP\Core;
 
 use ErrorException;
 use Exception;
-use NeoPHP\Config\Properties;
 use NeoPHP\Core\Controllers\Controllers;
+use NeoPHP\Core\Facades\Properties;
 use NeoPHP\Routing\RouteNotFoundException;
 
 /**
@@ -14,6 +14,7 @@ use NeoPHP\Routing\RouteNotFoundException;
  */
 abstract class Application {
 
+    private static $facades = [];
     private static $basePath;
     private static $configPath;
 
@@ -96,6 +97,22 @@ abstract class Application {
             throw new Exception ("Method \"$controllerMethodName\" not found in controller \"$controllerClass\" !!");
         }
         return $result;
+    }
+
+    /**
+     * @param $class
+     * @param $implementation
+     */
+    public static function registerFacadeImpl ($class, $implementation) {
+        self::$facades[$class] = $implementation;
+    }
+
+    /**
+     * @param $class
+     * @return mixed
+     */
+    public static function getFacadeImpl ($class) {
+        return isset(self::$facades[$class])? self::$facades[$class] : null;
     }
 
     /**
