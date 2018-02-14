@@ -16,7 +16,7 @@ abstract class Facade {
     /**
      * @return mixed|null|void
      */
-    private static function getInstance () {
+    private static function getInstance() {
         if (!isset(self::$instance)) {
             self::$instance = self::createInstance();
         }
@@ -26,21 +26,21 @@ abstract class Facade {
     /**
      * Get the interface class of the facade
      */
-    protected static function getFacadeClass () {
+    protected static function getFacadeClass() {
         throw new RuntimeException('Facade does not implement getFacadeClass method.');
     }
 
     /**
      * Get the instance implementation of the facade
      */
-    protected static function createDefaultFacadeImplementation (){
+    protected static function createDefaultFacadeImplementation() {
         throw new RuntimeException('Facade does not implement createDefaultFacadeImplementation method.');
     }
 
     /**
      * @return mixed|null|void
      */
-    private static function createInstance () {
+    private static function createInstance() {
         $instance = null;
         $facadeClass = static::getFacadeClass();
         $facadeImplementation = Application::getFacadeImpl($facadeClass);
@@ -54,6 +54,9 @@ abstract class Facade {
         }
         else {
             $instance = static::createDefaultFacadeImplementation();
+        }
+        if (!is_a($instance, $facadeClass)) {
+            throw new RuntimeException("Facade instance must be subclass of $facadeClass !!");
         }
         return $instance;
     }
