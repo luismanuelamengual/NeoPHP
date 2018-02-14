@@ -9,19 +9,47 @@ use NeoPHP\Core\Controllers\Controllers;
  * Class Application
  * @package NeoPHP\Core
  */
-abstract class Application {
+class Application {
 
-    private static $facades = [];
-    private static $basePath;
+    private static $instance;
+
+    private $basePath;
+    private $facades = [];
 
     /**
-     * @param $basePath
+     * @return Application
+     */
+    public static function getInstance() {
+        if (!isset(self::$instance)) {
+            self::$instance = new Application();
+        }
+        return self::$instance;
+    }
+
+    /**
+     * Application constructor.
+     */
+    private function __construct() {
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getBasePath() {
+        return $this->basePath;
+    }
+
+    /**
+     * @param mixed $basePath
+     */
+    public function setBasePath($basePath) {
+        $this->basePath = $basePath;
+    }
+
+    /**
      * @throws Exception
      */
-    public static function init($basePath) {
-
-        //register paths
-        self::$basePath = $basePath;
+    public function init() {
 
         //register error handlers
         if (config("app.debug") === true) {
@@ -37,15 +65,24 @@ abstract class Application {
         //execute boot actions
         $bootActions = config("app.bootActions", []);
         foreach ($bootActions as $bootAction) {
-            self::execute($bootAction);
+            $this->execute($bootAction);
         }
     }
 
     /**
+     * @param $class
+     * @param $implementation
+     */
+    public function registerFacadeImpl ($class, $implementation) {
+        $this->facades[$class] = $implementation;
+    }
+
+    /**
+     * @param $class
      * @return mixed
      */
-    public static function getBasePath() {
-        return self::$basePath;
+    public function getFacadeImpl ($class) {
+        return isset($this->facades[$class])? $this->facades[$class] : null;
     }
 
     /**
@@ -54,7 +91,7 @@ abstract class Application {
      * @return mixed|null
      * @throws Exception
      */
-    public static function execute($action, array $parameters = []) {
+    public function execute($action, array $parameters = []) {
         $result = null;
         $actionParts = explode("@", $action);
         $controllerClass = $actionParts[0];
@@ -85,21 +122,5 @@ abstract class Application {
             throw new Exception ("Method \"$controllerMethodName\" not found in controller \"$controllerClass\" !!");
         }
         return $result;
-    }
-
-    /**
-     * @param $class
-     * @param $implementation
-     */
-    public static function registerFacadeImpl ($class, $implementation) {
-        self::$facades[$class] = $implementation;
-    }
-
-    /**
-     * @param $class
-     * @return mixed
-     */
-    public static function getFacadeImpl ($class) {
-        return isset(self::$facades[$class])? self::$facades[$class] : null;
     }
 }
