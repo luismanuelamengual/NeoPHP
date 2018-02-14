@@ -2,11 +2,8 @@
 
 namespace NeoPHP\Core;
 
-use ErrorException;
 use Exception;
 use NeoPHP\Core\Controllers\Controllers;
-use NeoPHP\Core\Facades\Properties;
-use NeoPHP\Routing\RouteNotFoundException;
 
 /**
  * Class Application
@@ -16,7 +13,6 @@ abstract class Application {
 
     private static $facades = [];
     private static $basePath;
-    private static $configPath;
 
     /**
      * @param $basePath
@@ -26,21 +22,20 @@ abstract class Application {
 
         //register paths
         self::$basePath = $basePath;
-        self::$configPath = self::$basePath . DIRECTORY_SEPARATOR . "config";
 
         //register error handlers
-        if (Properties::get("app.debug") === true) {
+        if (config("app.debug") === true) {
             $whoops = new \Whoops\Run;
             $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
             $whoops->register();
         }
         else {
-            set_error_handler([__CLASS__, "handleError"], E_ALL | E_STRICT);
-            set_exception_handler([__CLASS__, "handleException"]);
+            set_error_handler("handleError", E_ALL | E_STRICT);
+            set_exception_handler("handleException");
         }
 
         //execute boot actions
-        $bootActions = Properties::get("app.bootActions", []);
+        $bootActions = config("app.bootActions", []);
         foreach ($bootActions as $bootAction) {
             self::execute($bootAction);
         }
@@ -51,13 +46,6 @@ abstract class Application {
      */
     public static function getBasePath() {
         return self::$basePath;
-    }
-
-    /**
-     * Returns the configurations path
-     */
-    public static function getConfigPath() {
-        return self::$configPath;
     }
 
     /**
@@ -113,39 +101,5 @@ abstract class Application {
      */
     public static function getFacadeImpl ($class) {
         return isset(self::$facades[$class])? self::$facades[$class] : null;
-    }
-
-    /**
-     * @param $errno
-     * @param $errstr
-     * @param $errfile
-     * @param $errline
-     * @param $errcontext
-     * @throws ErrorException
-     */
-    public static function handleError($errno, $errstr, $errfile, $errline, $errcontext) {
-        throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
-    }
-
-    /**
-     * @param $ex
-     */
-    public static function handleException($ex) {
-        if (php_sapi_name() === 'cli') {
-            echo "ERROR: " . $ex->getMessage();
-        }
-        else {
-            if ($ex instanceof RouteNotFoundException) {
-                http_response_code(404);
-            }
-            else {
-                http_response_code(500);
-            }
-            echo "ERROR: " . $ex->getMessage();
-            echo "<pre>";
-            echo "## " . $ex->getFile() . "(" . $ex->getLine() . ")<br>";
-            echo print_r($ex->getTraceAsString(), true);
-            echo "</pre>";
-        }
     }
 }

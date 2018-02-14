@@ -13,6 +13,6 @@ abstract class Properties extends Facade {
     }
 
     protected static function createDefaultFacadeImplementation() {
-        return new FilePropertiesManager(Application::getConfigPath());
+        return new FilePropertiesManager(Application::getBasePath() . DIRECTORY_SEPARATOR . "config");
     }
 }
