@@ -9,6 +9,16 @@ if (!function_exists('app')) {
     }
 }
 
+if (!function_exists('controller')) {
+    /**
+     * @param $controllerClass
+     * @return mixed
+     */
+    function controller($controllerClass) {
+        return \NeoPHP\Core\Controllers\Controllers::getController($controllerClass);
+    }
+}
+
 if (!function_exists('config')) {
     /**
      * @param $key

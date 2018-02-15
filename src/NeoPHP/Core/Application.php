@@ -3,7 +3,6 @@
 namespace NeoPHP\Core;
 
 use Exception;
-use NeoPHP\Core\Controllers\Controllers;
 
 /**
  * Class Application
@@ -96,7 +95,7 @@ class Application {
         $actionParts = explode("@", $action);
         $controllerClass = $actionParts[0];
         $controllerMethodName = sizeof($actionParts) > 1 ? $actionParts[1] : "index";
-        $controller = Controllers::getController($controllerClass);
+        $controller = controller($controllerClass);
         if (method_exists($controller, $controllerMethodName)) {
             $controllerMethodParams = [];
             $controllerMethod = new \ReflectionMethod($controller, $controllerMethodName);
