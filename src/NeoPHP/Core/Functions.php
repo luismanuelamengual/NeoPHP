@@ -49,22 +49,15 @@ if (!function_exists('handleException')) {
      * @param $ex
      */
     function handleException($ex) {
-        if (php_sapi_name() === 'cli') {
-            echo "ERROR: " . $ex->getMessage();
+
+        $whoops = new \Whoops\Run;
+        if (config("app.debug")) {
+            $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
         }
         else {
-            if ($ex instanceof RouteNotFoundException) {
-                http_response_code(404);
-            }
-            else {
-                http_response_code(500);
-            }
-            echo "ERROR: " . $ex->getMessage();
-            echo "<pre>";
-            echo "## " . $ex->getFile() . "(" . $ex->getLine() . ")<br>";
-            echo print_r($ex->getTraceAsString(), true);
-            echo "</pre>";
+            $whoops->pushHandler(new \Whoops\Handler\PlainTextHandler());
         }
+        $whoops->handleException($ex);
     }
 }
 

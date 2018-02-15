@@ -29,6 +29,8 @@ class Application {
      * Application constructor.
      */
     private function __construct() {
+        set_error_handler("handleError", E_ALL | E_STRICT);
+        set_exception_handler("handleException");
     }
 
     /**
@@ -49,19 +51,6 @@ class Application {
      * @throws Exception
      */
     public function init() {
-
-        //register error handlers
-        if (config("app.debug") === true) {
-            $whoops = new \Whoops\Run;
-            $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
-            $whoops->register();
-        }
-        else {
-            set_error_handler("handleError", E_ALL | E_STRICT);
-            set_exception_handler("handleException");
-        }
-
-        //execute boot actions
         $bootActions = config("app.bootActions", []);
         foreach ($bootActions as $bootAction) {
             $this->execute($bootAction);
