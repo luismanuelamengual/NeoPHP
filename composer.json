@@ -20,7 +20,7 @@
   },
   "autoload": {
     "files": [
-      "src/NeoPHP/Core/Functions.php"
+      "src/NeoPHP/Core/Utils/helpers.php"
     ],
     "psr-4": { "": "src/" }
   },

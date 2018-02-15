@@ -1,6 +1,6 @@
 <?php
 
-namespace NeoPHP\Core\Controllers;
+namespace NeoPHP\Core;
 
 /**
  * Class Controllers
@@ -14,7 +14,7 @@ abstract class Controllers {
      * @param $controllerClass
      * @return mixed
      */
-    public static function getController($controllerClass) {
+    public static function get($controllerClass) {
         if (!isset(self::$controllers[$controllerClass])) {
             self::$controllers[$controllerClass] = new $controllerClass;
         }

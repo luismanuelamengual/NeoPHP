@@ -15,7 +15,7 @@ if (!function_exists('controller')) {
      * @return mixed
      */
     function controller($controllerClass) {
-        return \NeoPHP\Core\Controllers\Controllers::getController($controllerClass);
+        return \NeoPHP\Core\Controllers::get($controllerClass);
     }
 }
 
