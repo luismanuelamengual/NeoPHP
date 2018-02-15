@@ -1,5 +1,14 @@
 <?php
 
+if (!function_exists('app')) {
+    /**
+     * @return \NeoPHP\Core\Application
+     */
+    function app() {
+        return \NeoPHP\Core\Application::getInstance();
+    }
+}
+
 if (!function_exists('config')) {
     /**
      * @param $key

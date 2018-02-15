@@ -2,7 +2,6 @@
 
 namespace NeoPHP\Core\Facades;
 
-use NeoPHP\Core\Application;
 use RuntimeException;
 
 /**
@@ -43,7 +42,7 @@ abstract class Facade {
     private static function createInstance() {
         $instance = null;
         $facadeClass = static::getFacadeClass();
-        $facadeImplementation = Application::getFacadeImpl($facadeClass);
+        $facadeImplementation = app()->getFacadeImpl($facadeClass);
         if ($facadeImplementation != null) {
             if (is_callable($facadeImplementation)) {
                 $instance = call_user_func($facadeImplementation);

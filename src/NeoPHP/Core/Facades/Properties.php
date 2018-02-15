@@ -4,7 +4,6 @@ namespace NeoPHP\Core\Facades;
 
 use NeoPHP\Config\FilePropertiesManager;
 use NeoPHP\Config\PropertiesManager;
-use NeoPHP\Core\Application;
 
 /**
  * Class Properties
@@ -23,6 +22,6 @@ abstract class Properties extends Facade {
      * @return FilePropertiesManager|void
      */
     protected static function createDefaultFacadeImplementation() {
-        return new FilePropertiesManager(Application::getBasePath() . DIRECTORY_SEPARATOR . "config");
+        return new FilePropertiesManager(app()->getBasePath() . DIRECTORY_SEPARATOR . "config");
     }
 }
