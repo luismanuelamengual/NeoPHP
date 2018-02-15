@@ -26,7 +26,7 @@ if (!function_exists('config')) {
      * @return mixed
      */
     function config($key, $defaultValue=null) {
-        return \NeoPHP\Core\Facades\Properties::get($key, $defaultValue);
+        return \NeoPHP\Core\Properties::get($key, $defaultValue);
     }
 }
 

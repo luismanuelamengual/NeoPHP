@@ -13,7 +13,6 @@ class Application {
     private static $instance;
 
     private $basePath;
-    private $facades = [];
 
     /**
      * @return Application
@@ -55,22 +54,6 @@ class Application {
         foreach ($bootActions as $bootAction) {
             $this->execute($bootAction);
         }
-    }
-
-    /**
-     * @param $facadeName
-     * @param $implementation
-     */
-    public function registerFacadeImpl ($facadeName, $implementation) {
-        $this->facades[$facadeName] = $implementation;
-    }
-
-    /**
-     * @param $facadeName
-     * @return mixed
-     */
-    public function getFacadeImpl ($facadeName) {
-        return isset($this->facades[$facadeName])? $this->facades[$facadeName] : null;
     }
 
     /**

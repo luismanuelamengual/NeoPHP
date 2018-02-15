@@ -4,6 +4,8 @@ namespace NeoPHP\Http;
 
 final class Request {
 
+    const PATH_SEPARATOR = "/";
+
     const METHOD_GET = "GET";
     const METHOD_PUT = "PUT";
     const METHOD_POST = "POST";
@@ -14,6 +16,12 @@ final class Request {
 
     private static $instance;
 
+    /**
+     * Request constructor.
+     */
+    private function __construct() {
+    }
+
     public static function getInstance() {
         if (!isset(self::$instance))
             self::$instance = new self;
@@ -21,7 +29,11 @@ final class Request {
     }
 
     public function getParameters() {
-        return Parameters::getInstance();
+        return $_REQUEST;
+    }
+
+    public function getParameter($name) {
+        return isset($_REQUEST[$name]) ? $_REQUEST[$name] : null;
     }
 
     public function getHeaders() {
@@ -102,6 +114,27 @@ final class Request {
 
     public function getUri() {
         return $_SERVER["REQUEST_URI"];
+    }
+
+    public function getPath() {
+        if (!isset($this->path)) {
+            $this->path = "";
+            if (!empty($_SERVER["REDIRECT_URL"])) {
+                $this->path = $_SERVER["REDIRECT_URL"];
+                if (!empty($_SERVER["CONTEXT_PREFIX"])) {
+                    $this->path = substr($this->path, strlen($_SERVER["CONTEXT_PREFIX"]));
+                }
+            }
+            $this->path = trim($this->path, PATH_SEPARATOR);
+        }
+        return $this->path;
+    }
+
+    public function getPathParts() {
+        if (!isset($this->pathParts)) {
+            $this->pathParts = explode(PATH_SEPARATOR, $this->getPath());
+        }
+        return $this->pathParts;
     }
 
     public function getUserAgent() {
