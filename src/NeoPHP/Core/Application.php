@@ -58,19 +58,19 @@ class Application {
     }
 
     /**
-     * @param $class
+     * @param $facadeName
      * @param $implementation
      */
-    public function registerFacadeImpl ($class, $implementation) {
-        $this->facades[$class] = $implementation;
+    public function registerFacadeImpl ($facadeName, $implementation) {
+        $this->facades[$facadeName] = $implementation;
     }
 
     /**
-     * @param $class
+     * @param $facadeName
      * @return mixed
      */
-    public function getFacadeImpl ($class) {
-        return isset($this->facades[$class])? $this->facades[$class] : null;
+    public function getFacadeImpl ($facadeName) {
+        return isset($this->facades[$facadeName])? $this->facades[$facadeName] : null;
     }
 
     /**

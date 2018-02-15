@@ -3,7 +3,6 @@
 namespace NeoPHP\Core\Facades;
 
 use NeoPHP\Config\FilePropertiesManager;
-use NeoPHP\Config\PropertiesManager;
 
 /**
  * Class Properties
@@ -14,8 +13,8 @@ abstract class Properties extends Facade {
     /**
      * @return string|void
      */
-    protected static function getFacadeClass() {
-        return PropertiesManager::class;
+    protected static function getFacadeName() {
+        return "properties";
     }
 
     /**

@@ -2,8 +2,6 @@
 
 namespace NeoPHP\Core\Facades;
 
-use RuntimeException;
-
 /**
  * Class Facade
  * @package NeoPHP\Core\Facades
@@ -15,7 +13,7 @@ abstract class Facade {
     /**
      * @return mixed|null|void
      */
-    private static function getInstance() {
+    protected static function getInstance() {
         if (!isset(self::$instance)) {
             self::$instance = self::createInstance();
         }
@@ -23,26 +21,12 @@ abstract class Facade {
     }
 
     /**
-     * Get the interface class of the facade
-     */
-    protected static function getFacadeClass() {
-        throw new RuntimeException('Facade does not implement getFacadeClass method.');
-    }
-
-    /**
-     * Get the instance implementation of the facade
-     */
-    protected static function createDefaultFacadeImplementation() {
-        throw new RuntimeException('Facade does not implement createDefaultFacadeImplementation method.');
-    }
-
-    /**
      * @return mixed|null|void
      */
     private static function createInstance() {
         $instance = null;
-        $facadeClass = static::getFacadeClass();
-        $facadeImplementation = app()->getFacadeImpl($facadeClass);
+        $facadeName = static::getFacadeName();
+        $facadeImplementation = app()->getFacadeImpl($facadeName);
         if ($facadeImplementation != null) {
             if (is_callable($facadeImplementation)) {
                 $instance = call_user_func($facadeImplementation);
@@ -53,9 +37,6 @@ abstract class Facade {
         }
         else {
             $instance = static::createDefaultFacadeImplementation();
-        }
-        if (!is_a($instance, $facadeClass)) {
-            throw new RuntimeException("Facade instance must be subclass of $facadeClass !!");
         }
         return $instance;
     }
@@ -68,4 +49,14 @@ abstract class Facade {
     public static function __callStatic($method, $args) {
         return self::getInstance()->$method(...$args);
     }
+
+    /**
+     * Get the interface class of the facade
+     */
+    protected abstract static function getFacadeName();
+
+    /**
+     * Get the instance implementation of the facade
+     */
+    protected abstract static function createDefaultFacadeImplementation();
 }

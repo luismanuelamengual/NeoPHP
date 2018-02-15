@@ -190,7 +190,7 @@ abstract class Routes {
             $response = call_user_func_array($routeAction, $routeParameters);
         }
         else {
-            $response = Application::execute($routeAction, $routeParameters);
+            $response = app()->execute($routeAction, $routeParameters);
         }
         return $response;
     }
