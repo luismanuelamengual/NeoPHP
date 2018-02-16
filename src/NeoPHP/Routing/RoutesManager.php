@@ -3,10 +3,10 @@
 namespace NeoPHP\Routing;
 
 /**
- * Class RoutesCollection
+ * Class RoutesManager
  * @package NeoPHP\Routing
  */
-abstract class RoutesCollection {
+abstract class RoutesManager {
 
     /**
      * @param $method

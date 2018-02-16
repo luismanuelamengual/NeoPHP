@@ -5,28 +5,22 @@ namespace NeoPHP\Database;
 use PDO;
 use stdClass;
 
-class ConnectionQuery {
+class Query {
 
-    private $connection;
-    private $sql;
+    private $table;
+    private $selectFields = [];
+    private $whereCondition = null;
+    private $havingCondition = null;
+    private $orderByFields = [];
+    private $groupByFields = [];
+    private $joins = [];
+    private $limit = null;
+    private $offset = null;
 
-    public function __construct(Connection $database, $table = null) {
-        $this->connection = $database;
-        $this->sql = new stdClass();
-        $this->setTable($table);
-    }
-
-    public function reset() {
-        $this->sql = new stdClass();
-    }
-
-    public function addField($field, $fieldFormat = null, $fieldTable = null) {
-        $this->addFields([$field], $fieldFormat, $fieldTable);
+    public function __construct() {
     }
 
     public function addFields(array $fields, $fieldsFormat = null, $fieldsTable = null) {
-        if (empty($this->sql->fields))
-            $this->sql->fields = [];
         foreach ($fields as $field) {
             $fieldName = $field;
             if (!empty($fieldsFormat)) {
@@ -38,6 +32,10 @@ class ConnectionQuery {
             $this->sql->fields[] = $fieldName;
         }
         return $this;
+    }
+
+    public function addField($field, $alias = null, $table = null) {
+        $this->fields[] = $field;
     }
 
     public function setTable($table) {

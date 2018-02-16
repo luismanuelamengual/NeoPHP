@@ -15,7 +15,7 @@ if (!function_exists('controller')) {
      * @return mixed
      */
     function controller($controllerClass) {
-        return \NeoPHP\Core\Controllers::get($controllerClass);
+        return \NeoPHP\Core\Controllers\Controllers::get($controllerClass);
     }
 }
 
@@ -26,7 +26,7 @@ if (!function_exists('config')) {
      * @return mixed
      */
     function config($key, $defaultValue=null) {
-        return \NeoPHP\Core\Properties::get($key, $defaultValue);
+        return \NeoPHP\Config\Properties::get($key, $defaultValue);
     }
 }
 

@@ -6,7 +6,7 @@ namespace NeoPHP\Routing;
  * Class DefaultRoutesCollection
  * @package NeoPHP\Routing
  */
-class DefaultRoutesCollection extends RoutesCollection {
+class DefaultRoutesManager extends RoutesManager {
 
     const ROUTE_ACTION_KEY = "__routeAction";
 

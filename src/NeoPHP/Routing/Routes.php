@@ -1,11 +1,8 @@
 <?php
 
-namespace NeoPHP\Core;
+namespace NeoPHP\Routing;
 
 use NeoPHP\Http\Request;
-use NeoPHP\Routing\DefaultRoutesCollection;
-use NeoPHP\Routing\Route;
-use NeoPHP\Routing\RouteNotFoundException;
 
 /**
  * Class Routes
@@ -22,10 +19,10 @@ class Routes {
      * Static initialization
      */
     private static function init () {
-        self::$routes = new DefaultRoutesCollection();
-        self::$beforeRoutes = new DefaultRoutesCollection();
-        self::$afterRoutes = new DefaultRoutesCollection();
-        self::$errorRoutes = new DefaultRoutesCollection();
+        self::$routes = new DefaultRoutesManager();
+        self::$beforeRoutes = new DefaultRoutesManager();
+        self::$afterRoutes = new DefaultRoutesManager();
+        self::$errorRoutes = new DefaultRoutesManager();
     }
 
     /**
