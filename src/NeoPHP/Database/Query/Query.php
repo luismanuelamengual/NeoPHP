@@ -19,6 +19,10 @@ class Query {
     public function __construct() {
     }
 
+    public function clearSelectFields() {
+        $this->selectFields = [];
+    }
+
     public function addSelectFields(...$fields) {
         foreach ($fields as $field) {
             $this->addSelectField($field);
@@ -113,6 +117,10 @@ class Query {
         return $this;
     }
 
+    public function clearOrderByFields() {
+        $this->orderByFields = [];
+    }
+
     public function addOrderByFields(...$fields) {
         foreach ($fields as $field) {
             $this->addOrderByField($field);
@@ -140,6 +148,10 @@ class Query {
         return $this->orderByFields;
     }
 
+    public function clearGroupByFields() {
+        $this->groupByFields = [];
+    }
+
     public function addGroupByFields(...$fields) {
         foreach ($fields as $field) {
             $this->addGroupByField($field);
@@ -154,5 +166,17 @@ class Query {
 
     public function getGroupByFields(): array {
         return $this->groupByFields;
+    }
+
+    public function getJoins () {
+        return $this->joins;
+    }
+
+    public function clearJoins () {
+        $this->joins = [];
+    }
+
+    public function addJoin (...$arguments) {
+
     }
 }
