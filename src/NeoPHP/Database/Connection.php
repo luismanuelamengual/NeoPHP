@@ -115,7 +115,7 @@ class Connection {
      * @throws Exception
      */
     public final function query($sql, array $bindings = []) {
-        $sqlSentence = $sql . (!empty($bindings) ? " [" . implode(",", $bindings) . "]" : "");
+        $sqlSentence = $this->getSqlSentence($sql, $bindings);
         $queryStatement = null;
         if (empty($bindings)) {
             $queryStatement = $this->pdo->query($sql);
@@ -146,7 +146,7 @@ class Connection {
      * @throws Exception
      */
     public final function exec($sql, array $bindings = []) {
-        $sqlSentence = $sql . (!empty($bindings) ? " [" . implode(",", $bindings) . "]" : "");
+        $sqlSentence = $this->getSqlSentence($sql, $bindings);
         $affectedRows = false;
         if (!$this->readOnly) {
             if (empty($bindings)) {
@@ -171,5 +171,21 @@ class Connection {
             getLogger()->debug("SQL: $sqlSentence");
         }
         return $affectedRows;
+    }
+
+    /**
+     * @param $sql
+     * @param array $bindings
+     * @return mixed
+     */
+    private function getSqlSentence ($sql, array $bindings = []) {
+        $sqlSentence = $sql;
+        foreach ($bindings as $key=>$value) {
+            if (!is_numeric($value) && !is_bool($value)) {
+                $value = "'$value'";
+            }
+            $sqlSentence = str_replace(":$key", $value, $sqlSentence);
+        }
+        return $sqlSentence;
     }
 }
