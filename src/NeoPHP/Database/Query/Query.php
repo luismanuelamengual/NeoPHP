@@ -52,11 +52,6 @@ class Query {
         return $this->selectFields;
     }
 
-    public function setSelectFields(array $selectFields) {
-        $this->selectFields = $selectFields;
-        return $this;
-    }
-
     public function setTable($table) {
         $this->table = $table;
         return $this;
@@ -66,8 +61,8 @@ class Query {
         return $this->table;
     }
 
-    public function setWhereConditions(ConditionGroup $whereConditions) {
-        $this->whereConditions = $whereConditions;
+    public function clearWhereConditions() {
+        $this->whereConditions = null;
         return $this;
     }
 
@@ -92,8 +87,8 @@ class Query {
         return $this;
     }
 
-    public function setHavingConditions(ConditionGroup $havingConditions) {
-        $this->havingConditions = $havingConditions;
+    public function clearHavingConditions() {
+        $this->havingConditions = null;
         return $this;
     }
 
@@ -145,11 +140,6 @@ class Query {
         return $this->orderByFields;
     }
 
-    public function setOrderByFields(array $orderByFields) {
-        $this->orderByFields = $orderByFields;
-        return $this;
-    }
-
     public function addGroupByFields(...$fields) {
         foreach ($fields as $field) {
             $this->addGroupByField($field);
@@ -164,10 +154,5 @@ class Query {
 
     public function getGroupByFields(): array {
         return $this->groupByFields;
-    }
-
-    public function setGroupByFields(array $groupByFields) {
-        $this->groupByFields = $groupByFields;
-        return $this;
     }
 }
