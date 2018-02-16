@@ -176,6 +176,7 @@ class Query {
 
     public function clearJoins () {
         $this->joins = [];
+        return $this;
     }
 
     public function addJoin (...$joinArgument) {
@@ -201,5 +202,24 @@ class Query {
         if ($joinObj != null) {
             $this->joins[] = $joinObj;
         }
+        return $this;
+    }
+
+    public function getLimit() {
+        return $this->limit;
+    }
+
+    public function setLimit($limit) {
+        $this->limit = $limit;
+        return $this;
+    }
+
+    public function getOffset() {
+        return $this->offset;
+    }
+
+    public function setOffset($offset) {
+        $this->offset = $offset;
+        return $this;
     }
 }
