@@ -8,6 +8,9 @@ namespace NeoPHP\Database\Query;
  */
 class ConditionGroup {
 
+    const CONNECTOR_AND = "AND";
+    const CONNECTOR_OR = "OR";
+
     private $conditions = [];
     private $connector;
 
@@ -15,7 +18,7 @@ class ConditionGroup {
      * ConditionGroup constructor.
      * @param string $connector
      */
-    public function __construct($connector="AND") {
+    public function __construct($connector=self::CONNECTOR_AND) {
         $this->connector = $connector;
     }
 
@@ -28,9 +31,11 @@ class ConditionGroup {
 
     /**
      * @param string $connector
+     * @return ConditionGroup
      */
     public function setConnector(string $connector) {
         $this->connector = $connector;
+        return $this;
     }
 
     /**
@@ -42,9 +47,11 @@ class ConditionGroup {
 
     /**
      * @param array $conditions
+     * @return ConditionGroup
      */
     public function setConditions(array $conditions) {
         $this->conditions = $conditions;
+        return $this;
     }
 
     /**
@@ -52,10 +59,12 @@ class ConditionGroup {
      */
     public function clearConditions() {
         $this->conditions = [];
+        return $this;
     }
 
     /**
      * @param array ...$arguments
+     * @return ConditionGroup
      */
     public function addCondition(...$arguments) {
         $condition = null;
@@ -76,5 +85,6 @@ class ConditionGroup {
                 break;
         }
         $this->conditions[] = $condition;
+        return $this;
     }
 }

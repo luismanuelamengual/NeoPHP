@@ -170,5 +170,4 @@ class Query {
         $this->groupByFields = $groupByFields;
         return $this;
     }
-
 }
