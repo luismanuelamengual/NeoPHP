@@ -1,10 +1,6 @@
 <?php
 
-namespace NeoPHP\Database;
-
-use NeoPHP\Database\Query\ConditionGroup;
-use NeoPHP\Database\Query\Join;
-use NeoPHP\Database\Query\RawValue;
+namespace NeoPHP\Database\Query;
 
 class Query {
 
