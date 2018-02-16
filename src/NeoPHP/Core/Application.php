@@ -50,7 +50,7 @@ class Application {
      * @throws Exception
      */
     public function init() {
-        $bootActions = config("app.bootActions", []);
+        $bootActions = getProperty("app.bootActions", []);
         foreach ($bootActions as $bootAction) {
             $this->execute($bootAction);
         }
@@ -67,7 +67,7 @@ class Application {
         $actionParts = explode("@", $action);
         $controllerClass = $actionParts[0];
         $controllerMethodName = sizeof($actionParts) > 1 ? $actionParts[1] : "index";
-        $controller = controller($controllerClass);
+        $controller = getController($controllerClass);
         if (method_exists($controller, $controllerMethodName)) {
             $controllerMethodParams = [];
             $controllerMethod = new \ReflectionMethod($controller, $controllerMethodName);

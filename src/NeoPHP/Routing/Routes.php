@@ -155,7 +155,7 @@ class Routes {
             $result = call_user_func($route->getAction(), $route->getParameters());
         }
         else {
-            $result = app()->execute($route->getAction(), $route->getParameters());
+            $result = getApp()->execute($route->getAction(), $route->getParameters());
         }
         return $result;
     }

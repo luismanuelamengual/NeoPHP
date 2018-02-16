@@ -1,31 +1,31 @@
 <?php
 
-if (!function_exists('app')) {
+if (!function_exists('getApp')) {
     /**
      * @return \NeoPHP\Core\Application
      */
-    function app() {
+    function getApp() {
         return \NeoPHP\Core\Application::getInstance();
     }
 }
 
-if (!function_exists('controller')) {
+if (!function_exists('getController')) {
     /**
      * @param $controllerClass
      * @return mixed
      */
-    function controller($controllerClass) {
+    function getController($controllerClass) {
         return \NeoPHP\Core\Controllers\Controllers::get($controllerClass);
     }
 }
 
-if (!function_exists('config')) {
+if (!function_exists('getProperty')) {
     /**
      * @param $key
      * @param null $defaultValue
      * @return mixed
      */
-    function config($key, $defaultValue=null) {
+    function getProperty($key, $defaultValue=null) {
         return \NeoPHP\Config\Properties::get($key, $defaultValue);
     }
 }
@@ -62,7 +62,7 @@ if (!function_exists('handleException')) {
 
         getLogger()->error($ex);
         $whoops = new \Whoops\Run;
-        if (config("app.debug")) {
+        if (getProperty("app.debug")) {
             $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
         }
         else {
