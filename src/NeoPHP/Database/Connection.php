@@ -133,7 +133,8 @@ class Connection {
                 throw new Exception ("Unable to execute prepared statement \"" . $sqlSentence . "\" " . $queryStatement->errorInfo()[2]);
             }
         }
-        return $queryStatement;
+
+        return $queryStatement->fetchAll(PDO::FETCH_OBJ);
     }
 
     /**

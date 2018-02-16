@@ -13,10 +13,8 @@
   ],
   "require": {
     "php": ">=7.0",
-    "league/flysystem": "~1.0",
-    "monolog/monolog": "~1.12",
-    "nesbot/carbon": "~1.20",
-    "filp/whoops": "^2.1.14"
+    "filp/whoops": "^2.1.14",
+    "theorchard/monolog-cascade": "^0.5.0"
   },
   "autoload": {
     "files": [
