@@ -3,7 +3,7 @@
 namespace NeoPHP\Routing;
 
 /**
- * Class DefaultRoutesCollection
+ * Class DefaultRoutesManager
  * @package NeoPHP\Routing
  */
 class DefaultRoutesManager extends RoutesManager {
