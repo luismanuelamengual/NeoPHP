@@ -30,6 +30,16 @@ if (!function_exists('config')) {
     }
 }
 
+if (!function_exists('getLogger')) {
+    /**
+     * @param null $loggerName
+     * @return \Monolog\Logger
+     */
+    function getLogger($loggerName=null) {
+        return \NeoPHP\Log\Loggers::get($loggerName);
+    }
+}
+
 if (!function_exists('handleError')) {
     /**
      * @param $errno
@@ -50,6 +60,7 @@ if (!function_exists('handleException')) {
      */
     function handleException($ex) {
 
+        getLogger()->error($ex);
         $whoops = new \Whoops\Run;
         if (config("app.debug")) {
             $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
