@@ -3,6 +3,8 @@
 namespace NeoPHP\Database;
 
 use NeoPHP\Database\Query\ConditionGroup;
+use NeoPHP\Database\Query\Join;
+use NeoPHP\Database\Query\RawValue;
 
 class Query {
 
@@ -176,7 +178,28 @@ class Query {
         $this->joins = [];
     }
 
-    public function addJoin (...$arguments) {
-
+    public function addJoin (...$joinArgument) {
+        $joinObj = null;
+        switch (sizeof($joinArgument)) {
+            case 1:
+                if (is_a($joinArgument[0], Join::class)) {
+                    $joinObj = $joinArgument[0];
+                }
+                break;
+            case 3:
+            case 4:
+                $tableName = $joinArgument[0];
+                $originField = $joinArgument[1];
+                $destinationField = new RawValue($joinArgument[2]);
+                $joinObj = new Join($tableName);
+                if (isset($joinArgument[3])) {
+                    $joinObj->setType($joinArgument[3]);
+                }
+                $joinObj->addCondition($originField, $destinationField);
+                break;
+        }
+        if ($joinObj != null) {
+            $this->joins[] = $joinObj;
+        }
     }
 }
