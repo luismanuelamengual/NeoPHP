@@ -111,7 +111,7 @@ class Connection {
     /**
      * @param $sql
      * @param array $bindings
-     * @return null|PDOStatement
+     * @return array
      * @throws Exception
      */
     public final function query($sql, array $bindings = []) {
@@ -133,7 +133,9 @@ class Connection {
                 throw new Exception ("Unable to execute prepared statement \"" . $sqlSentence . "\" " . $queryStatement->errorInfo()[2]);
             }
         }
-
+        if (getProperty("app.debug")) {
+            getLogger()->debug("SQL: $sqlSentence");
+        }
         return $queryStatement->fetchAll(PDO::FETCH_OBJ);
     }
 
@@ -164,6 +166,9 @@ class Connection {
                 }
                 $affectedRows = $preparedStatement->rowCount();
             }
+        }
+        if (getProperty("app.debug")) {
+            getLogger()->debug("SQL: $sqlSentence");
         }
         return $affectedRows;
     }

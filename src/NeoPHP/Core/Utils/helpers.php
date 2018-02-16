@@ -1,11 +1,21 @@
 <?php
 
+if (!function_exists('createApp')) {
+    /**
+     * @param $basePath
+     * @return \NeoPHP\Core\Application
+     */
+    function createApp($basePath) {
+        return \NeoPHP\Core\Application::create($basePath);
+    }
+}
+
 if (!function_exists('getApp')) {
     /**
      * @return \NeoPHP\Core\Application
      */
     function getApp() {
-        return \NeoPHP\Core\Application::getInstance();
+        return \NeoPHP\Core\Application::get();
     }
 }
 

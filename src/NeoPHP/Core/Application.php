@@ -13,21 +13,30 @@ class Application {
     private static $instance;
 
     private $basePath;
+    private $storagePath;
+
+    /**
+     * @param $basePath
+     * @return Application
+     */
+    public static function create($basePath) {
+        self::$instance = new Application($basePath);
+        return self::$instance;
+    }
 
     /**
      * @return Application
      */
-    public static function getInstance() {
-        if (!isset(self::$instance)) {
-            self::$instance = new Application();
-        }
+    public static function get() {
         return self::$instance;
     }
 
     /**
      * Application constructor.
+     * @param $basePath
      */
-    private function __construct() {
+    private function __construct($basePath) {
+        $this->basePath = $basePath;
         set_error_handler("handleError", E_ALL | E_STRICT);
         set_exception_handler("handleException");
     }
@@ -40,10 +49,13 @@ class Application {
     }
 
     /**
-     * @param mixed $basePath
+     * Returns the storage path
      */
-    public function setBasePath($basePath) {
-        $this->basePath = $basePath;
+    public function getStoragePath() {
+        if (!isset($this->storagePath)) {
+            $this->storagePath = getProperty("app.storagePath", $this->basePath . DIRECTORY_SEPARATOR . "storage");
+        }
+        return $this->storagePath;
     }
 
     /**
