@@ -6,7 +6,7 @@ use NeoPHP\Http\Request;
 
 /**
  * Class Routes
- * @package NeoPHP\Core
+ * @package NeoPHP\Routing
  */
 class Routes {
 
