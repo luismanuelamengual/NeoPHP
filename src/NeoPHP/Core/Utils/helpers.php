@@ -72,13 +72,20 @@ if (!function_exists('handleException')) {
 
         getLogger()->error($ex);
 
-        if (getProperty("app.debug")) {
+        if (php_sapi_name() == "cli") {
             $whoops = new \Whoops\Run;
-            $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
+            $whoops->pushHandler(new \Whoops\Handler\PlainTextHandler());
             $whoops->handleException($ex);
         }
         else {
-            handleErrorCode(500);
+            if (getProperty("app.debug")) {
+                $whoops = new \Whoops\Run;
+                $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
+                $whoops->handleException($ex);
+            }
+            else {
+                handleErrorCode(500);
+            }
         }
     }
 }
