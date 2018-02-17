@@ -5,7 +5,6 @@ namespace NeoPHP\Database;
 use Closure;
 use Exception;
 use PDO;
-use PDOStatement;
 
 /**
  * Class Connection
@@ -111,6 +110,22 @@ class Connection {
     /**
      * @param $sql
      * @param array $bindings
+     * @return mixed
+     */
+    private function getSqlSentence ($sql, array $bindings = []) {
+        $sqlSentence = $sql;
+        foreach ($bindings as $key=>$value) {
+            if (!is_numeric($value) && !is_bool($value)) {
+                $value = "'$value'";
+            }
+            $sqlSentence = str_replace(":$key", $value, $sqlSentence);
+        }
+        return $sqlSentence;
+    }
+
+    /**
+     * @param $sql
+     * @param array $bindings
      * @return array
      * @throws Exception
      */
@@ -171,21 +186,5 @@ class Connection {
             getLogger()->debug("SQL: $sqlSentence");
         }
         return $affectedRows;
-    }
-
-    /**
-     * @param $sql
-     * @param array $bindings
-     * @return mixed
-     */
-    private function getSqlSentence ($sql, array $bindings = []) {
-        $sqlSentence = $sql;
-        foreach ($bindings as $key=>$value) {
-            if (!is_numeric($value) && !is_bool($value)) {
-                $value = "'$value'";
-            }
-            $sqlSentence = str_replace(":$key", $value, $sqlSentence);
-        }
-        return $sqlSentence;
     }
 }

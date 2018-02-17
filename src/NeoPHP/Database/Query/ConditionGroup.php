@@ -70,18 +70,27 @@ class ConditionGroup {
         $condition = null;
         switch (sizeof($arguments)) {
             case 1:
-                $condition = $arguments[0];
+                if (is_array($arguments[0])) {
+                    $condition = $arguments[0];
+                }
+                else if (is_string($arguments[0])) {
+                    $condition = [
+                        "raw" => $arguments[0]
+                    ];
+                }
                 break;
             case 2:
-                $condition = new \stdClass();
-                $condition->field = $arguments[0];
-                $condition->value = $arguments[1];
+                $condition = [
+                    "field" => $arguments[0],
+                    "value" => $arguments[1]
+                ];
                 break;
             case 3:
-                $condition = new \stdClass();
-                $condition->field = $arguments[0];
-                $condition->operator = $arguments[1];
-                $condition->value = $arguments[2];
+                $condition = [
+                    "field" => $arguments[0],
+                    "operator" => $arguments[1],
+                    "value" => $arguments[2]
+                ];
                 break;
         }
         $this->conditions[] = $condition;

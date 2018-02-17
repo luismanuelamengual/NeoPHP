@@ -2,5 +2,6 @@
 
 namespace NeoPHP\Database\Query;
 
-abstract class Query {
+class InsertQuery extends Query {
+
 }

@@ -20,7 +20,8 @@ class Join {
 
     /**
      * Join constructor.
-     * @param $type
+     * @param $table
+     * @param string $type
      */
     public function __construct($table, $type=self::TYPE_INNER_JOIN) {
         $this->table = $table;
