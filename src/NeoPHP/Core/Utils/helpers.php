@@ -71,14 +71,25 @@ if (!function_exists('handleException')) {
     function handleException($ex) {
 
         getLogger()->error($ex);
-        $whoops = new \Whoops\Run;
+
         if (getProperty("app.debug")) {
+            $whoops = new \Whoops\Run;
             $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
+            $whoops->handleException($ex);
         }
         else {
-            $whoops->pushHandler(new \Whoops\Handler\PlainTextHandler());
+            handleErrorCode(500);
         }
-        $whoops->handleException($ex);
     }
 }
 
+if (!function_exists('handleErrorCode')) {
+    /**
+     * @param $code
+     */
+    function handleErrorCode($code) {
+
+        http_response_code($code);
+        include __DIR__ . DIRECTORY_SEPARATOR . "errorPage.php";
+    }
+}

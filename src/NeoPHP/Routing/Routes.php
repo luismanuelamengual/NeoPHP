@@ -140,7 +140,12 @@ class Routes {
                 }
             }
             else {
-                throw $ex;
+                if ($ex instanceof RouteNotFoundException) {
+                    handleErrorCode(404);
+                }
+                else {
+                    throw $ex;
+                }
             }
         }
     }
