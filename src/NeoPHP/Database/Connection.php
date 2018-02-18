@@ -4,6 +4,9 @@ namespace NeoPHP\Database;
 
 use Closure;
 use Exception;
+use NeoPHP\Database\Builder\BaseQueryBuilder;
+use NeoPHP\Database\Query\Query;
+use NeoPHP\Database\Query\SelectQuery;
 use PDO;
 
 /**
@@ -14,6 +17,7 @@ class Connection {
 
     private $pdo;
     private $readOnly;
+    private $queryBuilder;
 
     /**
      * Connection constructor.
@@ -22,6 +26,7 @@ class Connection {
     public function __construct(PDO $pdo) {
         $this->pdo = $pdo;
         $this->readOnly = false;
+        $this->queryBuilder = new BaseQueryBuilder();
     }
 
     /**
@@ -186,5 +191,23 @@ class Connection {
             getLogger()->debug("SQL: $sqlSentence");
         }
         return $affectedRows;
+    }
+
+    /**
+     * @param Query $query
+     * @return array|bool|int|null
+     * @throws Exception
+     */
+    public final function execQuery (Query $query) {
+        $result = null;
+        $bindings = [];
+        $sql = $this->queryBuilder->buildSql($query, $bindings);
+        if ($query instanceof SelectQuery) {
+            $result = $this->query($sql, $bindings);
+        }
+        else {
+            $result = $this->exec($sql, $bindings);
+        }
+        return $result;
     }
 }

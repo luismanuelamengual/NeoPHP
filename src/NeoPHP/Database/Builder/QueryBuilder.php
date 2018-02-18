@@ -2,9 +2,9 @@
 
 namespace NeoPHP\Database\Builder;
 
-use MongoDB\Driver\Query;
+use NeoPHP\Database\Query\Query;
 
 abstract class QueryBuilder {
 
-    public abstract function buildQuery (Query $query, array &$bindings);
+    public abstract function buildSql (Query $query, array &$bindings);
 }

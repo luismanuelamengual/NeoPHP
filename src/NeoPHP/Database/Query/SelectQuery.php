@@ -5,6 +5,7 @@ namespace NeoPHP\Database\Query;
 class SelectQuery extends Query {
 
     private $table;
+    private $modifiers = [];
     private $selectFields = [];
     private $whereConditions = null;
     private $havingConditions = null;
@@ -14,7 +15,26 @@ class SelectQuery extends Query {
     private $limit = null;
     private $offset = null;
 
-    public function __construct() {
+    public function __construct($table="") {
+        $this->table = $table;
+    }
+
+    public function getModifiers(): array {
+        return $this->modifiers;
+    }
+
+    public function setModifiers(array $modifiers) {
+        $this->modifiers = $modifiers;
+    }
+
+    public function addModifiers(...$modifiers) {
+        foreach ($modifiers as $modifier) {
+            $this->addModifier($modifier);
+        }
+    }
+
+    public function addModifier($modifier) {
+        $this->modifiers[] = $modifier;
     }
 
     public function clearSelectFields() {
@@ -23,7 +43,12 @@ class SelectQuery extends Query {
 
     public function addSelectFields(...$fields) {
         foreach ($fields as $field) {
-            $this->addSelectField($field);
+            if (is_array($field)) {
+                call_user_func_array([$this, "addSelectField"], $field);
+            }
+            else {
+                $this->addSelectField($field);
+            }
         }
         return $this;
     }
@@ -32,14 +57,7 @@ class SelectQuery extends Query {
         $field = null;
         switch (sizeof($fieldArguments)) {
             case 1:
-                if (is_array($fieldArguments[0])) {
-                    $field = $fieldArguments[0];
-                }
-                else {
-                    $field = [
-                        "field" => $fieldArguments[0]
-                    ];
-                }
+                $field = $fieldArguments[0];
                 break;
             case 2:
                 $field = [
