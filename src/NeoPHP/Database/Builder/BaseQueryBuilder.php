@@ -3,6 +3,7 @@
 namespace NeoPHP\Database\Builder;
 
 use NeoPHP\Database\Query\ConditionGroup;
+use NeoPHP\Database\Query\Join;
 use NeoPHP\Database\Query\Query;
 use NeoPHP\Database\Query\RawValue;
 use NeoPHP\Database\Query\SelectQuery;
@@ -58,20 +59,7 @@ class BaseQueryBuilder extends QueryBuilder {
                     $sql .= ", ";
                 }
                 $selectField = $selectFields[$i];
-                if (is_string($selectField)) {
-                    $sql .= $selectField;
-                }
-                else if (is_array($selectField)) {
-                    if (isset($selectField["table"])) {
-                        $sql .= $selectField["table"];
-                        $sql .= ".";
-                    }
-                    $sql .= $selectField["field"];
-                    if (isset($selectField["alias"])) {
-                        $sql .= " AS ";
-                        $sql .= $selectField["alias"];
-                    }
-                }
+                $sql .= $this->buildSelectFieldSql($selectField, $bindings);
             }
         }
         return $sql;
@@ -86,57 +74,99 @@ class BaseQueryBuilder extends QueryBuilder {
                     $sql .= " ";
                 }
                 $join = $joins[$i];
+                $sql .= $this->buildJoinSql($join, $bindings);
             }
         }
     }
 
-    protected function buildConditionsSql (ConditionGroup $conditionGroup, array &$bindings) {
-        $sql = null;
+    protected function buildSelectFieldSql ($field, array &$bindings) {
+        $sql = "";
+        if (is_string($field)) {
+            $sql .= $field;
+        }
+        else if (is_array($field)) {
+            if (isset($field["table"])) {
+                $sql .= $field["table"];
+                $sql .= ".";
+            }
+            $sql .= $field["field"];
+            if (isset($field["alias"])) {
+                $sql .= " AS ";
+                $sql .= $field["alias"];
+            }
+        }
+        return $sql;
+    }
+
+    protected function buildJoinSql (Join $join, array &$bindings) {
+        $sql = "";
+        switch ($join->getType()) {
+            case Join::TYPE_JOIN: $sql .= "JOIN"; break;
+            case Join::TYPE_INNER_JOIN: $sql .= "INNER JOIN"; break;
+            case Join::TYPE_OUTER_JOIN: $sql .= "OUTER JOIN"; break;
+            case Join::TYPE_LEFT_JOIN: $sql .= "LEFT JOIN"; break;
+            case Join::TYPE_RIGHT_JOIN: $sql .= "RIGHT JOIN"; break;
+        }
+        $sql .= " " . $join->getTable();
+        if (!$join->getConditions()->isEmpty()) {
+            $sql .= " ON " . $this->buildConditionGroupSql($join->getConditions(), $bindings);
+        }
+        return $sql;
+    }
+
+    protected function buildConditionGroupSql (ConditionGroup $conditionGroup, array &$bindings) {
+        $sql = "";
         $conditions = $conditionGroup->getConditions();
-        if (!empty($conditions)) {
-            $connector = $conditionGroup->getConnector();
-            for ($i = 0; $i < sizeof($conditions); $i++) {
-                if ($i > 0) {
-                    $sql .= " $connector ";
+        $connector = $conditionGroup->getConnector();
+        for ($i = 0; $i < sizeof($conditions); $i++) {
+            if ($i > 0) {
+                $sql .= " $connector ";
+            }
+            $condition = $conditions[$i];
+            if (is_string($condition)) {
+                $sql .= $condition;
+            }
+            else if (is_object($condition)) {
+                if (is_a($condition, ConditionGroup::class)) {
+                    $sql .= "(" . $this->buildConditionGroupSql($condition, $bindings) . ")";
                 }
-                $condition = $conditions[$i];
-                if (is_string($condition)) {
-                    $sql .= $condition;
-                }
-                else if (is_object($condition)) {
-                    if (is_a($condition, ConditionGroup::class)) {
-                        $sql .= "(" . $this->buildConditionsSql($condition, $bindings) . ")";
-                    }
-                }
-                else if (is_array($condition)) {
-                    $operator = $condition["operator"] ?: "=";
-                    $operator = strtoupper($operator);
+            }
+            else if (is_array($condition)) {
+                $operator = $condition["operator"] ?: "=";
+                $operator = strtoupper($operator);
+                $sql .= $condition["field"];
+                $sql .= " $operator";
+                if (isset($condition["value"])) {
                     $value = $condition["value"];
-                    $sql .= $condition["field"];
-                    $sql .= " $operator ";
-                    if (is_object($value)) {
-                        if ($value instanceof SelectQuery) {
-                            $sql .= "(" . $this->buildSelectSql($value, $bindings) . ")";
-                        }
-                        else if ($value instanceof RawValue) {
-                            $sql .= $value->getValue();
-                        }
-                    }
-                    else if (is_array($value)) {
-                        for ($j = 0; $j < sizeof($value); $j++) {
-                            if ($j > 0) {
-                                $sql .= ", ";
-                            }
-                            $sql .= "?";
-                            $bindings[] = $value[$i];
-                        }
-                    }
-                    else {
-                        $sql .= "?";
-                        $bindings[] = $value;
-                    }
+                    $sql .= " " . $this->buildValueSql($value);
                 }
             }
         }
+    }
+
+    protected function buildValueSql ($value, array &$bindings) {
+        $sql = "";
+        if (is_object($value)) {
+            if ($value instanceof SelectQuery) {
+                $sql .= "(" . $this->buildSelectSql($value, $bindings) . ")";
+            }
+            else if ($value instanceof RawValue) {
+                $sql .= $value->getValue();
+            }
+        }
+        else if (is_array($value)) {
+            for ($i = 0; $i < sizeof($value); $i++) {
+                if ($i > 0) {
+                    $sql .= ", ";
+                }
+                $sql .= "?";
+                $bindings[] = $value[$i];
+            }
+        }
+        else {
+            $sql .= "?";
+            $bindings[] = $value;
+        }
+        return $sql;
     }
 }

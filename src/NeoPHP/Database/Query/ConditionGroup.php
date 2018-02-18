@@ -39,6 +39,13 @@ class ConditionGroup {
     }
 
     /**
+     * @return bool
+     */
+    public function isEmpty(): bool {
+        return empty($this->conditions);
+    }
+
+    /**
      * @return array
      */
     public function getConditions(): array {
