@@ -20,35 +20,13 @@ class BaseQueryBuilder extends QueryBuilder {
 
     protected function buildSelectSql (SelectQuery $query, array &$bindings) {
         $sql = "SELECT";
-        $modifiersSql = $this->buildModifiersSql($query, $bindings);
-        if (!empty($modifiersSql)) {
-            $sql .= " $modifiersSql";
-        }
-        $selectFieldsSql = $this->buildSelectFieldsSql($query, $bindings);
-        if (!empty($selectFieldsSql)) {
-            $sql .= " $selectFieldsSql";
-        }
-        $sql .= " FROM ";
-        $sql .= $query->getTable();
-        return $sql;
-    }
-
-    protected function buildModifiersSql (SelectQuery $query, array &$bindings) {
-        $sql = null;
         $modifiers = $query->getModifiers();
         if (!empty($modifiers)) {
-            for ($i = 0; $i < sizeof($modifiers); $i++) {
-                if ($i > 0) {
-                    $sql .= ", ";
-                }
-                $sql .= $modifiers[$i];
+            foreach ($modifiers as $modifier) {
+                $sql .= " $modifier";
             }
         }
-        return $sql;
-    }
-
-    protected function buildSelectFieldsSql (SelectQuery $query, array &$bindings) {
-        $sql = null;
+        $sql .= " ";
         $selectFields = $query->getSelectFields();
         if (empty($selectFields)) {
             $sql = "*";
@@ -62,21 +40,15 @@ class BaseQueryBuilder extends QueryBuilder {
                 $sql .= $this->buildSelectFieldSql($selectField, $bindings);
             }
         }
-        return $sql;
-    }
-
-    protected function buildJoinsSql (SelectQuery $query, array &$bindings) {
-        $sql = null;
+        $sql .= " FROM ";
+        $sql .= $query->getTable();
         $joins = $query->getJoins();
         if (!empty($joins)) {
-            for ($i = 0; $i < sizeof($joins); $i++) {
-                if ($i > 0) {
-                    $sql .= " ";
-                }
-                $join = $joins[$i];
-                $sql .= $this->buildJoinSql($join, $bindings);
+            foreach ($joins as $join) {
+                $sql .= " " . $this->buildJoinSql($join, $bindings);
             }
         }
+        return $sql;
     }
 
     protected function buildSelectFieldSql ($field, array &$bindings) {
