@@ -218,16 +218,16 @@ class SelectQuery extends Query {
                     $joinObj = $joinArgument[0];
                 }
                 break;
-            case 3:
             case 4:
+            case 5:
                 $tableName = $joinArgument[0];
                 $originField = $joinArgument[1];
-                $destinationField = new RawValue($joinArgument[2]);
+                $destinationField = $joinArgument[2];
                 $joinObj = new Join($tableName);
                 if (isset($joinArgument[3])) {
                     $joinObj->setType($joinArgument[3]);
                 }
-                $joinObj->addCondition($originField, $destinationField);
+                $joinObj->addCondition($originField, new RawValue($destinationField));
                 break;
         }
         if ($joinObj != null) {

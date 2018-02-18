@@ -70,14 +70,7 @@ class ConditionGroup {
         $condition = null;
         switch (sizeof($arguments)) {
             case 1:
-                if (is_array($arguments[0])) {
-                    $condition = $arguments[0];
-                }
-                else if (is_string($arguments[0])) {
-                    $condition = [
-                        "raw" => $arguments[0]
-                    ];
-                }
+                $condition = $arguments[0];
                 break;
             case 2:
                 $condition = [

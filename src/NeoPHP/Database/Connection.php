@@ -120,10 +120,7 @@ class Connection {
     private function getSqlSentence ($sql, array $bindings = []) {
         $sqlSentence = $sql;
         foreach ($bindings as $key=>$value) {
-            if (!is_numeric($value) && !is_bool($value)) {
-                $value = "'$value'";
-            }
-            $sqlSentence = str_replace(":$key", $value, $sqlSentence);
+            $sqlSentence = str_replace(":$key", $this->quote($value), $sqlSentence);
         }
         return $sqlSentence;
     }
