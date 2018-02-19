@@ -109,7 +109,7 @@ class BaseQueryBuilder extends QueryBuilder {
         }
         else if (is_array($field)) {
             if (isset($field["table"])) {
-                $sql .= $field["table"];
+                $sql .= $this->buildTableSql($field["table"], $bindings);
                 $sql .= ".";
             }
             $sql .= $field["field"];
@@ -124,7 +124,7 @@ class BaseQueryBuilder extends QueryBuilder {
         }
         else if (is_array($field)) {
             if (isset($field["table"])) {
-                $sql .= $field["table"];
+                $sql .= $this->buildTableSql($field["table"], $bindings);
                 $sql .= ".";
             }
             $sql .= $field["field"];
@@ -143,7 +143,7 @@ class BaseQueryBuilder extends QueryBuilder {
         }
         else if (is_array($field)) {
             if (isset($field["table"])) {
-                $sql .= $field["table"];
+                $sql .= $this->buildTableSql($field["table"], $bindings);
                 $sql .= ".";
             }
             $sql .= $field["field"];
