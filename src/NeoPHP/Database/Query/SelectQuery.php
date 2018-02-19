@@ -95,6 +95,10 @@ class SelectQuery extends Query {
         return $this;
     }
 
+    public function hasWhereConditions() {
+        return isset($this->whereConditions) && !$this->whereConditions->isEmpty();
+    }
+
     public function getWhereConditions(): ConditionGroup {
         if (!isset($this->whereConditions)) {
             $this->whereConditions = new ConditionGroup();
@@ -112,13 +116,17 @@ class SelectQuery extends Query {
     }
 
     public function addWhere(...$arguments) {
-        $this->getWhereConditions()->addCondition($arguments);
+        call_user_func_array([$this->getWhereConditions(), "addCondition"], $arguments);
         return $this;
     }
 
     public function clearHavingConditions() {
         $this->havingConditions = null;
         return $this;
+    }
+
+    public function hasHavingConditions() {
+        return isset($this->havingConditions) && !$this->havingConditions->isEmpty();
     }
 
     public function getHavingConditions(): ConditionGroup {
@@ -138,7 +146,7 @@ class SelectQuery extends Query {
     }
 
     public function addHaving(...$arguments) {
-        $this->getHavingConditions()->addCondition($arguments);
+        call_user_func_array([$this->getHavingConditions(), "addCondition"], $arguments);
         return $this;
     }
 

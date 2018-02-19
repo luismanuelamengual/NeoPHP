@@ -29,7 +29,7 @@ class BaseQueryBuilder extends QueryBuilder {
         $sql .= " ";
         $selectFields = $query->getSelectFields();
         if (empty($selectFields)) {
-            $sql = "*";
+            $sql .= "*";
         }
         else {
             for ($i = 0; $i < sizeof($selectFields); $i++) {
@@ -47,6 +47,10 @@ class BaseQueryBuilder extends QueryBuilder {
             foreach ($joins as $join) {
                 $sql .= " " . $this->buildJoinSql($join, $bindings);
             }
+        }
+        if ($query->hasWhereConditions()) {
+            $sql .= " WHERE ";
+            $sql .= $this->buildConditionGroupSql($query->getWhereConditions(), $bindings);
         }
         return $sql;
     }
@@ -104,13 +108,13 @@ class BaseQueryBuilder extends QueryBuilder {
                 }
             }
             else if (is_array($condition)) {
-                $operator = $condition["operator"] ?: "=";
+                $operator = isset($condition["operator"])? $condition["operator"] : "=";
                 $operator = strtoupper($operator);
                 $sql .= $condition["field"];
                 $sql .= " $operator";
                 if (isset($condition["value"])) {
                     $value = $condition["value"];
-                    $sql .= " " . $this->buildValueSql($value);
+                    $sql .= " " . $this->buildValueSql($value, $bindings);
                 }
             }
         }
