@@ -22,6 +22,22 @@ trait JoinsTrait {
         return $this;
     }
 
+    public function addInnerJoin($table, $originField, $destinationField) {
+        return $this->addJoin($table, $originField, $destinationField, Join::TYPE_INNER_JOIN);
+    }
+
+    public function addOuterJoin($table, $originField, $destinationField) {
+        return $this->addJoin($table, $originField, $destinationField, Join::TYPE_OUTER_JOIN);
+    }
+
+    public function addLeftJoin($table, $originField, $destinationField) {
+        return $this->addJoin($table, $originField, $destinationField, Join::TYPE_LEFT_JOIN);
+    }
+
+    public function addRightJoin($table, $originField, $destinationField) {
+        return $this->addJoin($table, $originField, $destinationField, Join::TYPE_RIGHT_JOIN);
+    }
+
     public function addJoin (...$joinArgument) {
         $joinObj = null;
         switch (sizeof($joinArgument)) {

@@ -23,7 +23,7 @@ class Join {
      * @param $table
      * @param string $type
      */
-    public function __construct($table, $type=self::TYPE_INNER_JOIN) {
+    public function __construct($table, $type=self::TYPE_JOIN) {
         $this->table = $table;
         $this->type = $type;
         $this->conditions = new ConditionGroup();
