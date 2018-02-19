@@ -226,8 +226,8 @@ class SelectQuery extends Query {
                     $joinObj = $joinArgument[0];
                 }
                 break;
+            case 3:
             case 4:
-            case 5:
                 $tableName = $joinArgument[0];
                 $originField = $joinArgument[1];
                 $destinationField = $joinArgument[2];

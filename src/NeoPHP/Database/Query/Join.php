@@ -87,7 +87,7 @@ class Join {
      * @return $this
      */
     public function addCondition(...$arguments) {
-        $this->conditions->addCondition($arguments);
+        call_user_func_array([$this->conditions, "addCondition"], $arguments);
         return $this;
     }
 }
