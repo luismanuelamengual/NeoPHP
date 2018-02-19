@@ -140,6 +140,9 @@ class Connection {
      * @throws Exception
      */
     public final function query($sql, array $bindings = []) {
+        if ($sql instanceof Query) {
+            $sql = $this->queryBuilder->buildSql($sql, $bindings);
+        }
         $startTimestamp = microtime(true);
         $queryStatement = null;
         if (empty($bindings)) {
@@ -173,6 +176,9 @@ class Connection {
      * @throws Exception
      */
     public final function exec($sql, array $bindings = []) {
+        if ($sql instanceof Query) {
+            $sql = $this->queryBuilder->buildSql($sql, $bindings);
+        }
         $startTimestamp = microtime(true);
         $affectedRows = false;
         if (!$this->readOnly) {
@@ -199,23 +205,5 @@ class Connection {
             getLogger()->debug("SQL: " . $this->getSqlSentence($sql, $bindings) . " [Time: " . number_format ($elapsedTime, 4) . ", Affected rows: " . $affectedRows . "]");
         }
         return $affectedRows;
-    }
-
-    /**
-     * @param Query $query
-     * @return array|bool|int|null
-     * @throws Exception
-     */
-    public final function execQuery (Query $query) {
-        $result = null;
-        $bindings = [];
-        $sql = $this->queryBuilder->buildSql($query, $bindings);
-        if ($query instanceof SelectQuery) {
-            $result = $this->query($sql, $bindings);
-        }
-        else {
-            $result = $this->exec($sql, $bindings);
-        }
-        return $result;
     }
 }
