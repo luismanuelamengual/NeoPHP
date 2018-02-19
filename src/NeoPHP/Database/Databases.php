@@ -39,13 +39,4 @@ abstract class Databases {
         }
         return self::$connections[$connectionName];
     }
-
-    /**
-     * @param $sql
-     * @param array $bindings
-     * @return null|\PDOStatement
-     */
-    public static function query($sql, array $bindings = []) {
-        return self::getConnection()->query($sql, $bindings);
-    }
 }

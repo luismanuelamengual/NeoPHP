@@ -66,18 +66,18 @@ class ConnectionTable {
     /**
      * @return mixed
      */
-    public function insert() {
+    public function insert(array $fields = null) {
         $query = new InsertQuery($this->getTable());
-        $query->setFields($this->getFields());
+        $query->setFields($fields != null? $fields : $this->getFields());
         return $this->connection->exec($query);
     }
 
     /**
      * @return mixed
      */
-    public function update() {
+    public function update(array $fields = null) {
         $query = new UpdateQuery($this->getTable());
-        $query->setFields($this->getFields());
+        $query->setFields($fields != null? $fields : $this->getFields());
         $query->setWhereConditions($this->getWhereConditions());
         return $this->connection->exec($query);
     }
