@@ -211,7 +211,7 @@ class Connection {
         $results = $queryStatement->fetchAll(PDO::FETCH_OBJ);
         $elapsedTime = microtime(true) - $startTimestamp;
         if ($this->logQueries) {
-            getLogger()->debug("SQL: " . $this->getSqlSentence($sql, $bindings) . " [Time: " . number_format ($elapsedTime, 4) . ", Results:" . sizeof($results) . "]");
+            getLogger()->debug("SQL: " . $this->getSqlSentence($sql, $bindings) . " [Time: " . number_format ($elapsedTime, 4) . ", Results: " . sizeof($results) . "]");
         }
         return $results;
     }
