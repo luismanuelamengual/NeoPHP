@@ -209,6 +209,7 @@ class BaseQueryBuilder extends QueryBuilder {
             }
         }
         else if (is_array($value)) {
+            $sql .= "(";
             for ($i = 0; $i < sizeof($value); $i++) {
                 if ($i > 0) {
                     $sql .= ", ";
@@ -216,6 +217,7 @@ class BaseQueryBuilder extends QueryBuilder {
                 $sql .= "?";
                 $bindings[] = $value[$i];
             }
+            $sql .= ")";
         }
         else {
             $sql .= "?";
