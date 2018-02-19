@@ -118,6 +118,7 @@ class BaseQueryBuilder extends QueryBuilder {
                 }
             }
         }
+        return $sql;
     }
 
     protected function buildValueSql ($value, array &$bindings) {

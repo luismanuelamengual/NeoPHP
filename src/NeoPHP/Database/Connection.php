@@ -122,7 +122,7 @@ class Connection {
         foreach ($bindings as $key=>$value) {
             $value = $this->quote($value);
             if (is_numeric($key)) {
-                $sqlSentence = str_replace("?", $value, 1);
+                $sqlSentence = preg_replace('/'.preg_quote("?", '/').'/', $value, $sqlSentence, 1);
             }
             else {
                 $sqlSentence = str_replace(":$key", $value, $sqlSentence);
