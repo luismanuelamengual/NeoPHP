@@ -78,6 +78,12 @@ class BaseQueryBuilder extends QueryBuilder {
             $sql .= " HAVING ";
             $sql .= $this->buildConditionGroupSql($query->getHavingConditions(), $bindings);
         }
+        if ($query->getOffset() != null) {
+            $sql .= " OFFSET " . $query->getOffset();
+        }
+        if ($query->getLimit() != null) {
+            $sql .= " LIMIT " . $query->getLimit();
+        }
         return $sql;
     }
 
@@ -164,23 +170,29 @@ class BaseQueryBuilder extends QueryBuilder {
                 $sql .= " $connector ";
             }
             $condition = $conditions[$i];
-            if (is_string($condition)) {
-                $sql .= $condition;
+            $sql .= $this->buildConditionSql($condition, $bindings);
+        }
+        return $sql;
+    }
+
+    protected function buildConditionSql ($condition, array &$bindings) {
+        $sql = "";
+        if (is_string($condition)) {
+            $sql .= $condition;
+        }
+        else if (is_object($condition)) {
+            if (is_a($condition, ConditionGroup::class)) {
+                $sql .= "(" . $this->buildConditionGroupSql($condition, $bindings) . ")";
             }
-            else if (is_object($condition)) {
-                if (is_a($condition, ConditionGroup::class)) {
-                    $sql .= "(" . $this->buildConditionGroupSql($condition, $bindings) . ")";
-                }
-            }
-            else if (is_array($condition)) {
-                $operator = isset($condition["operator"])? $condition["operator"] : "=";
-                $operator = strtoupper($operator);
-                $sql .= $condition["field"];
-                $sql .= " $operator";
-                if (isset($condition["value"])) {
-                    $value = $condition["value"];
-                    $sql .= " " . $this->buildValueSql($value, $bindings);
-                }
+        }
+        else if (is_array($condition)) {
+            $operator = isset($condition["operator"])? $condition["operator"] : "=";
+            $operator = strtoupper($operator);
+            $sql .= $condition["field"];
+            $sql .= " $operator";
+            if (isset($condition["value"])) {
+                $value = $condition["value"];
+                $sql .= " " . $this->buildValueSql($value, $bindings);
             }
         }
         return $sql;
