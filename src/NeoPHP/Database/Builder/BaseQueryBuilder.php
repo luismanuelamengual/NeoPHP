@@ -8,6 +8,7 @@ use NeoPHP\Database\Query\Join;
 use NeoPHP\Database\Query\Query;
 use NeoPHP\Database\Query\RawValue;
 use NeoPHP\Database\Query\SelectQuery;
+use NeoPHP\Database\Query\UpdateQuery;
 
 class BaseQueryBuilder extends QueryBuilder {
 
@@ -18,6 +19,9 @@ class BaseQueryBuilder extends QueryBuilder {
         }
         else if ($query instanceof InsertQuery) {
             $sql = $this->buildInsertSql($query, $bindings);
+        }
+        else if ($query instanceof UpdateQuery) {
+            $sql = $this->buildUpdateSql($query, $bindings);
         }
         return $sql;
     }
@@ -107,6 +111,27 @@ class BaseQueryBuilder extends QueryBuilder {
             $i++;
         }
         $sql .= " ($fieldsSql) VALUES ($valuesSql)";
+        return $sql;
+    }
+
+    protected function buildUpdateSql (UpdateQuery $query, array &$bindings) {
+        $sql = "UPDATE ";
+        $sql .= $this->buildTableSql($query->getTable(), $bindings);
+        $sql .= " SET ";
+        $i = 0;
+        foreach ($query->getFields() as $field => $value) {
+            if ($i > 0) {
+                $sql .= ", ";
+            }
+            $sql .= $field;
+            $sql .= " = ";
+            $sql .= $this->buildValueSql($value, $bindings);
+            $i++;
+        }
+        if ($query->hasWhereConditions()) {
+            $sql .= " WHERE ";
+            $sql .= $this->buildConditionGroupSql($query->getWhereConditions(), $bindings);
+        }
         return $sql;
     }
 
