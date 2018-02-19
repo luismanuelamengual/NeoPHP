@@ -152,6 +152,14 @@ class Connection {
     }
 
     /**
+     * @param $table
+     * @return ConnectionTable
+     */
+    public final function table($table) {
+        return new ConnectionTable($this, $table);
+    }
+
+    /**
      * @param $sql
      * @param array $bindings
      * @return mixed

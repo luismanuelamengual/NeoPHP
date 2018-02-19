@@ -24,6 +24,10 @@ trait HavingConditionsTrait {
         return $this->havingConditions;
     }
 
+    public function setHavingConditions($havingConditions) {
+        $this->havingConditions = $havingConditions;
+    }
+
     public function setHavingConnector($connector) {
         $this->getHavingConditions()->setConnector($connector);
         return $this;
