@@ -54,6 +54,7 @@ class BaseQueryBuilder extends QueryBuilder {
         }
         $groupByFields = $query->getGroupByFields();
         if (!empty($groupByFields)) {
+            $sql .= " GROUP BY ";
             for ($i = 0; $i < sizeof($groupByFields); $i++) {
                 if ($i > 0) {
                     $sql .= ", ";
@@ -61,6 +62,21 @@ class BaseQueryBuilder extends QueryBuilder {
                 $groupByField = $groupByFields[$i];
                 $sql .= $this->buildGroupByFieldSql($groupByField, $bindings);
             }
+        }
+        $orderByFields = $query->getOrderByFields();
+        if (!empty($orderByFields)) {
+            $sql .= " ORDER BY ";
+            for ($i = 0; $i < sizeof($orderByFields); $i++) {
+                if ($i > 0) {
+                    $sql .= ", ";
+                }
+                $orderByField = $orderByFields[$i];
+                $sql .= $this->buildOrderByFieldSql($orderByField, $bindings);
+            }
+        }
+        if ($query->hasHavingConditions()) {
+            $sql .= " HAVING ";
+            $sql .= $this->buildConditionGroupSql($query->getHavingConditions(), $bindings);
         }
         return $sql;
     }
@@ -94,6 +110,24 @@ class BaseQueryBuilder extends QueryBuilder {
             if (isset($field["alias"])) {
                 $sql .= " AS ";
                 $sql .= $field["alias"];
+            }
+        }
+        return $sql;
+    }
+
+    protected function buildOrderByFieldSql ($field, array &$bindings) {
+        $sql = "";
+        if (is_string($field)) {
+            $sql .= $field;
+        }
+        else if (is_array($field)) {
+            if (isset($field["table"])) {
+                $sql .= $field["table"];
+                $sql .= ".";
+            }
+            $sql .= $field["field"];
+            if (isset($field["direction"])) {
+                $sql .= " " . strtoupper($field["direction"]) . " ";
             }
         }
         return $sql;
