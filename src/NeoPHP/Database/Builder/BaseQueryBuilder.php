@@ -41,7 +41,7 @@ class BaseQueryBuilder extends QueryBuilder {
             }
         }
         $sql .= " FROM ";
-        $sql .= $query->getTable();
+        $sql .= $this->buildTableSql($query->getTable(), $bindings);
         $joins = $query->getJoins();
         if (!empty($joins)) {
             foreach ($joins as $join) {
@@ -83,6 +83,21 @@ class BaseQueryBuilder extends QueryBuilder {
         }
         if ($query->getLimit() != null) {
             $sql .= " LIMIT " . $query->getLimit();
+        }
+        return $sql;
+    }
+
+    protected function buildTableSql ($table, array &$bindings) {
+        $sql = "";
+        if (is_string($table)) {
+            $sql .= $table;
+        }
+        else if (is_array($table)) {
+            if (isset($table["database"])) {
+                $sql .= $table["database"];
+                $sql .= ".";
+            }
+            $sql .= $table["name"];
         }
         return $sql;
     }
@@ -192,13 +207,13 @@ class BaseQueryBuilder extends QueryBuilder {
             $sql .= " $operator";
             if (isset($condition["value"])) {
                 $value = $condition["value"];
-                $sql .= " " . $this->buildValueSql($value, $bindings);
+                $sql .= " " . $this->buildConditionValueSql($value, $bindings);
             }
         }
         return $sql;
     }
 
-    protected function buildValueSql ($value, array &$bindings) {
+    protected function buildConditionValueSql ($value, array &$bindings) {
         $sql = "";
         if (is_object($value)) {
             if ($value instanceof SelectQuery) {
