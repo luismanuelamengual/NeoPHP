@@ -35,7 +35,7 @@ abstract class Databases {
             $connectionDsn .= ";port=" . $connectionConfig["port"];
             $connectionDsn .= ";dbname=" . $connectionConfig["database"];
             $connectionPdo = new PDO($connectionDsn, $connectionConfig["username"], $connectionConfig["password"]);
-            self::$connections[$connectionName] = new Connection($connectionPdo);
+            self::$connections[$connectionName] = new Connection($connectionPdo, $connectionConfig);
         }
         return self::$connections[$connectionName];
     }

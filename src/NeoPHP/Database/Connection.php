@@ -5,8 +5,8 @@ namespace NeoPHP\Database;
 use Closure;
 use Exception;
 use NeoPHP\Database\Builder\BaseQueryBuilder;
+use NeoPHP\Database\Builder\QueryBuilder;
 use NeoPHP\Database\Query\Query;
-use NeoPHP\Database\Query\SelectQuery;
 use PDO;
 
 /**
@@ -16,16 +16,20 @@ use PDO;
 class Connection {
 
     private $pdo;
+    private $config;
     private $readOnly;
+    private $logQueries;
     private $queryBuilder;
 
     /**
      * Connection constructor.
      * @param PDO $pdo
      */
-    public function __construct(PDO $pdo) {
+    public function __construct(PDO $pdo, array $config = []) {
         $this->pdo = $pdo;
-        $this->readOnly = false;
+        $this->config = $config;
+        $this->readOnly = isset($config["readOnly"])? $config["readOnly"] : false;
+        $this->logQueries = isset($config["logQueries"])? $config["logQueries"] : false;
         $this->queryBuilder = new BaseQueryBuilder();
     }
 
@@ -34,6 +38,27 @@ class Connection {
      */
     public function getPdo(): PDO {
         return $this->pdo;
+    }
+
+    /**
+     * @return array
+     */
+    public function getConfig(): array {
+        return $this->config;
+    }
+
+    /**
+     * @return QueryBuilder
+     */
+    public function getQueryBuilder(): QueryBuilder {
+        return $this->queryBuilder;
+    }
+
+    /**
+     * @param QueryBuilder $queryBuilder
+     */
+    public function setQueryBuilder(QueryBuilder $queryBuilder) {
+        $this->queryBuilder = $queryBuilder;
     }
 
     /**
@@ -48,6 +73,20 @@ class Connection {
      */
     public function isReadOnly() {
         return $this->readOnly;
+    }
+
+    /**
+     * @return bool|mixed
+     */
+    public function getLogQueries() {
+        return $this->logQueries;
+    }
+
+    /**
+     * @param bool|mixed $logQueries
+     */
+    public function setLogQueries($logQueries) {
+        $this->logQueries = $logQueries;
     }
 
     /**
@@ -163,7 +202,7 @@ class Connection {
         }
         $results = $queryStatement->fetchAll(PDO::FETCH_OBJ);
         $elapsedTime = microtime(true) - $startTimestamp;
-        if (getProperty("app.debug")) {
+        if ($this->logQueries) {
             getLogger()->debug("SQL: " . $this->getSqlSentence($sql, $bindings) . " [Time: " . number_format ($elapsedTime, 4) . ", Results:" . sizeof($results) . "]");
         }
         return $results;
@@ -201,7 +240,7 @@ class Connection {
             }
         }
         $elapsedTime = microtime(true) - $startTimestamp;
-        if (getProperty("app.debug")) {
+        if ($this->logQueries) {
             getLogger()->debug("SQL: " . $this->getSqlSentence($sql, $bindings) . " [Time: " . number_format ($elapsedTime, 4) . ", Affected rows: " . $affectedRows . "]");
         }
         return $affectedRows;
