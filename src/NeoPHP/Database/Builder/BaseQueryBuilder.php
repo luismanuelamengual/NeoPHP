@@ -52,6 +52,31 @@ class BaseQueryBuilder extends QueryBuilder {
             $sql .= " WHERE ";
             $sql .= $this->buildConditionGroupSql($query->getWhereConditions(), $bindings);
         }
+        $groupByFields = $query->getGroupByFields();
+        if (!empty($groupByFields)) {
+            for ($i = 0; $i < sizeof($groupByFields); $i++) {
+                if ($i > 0) {
+                    $sql .= ", ";
+                }
+                $groupByField = $groupByFields[$i];
+                $sql .= $this->buildGroupByFieldSql($groupByField, $bindings);
+            }
+        }
+        return $sql;
+    }
+
+    protected function buildGroupByFieldSql ($field, array &$bindings) {
+        $sql = "";
+        if (is_string($field)) {
+            $sql .= $field;
+        }
+        else if (is_array($field)) {
+            if (isset($field["table"])) {
+                $sql .= $field["table"];
+                $sql .= ".";
+            }
+            $sql .= $field["field"];
+        }
         return $sql;
     }
 
@@ -94,6 +119,12 @@ class BaseQueryBuilder extends QueryBuilder {
         $sql = "";
         $conditions = $conditionGroup->getConditions();
         $connector = $conditionGroup->getConnector();
+        if ($connector == ConditionGroup::CONNECTOR_AND) {
+            $connector = "AND";
+        }
+        else if ($connector == ConditionGroup::CONNECTOR_OR) {
+            $connector = "OR";
+        }
         for ($i = 0; $i < sizeof($conditions); $i++) {
             if ($i > 0) {
                 $sql .= " $connector ";
