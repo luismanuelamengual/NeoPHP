@@ -3,6 +3,7 @@
 namespace NeoPHP\Database\Builder;
 
 use NeoPHP\Database\Query\ConditionGroup;
+use NeoPHP\Database\Query\DeleteQuery;
 use NeoPHP\Database\Query\InsertQuery;
 use NeoPHP\Database\Query\Join;
 use NeoPHP\Database\Query\Query;
@@ -22,6 +23,9 @@ class BaseQueryBuilder extends QueryBuilder {
         }
         else if ($query instanceof UpdateQuery) {
             $sql = $this->buildUpdateSql($query, $bindings);
+        }
+        else if ($query instanceof DeleteQuery) {
+            $sql = $this->buildDeleteSql($query, $bindings);
         }
         return $sql;
     }
@@ -128,6 +132,16 @@ class BaseQueryBuilder extends QueryBuilder {
             $sql .= $this->buildValueSql($value, $bindings);
             $i++;
         }
+        if ($query->hasWhereConditions()) {
+            $sql .= " WHERE ";
+            $sql .= $this->buildConditionGroupSql($query->getWhereConditions(), $bindings);
+        }
+        return $sql;
+    }
+
+    protected function buildDeleteSql (DeleteQuery $query, array &$bindings) {
+        $sql = "DELETE FROM ";
+        $sql .= $this->buildTableSql($query->getTable(), $bindings);
         if ($query->hasWhereConditions()) {
             $sql .= " WHERE ";
             $sql .= $this->buildConditionGroupSql($query->getWhereConditions(), $bindings);
