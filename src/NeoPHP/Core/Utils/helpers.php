@@ -50,6 +50,17 @@ if (!function_exists('getLogger')) {
     }
 }
 
+if (!function_exists('getConnection')) {
+
+    /**
+     * @param null $connectionName
+     * @return \NeoPHP\Database\Connection
+     */
+    function getConnection($connectionName=null) {
+        return \NeoPHP\Database\Databases::getConnection($connectionName);
+    }
+}
+
 if (!function_exists('handleError')) {
     /**
      * @param $errno

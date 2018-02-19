@@ -3,6 +3,7 @@
 namespace NeoPHP\Database\Builder;
 
 use NeoPHP\Database\Query\ConditionGroup;
+use NeoPHP\Database\Query\InsertQuery;
 use NeoPHP\Database\Query\Join;
 use NeoPHP\Database\Query\Query;
 use NeoPHP\Database\Query\RawValue;
@@ -14,6 +15,9 @@ class BaseQueryBuilder extends QueryBuilder {
         $sql = null;
         if ($query instanceof SelectQuery) {
             $sql = $this->buildSelectSql($query, $bindings);
+        }
+        else if ($query instanceof InsertQuery) {
+            $sql = $this->buildInsertSql($query, $bindings);
         }
         return $sql;
     }
@@ -84,6 +88,25 @@ class BaseQueryBuilder extends QueryBuilder {
         if ($query->getLimit() != null) {
             $sql .= " LIMIT " . $query->getLimit();
         }
+        return $sql;
+    }
+
+    protected function buildInsertSql (InsertQuery $query, array &$bindings) {
+        $sql = "INSERT INTO ";
+        $sql .= $this->buildTableSql($query->getTable(), $bindings);
+        $fieldsSql = "";
+        $valuesSql = "";
+        $i = 0;
+        foreach ($query->getFields() as $field => $value) {
+            if ($i > 0) {
+                $fieldsSql .= ", ";
+                $valuesSql .= ", ";
+            }
+            $fieldsSql .= $field;
+            $valuesSql .= $this->buildValueSql($value, $bindings);
+            $i++;
+        }
+        $sql .= " ($fieldsSql) VALUES ($valuesSql)";
         return $sql;
     }
 
@@ -207,17 +230,17 @@ class BaseQueryBuilder extends QueryBuilder {
             $sql .= " $operator";
             if (isset($condition["value"])) {
                 $value = $condition["value"];
-                $sql .= " " . $this->buildConditionValueSql($value, $bindings);
+                $sql .= " " . $this->buildValueSql($value, $bindings);
             }
         }
         return $sql;
     }
 
-    protected function buildConditionValueSql ($value, array &$bindings) {
+    protected function buildValueSql ($value, array &$bindings) {
         $sql = "";
         if (is_object($value)) {
-            if ($value instanceof SelectQuery) {
-                $sql .= "(" . $this->buildSelectSql($value, $bindings) . ")";
+            if ($value instanceof Query) {
+                $sql .= "(" . $this->buildSql($value, $bindings) . ")";
             }
             else if ($value instanceof RawValue) {
                 $sql .= $value->getValue();
