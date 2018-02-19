@@ -120,7 +120,9 @@ class Connection {
     private function getSqlSentence ($sql, array $bindings = []) {
         $sqlSentence = $sql;
         foreach ($bindings as $key=>$value) {
-            $value = $this->quote($value);
+            if (!is_numeric($value)) {
+                $value = $this->quote($value);
+            }
             if (is_numeric($key)) {
                 $sqlSentence = preg_replace('/'.preg_quote("?", '/').'/', $value, $sqlSentence, 1);
             }
@@ -138,26 +140,27 @@ class Connection {
      * @throws Exception
      */
     public final function query($sql, array $bindings = []) {
-        $sqlSentence = $this->getSqlSentence($sql, $bindings);
+        $startTimestamp = microtime(true);
         $queryStatement = null;
         if (empty($bindings)) {
             $queryStatement = $this->pdo->query($sql);
             if (!$queryStatement) {
-                throw new Exception ("Unable to execute sql statement \"" . $sqlSentence . "\" " . $this->pdo->errorInfo()[2]);
+                throw new Exception ("Unable to execute sql statement \"" . $this->getSqlSentence($sql, $bindings) . "\" " . $this->pdo->errorInfo()[2]);
             }
         }
         else {
             $queryStatement = $this->pdo->prepare($sql);
             if ($queryStatement == false) {
-                throw new Exception ("Unable to prepare sql statement \"" . $sqlSentence . "\"");
+                throw new Exception ("Unable to prepare sql statement \"" . $this->getSqlSentence($sql, $bindings) . "\"");
             }
             $sqlExecuted = $queryStatement->execute($bindings);
             if (!$sqlExecuted) {
-                throw new Exception ("Unable to execute prepared statement \"" . $sqlSentence . "\" " . $queryStatement->errorInfo()[2]);
+                throw new Exception ("Unable to execute prepared statement \"" . $this->getSqlSentence($sql, $bindings) . "\" " . $queryStatement->errorInfo()[2]);
             }
         }
+        $elapsedTime = microtime(true) - $startTimestamp;
         if (getProperty("app.debug")) {
-            getLogger()->debug("SQL: $sqlSentence");
+            getLogger()->debug("SQL: " . $this->getSqlSentence($sql, $bindings) . " [" . number_format ($elapsedTime, 4) . "]");
         }
         return $queryStatement->fetchAll(PDO::FETCH_OBJ);
     }
@@ -169,29 +172,30 @@ class Connection {
      * @throws Exception
      */
     public final function exec($sql, array $bindings = []) {
-        $sqlSentence = $this->getSqlSentence($sql, $bindings);
+        $startTimestamp = microtime(true);
         $affectedRows = false;
         if (!$this->readOnly) {
             if (empty($bindings)) {
                 $affectedRows = $this->pdo->exec($sql);
                 if (!$affectedRows) {
-                    throw new Exception ("Unable to execute sql \"" . $sqlSentence . "\" " . $this->pdo->errorInfo()[2]);
+                    throw new Exception ("Unable to execute sql \"" . $this->getSqlSentence($sql, $bindings) . "\" " . $this->pdo->errorInfo()[2]);
                 }
             }
             else {
                 $preparedStatement = $this->pdo->prepare($sql);
                 if ($preparedStatement == false) {
-                    throw new Exception ("Unable to prepare sql statement \"" . $sqlSentence . "\"");
+                    throw new Exception ("Unable to prepare sql statement \"" . $this->getSqlSentence($sql, $bindings) . "\"");
                 }
                 $sqlExecuted = $preparedStatement->execute($bindings);
                 if (!$sqlExecuted) {
-                    throw new Exception ("Unable to execute prepared statement \"" . $sqlSentence . "\" " . $preparedStatement->errorInfo()[2]);
+                    throw new Exception ("Unable to execute prepared statement \"" . $this->getSqlSentence($sql, $bindings) . "\" " . $preparedStatement->errorInfo()[2]);
                 }
                 $affectedRows = $preparedStatement->rowCount();
             }
         }
+        $elapsedTime = microtime(true) - $startTimestamp;
         if (getProperty("app.debug")) {
-            getLogger()->debug("SQL: $sqlSentence");
+            getLogger()->debug("SQL: " . $this->getSqlSentence($sql, $bindings) . " [" . number_format ($elapsedTime, 4) . "]");
         }
         return $affectedRows;
     }
