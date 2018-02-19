@@ -158,11 +158,12 @@ class Connection {
                 throw new Exception ("Unable to execute prepared statement \"" . $this->getSqlSentence($sql, $bindings) . "\" " . $queryStatement->errorInfo()[2]);
             }
         }
+        $results = $queryStatement->fetchAll(PDO::FETCH_OBJ);
         $elapsedTime = microtime(true) - $startTimestamp;
         if (getProperty("app.debug")) {
-            getLogger()->debug("SQL: " . $this->getSqlSentence($sql, $bindings) . " [" . number_format ($elapsedTime, 4) . "]");
+            getLogger()->debug("SQL: " . $this->getSqlSentence($sql, $bindings) . " [Time: " . number_format ($elapsedTime, 4) . ", Results:" . sizeof($results) . "]");
         }
-        return $queryStatement->fetchAll(PDO::FETCH_OBJ);
+        return $results;
     }
 
     /**
@@ -195,7 +196,7 @@ class Connection {
         }
         $elapsedTime = microtime(true) - $startTimestamp;
         if (getProperty("app.debug")) {
-            getLogger()->debug("SQL: " . $this->getSqlSentence($sql, $bindings) . " [" . number_format ($elapsedTime, 4) . "]");
+            getLogger()->debug("SQL: " . $this->getSqlSentence($sql, $bindings) . " [Time: " . number_format ($elapsedTime, 4) . ", Affected rows: " . $affectedRows . "]");
         }
         return $affectedRows;
     }
