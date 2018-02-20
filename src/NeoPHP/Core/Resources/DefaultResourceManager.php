@@ -21,7 +21,14 @@ class DefaultResourceManager extends ResourceManager {
      */
     public function __construct($table) {
         $this->setTable($table);
-        $this->connection = getConnection();
+        $this->connection = $this->getResourceConnection();
+    }
+
+    /**
+     * @return \NeoPHP\Database\Connection
+     */
+    protected function getResourceConnection () {
+        return getConnection();
     }
 
     /**
