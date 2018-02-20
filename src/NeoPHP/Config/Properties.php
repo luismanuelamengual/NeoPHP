@@ -37,7 +37,7 @@ abstract class Properties {
      * @param $key
      * @param $value
      */
-    public function set($key, $value) {
+    public static function set($key, $value) {
         $keyTokens = explode(".", $key);
         $propertyKey = &self::$properties;
         foreach ($keyTokens as $keyToken) {
