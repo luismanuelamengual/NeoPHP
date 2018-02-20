@@ -14,6 +14,6 @@ class BladeView extends View {
     }
 
     protected function renderContent() {
-        $this->viewFactory->make($this->name, $this->parameters)->render();
+        echo $this->viewFactory->make($this->name, $this->parameters)->render();
     }
 }

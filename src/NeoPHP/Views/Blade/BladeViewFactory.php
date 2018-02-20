@@ -36,7 +36,7 @@ class BladeViewFactory extends ViewFactory {
         $viewResolver->register('php', function () {
             return new PhpEngine;
         });
-        $viewFinder = new FileViewFinder($filesystem, $templatesPath);
+        $viewFinder = new FileViewFinder($filesystem, [$templatesPath]);
         $this->viewFactory = new Factory($viewResolver, $viewFinder, $eventDispatcher);
     }
 
