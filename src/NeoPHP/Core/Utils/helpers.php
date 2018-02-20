@@ -61,6 +61,17 @@ if (!function_exists('getConnection')) {
     }
 }
 
+if (!function_exists('getResource')) {
+
+    /**
+     * @param $resourceName
+     * @return \NeoPHP\Core\Resources\ResourceManager
+     */
+    function getResource($resourceName) {
+        return \NeoPHP\Core\Resources\Resources::get($resourceName);
+    }
+}
+
 if (!function_exists('handleError')) {
     /**
      * @param $errno

@@ -1,53 +1,31 @@
 <?php
 
-namespace NeoPHP\Database;
+namespace NeoPHP\Core\Resources;
 
 use NeoPHP\Database\Query\DeleteQuery;
 use NeoPHP\Database\Query\InsertQuery;
 use NeoPHP\Database\Query\SelectQuery;
-use NeoPHP\Database\Query\Traits\FieldsTrait;
-use NeoPHP\Database\Query\Traits\GroupByFieldsTrait;
-use NeoPHP\Database\Query\Traits\HavingConditionsTrait;
-use NeoPHP\Database\Query\Traits\JoinsTrait;
-use NeoPHP\Database\Query\Traits\ModifiersTrait;
-use NeoPHP\Database\Query\Traits\OffsetAndLimitTrait;
-use NeoPHP\Database\Query\Traits\OrderByFieldsTrait;
-use NeoPHP\Database\Query\Traits\SelectFieldsTrait;
-use NeoPHP\Database\Query\Traits\TableTrait;
-use NeoPHP\Database\Query\Traits\WhereConditionsTrait;
 use NeoPHP\Database\Query\UpdateQuery;
 
 /**
- * Class ConnectionTable
- * @package NeoPHP\Database
+ * Class DefaultResourceManager
+ * @package NeoPHP\Core\Resources
  */
-class ConnectionTable {
-
-    use TableTrait,
-        FieldsTrait,
-        ModifiersTrait,
-        SelectFieldsTrait,
-        OrderByFieldsTrait,
-        GroupByFieldsTrait,
-        WhereConditionsTrait,
-        HavingConditionsTrait,
-        OffsetAndLimitTrait,
-        JoinsTrait;
+class DefaultResourceManager extends ResourceManager {
 
     private $connection;
 
     /**
-     * ConnectionTable constructor.
-     * @param $connection
+     * DefaultResourceManager constructor.
      * @param $table
      */
-    public function __construct($connection, $table) {
+    public function __construct($table) {
         $this->setTable($table);
-        $this->connection = $connection;
+        $this->connection = getConnection();
     }
 
     /**
-     * @return mixed
+     * @return array|null|\PDOStatement
      */
     public function find() {
         $query = new SelectQuery($this->getTable());
@@ -64,7 +42,7 @@ class ConnectionTable {
     }
 
     /**
-     * @return mixed
+     * @return bool|int
      */
     public function insert() {
         $query = new InsertQuery($this->getTable());
@@ -73,7 +51,7 @@ class ConnectionTable {
     }
 
     /**
-     * @return mixed
+     * @return bool|int
      */
     public function update() {
         $query = new UpdateQuery($this->getTable());
@@ -83,7 +61,7 @@ class ConnectionTable {
     }
 
     /**
-     * @return mixed
+     * @return bool|int
      */
     public function delete() {
         $query = new DeleteQuery($this->getTable());
