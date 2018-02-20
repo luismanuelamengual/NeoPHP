@@ -13,28 +13,32 @@ use NeoPHP\Database\Query\UpdateQuery;
  */
 class DefaultResourceManager extends ResourceManager {
 
-    private $connection;
-
     /**
      * DefaultResourceManager constructor.
      * @param $table
      */
     public function __construct($table) {
         $this->setTable($table);
-        $this->connection = $this->getResourceConnection();
     }
 
     /**
-     * @return \NeoPHP\Database\Connection
+     * @return mixed
      */
-    protected function getResourceConnection () {
-        return getConnection();
+    protected function getConnectionName() {
+        return getProperty("database.default");
     }
 
     /**
-     * @return array|null|\PDOStatement
+     * @return mixed
      */
-    public function find() {
+    protected function getConnection() {
+        return getConnection($this->getConnectionName());
+    }
+
+    /**
+     * @return SelectQuery
+     */
+    protected function createSelectQuery(): SelectQuery {
         $query = new SelectQuery($this->getTable());
         $query->setModifiers($this->getModifiers());
         $query->setSelectFields($this->getSelectFields());
@@ -45,34 +49,65 @@ class DefaultResourceManager extends ResourceManager {
         $query->setHavingConditions($this->getHavingConditions());
         $query->setOffset($this->getOffset());
         $query->setLimit($this->getLimit());
-        return $this->connection->query($query);
+        return $query;
+    }
+
+    /**
+     * @return InsertQuery
+     */
+    protected function createInsertQuery(): InsertQuery {
+        $query = new InsertQuery($this->getTable());
+        $query->setFields($this->getFields());
+        return $query;
+    }
+
+    /**
+     * @return UpdateQuery
+     */
+    protected function createUpdateQuery(): UpdateQuery {
+        $query = new UpdateQuery($this->getTable());
+        $query->setFields($this->getFields());
+        $query->setWhereConditions($this->getWhereConditions());
+        return $query;
+    }
+
+    /**
+     * @return DeleteQuery
+     */
+    protected function createDeleteQuery(): DeleteQuery {
+        $query = new DeleteQuery($this->getTable());
+        $query->setWhereConditions($this->getWhereConditions());
+        return $query;
+    }
+
+    /**
+     * @return array|null|\PDOStatement
+     */
+    public function find() {
+        return $this->getConnection()->query($this->createSelectQuery());
     }
 
     /**
      * @return bool|int
      */
     public function insert() {
-        $query = new InsertQuery($this->getTable());
-        $query->setFields($this->getFields());
-        return $this->connection->exec($query);
+
+        return $this->getConnection()->query($this->createInsertQuery());
     }
 
     /**
      * @return bool|int
      */
     public function update() {
-        $query = new UpdateQuery($this->getTable());
-        $query->setFields($this->getFields());
-        $query->setWhereConditions($this->getWhereConditions());
-        return $this->connection->exec($query);
+
+        return $this->getConnection()->query($this->createUpdateQuery());
     }
 
     /**
      * @return bool|int
      */
     public function delete() {
-        $query = new DeleteQuery($this->getTable());
-        $query->setWhereConditions($this->getWhereConditions());
-        return $this->connection->exec($query);
+
+        return $this->getConnection()->query($this->createDeleteQuery());
     }
 }
