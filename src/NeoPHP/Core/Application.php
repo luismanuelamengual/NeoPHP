@@ -14,6 +14,7 @@ class Application {
 
     private $basePath;
     private $storagePath;
+    private $resourcesPath;
 
     /**
      * @param $basePath
@@ -56,6 +57,16 @@ class Application {
             $this->storagePath = getProperty("app.storagePath", $this->basePath . DIRECTORY_SEPARATOR . "storage");
         }
         return $this->storagePath;
+    }
+
+    /**
+     * Returns the resources path
+     */
+    public function getResourcesPath() {
+        if (!isset($this->resourcesPath)) {
+            $this->resourcesPath = getProperty("app.resourcesPath", $this->basePath . DIRECTORY_SEPARATOR . "resources");
+        }
+        return $this->resourcesPath;
     }
 
     /**

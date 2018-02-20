@@ -1,17 +1,21 @@
 <?php
 
-namespace NeoPHP\Core\Views;
+namespace NeoPHP\Views\Blade;
 
-use NeoPHP\mvc\MVCApplication;
+use Exception;
+use NeoPHP\Views\View;
+use RuntimeException;
 
 class BladeView extends View {
 
+    protected $templatesPath;
+    protected $compiledTemplatesPath;
     protected $sections;
     protected $sectionsStack;
     protected $contentTags = ['{{', '}}'];
     protected $escapedTags = ['{{{', '}}}'];
     protected $extensions = [];
-    protected $compilers = array(
+    protected $compilers = [
         'Extensions',
         'Extends',
         'Comments',
@@ -30,10 +34,12 @@ class BladeView extends View {
         'SectionStart',
         'SectionStop',
         'SectionOverwrite'
-    );
+    ];
 
-    public function __construct(MVCApplication $application, $name, array $parameters = []) {
-        parent::__construct($application, $name, $parameters);
+    public function __construct($templatesPath, $compiledTemplatesPath, $name, array $parameters = []) {
+        parent::__construct($name, $parameters);
+        $this->templatesPath = $templatesPath;
+        $this->compiledTemplatesPath = $compiledTemplatesPath;
         $this->sections = [];
         $this->sectionsStack = [];
     }
@@ -247,37 +253,29 @@ class BladeView extends View {
         $templateParameters = array_merge($this->parameters, $parameters);
         extract($templateParameters);
 
-        $resourcesPath = $this->application->getResourcesPath();
-        $templatesPath = $resourcesPath . DIRECTORY_SEPARATOR . "templates";
-        $templateFilename = $templatesPath . DIRECTORY_SEPARATOR . str_replace('.', DIRECTORY_SEPARATOR, $templateName) . ".blade.php";
-
-        if (file_exists($templateFilename)) {
-            throw new Exception("Template file \"$templateFilename\" not found !!");
+        $templateFilename = $this->templatesPath . DIRECTORY_SEPARATOR . str_replace('.', DIRECTORY_SEPARATOR, $templateName) . ".blade.php";
+        if (!file_exists($templateFilename)) {
+            throw new RuntimeException("Template file \"$templateFilename\" not found !!");
         }
-
-        $storagePath = $this->application->getStoragePath();
-        $templatesCachePath = $storagePath . DIRECTORY_SEPARATOR . "framework" . DIRECTORY_SEPARATOR . "templates";
-        $templateCacheFilename = $templatesCachePath . DIRECTORY_SEPARATOR . str_replace('.', DIRECTORY_SEPARATOR, $templateName) . ".php";
-
-        if (!file_exists($templateCacheFilename) || (filemtime($templateFilename) > filemtime($templateCacheFilename))) {
+        $compiledTemplateFilename = $this->compiledTemplatesPath . DIRECTORY_SEPARATOR . str_replace('.', DIRECTORY_SEPARATOR, $templateName) . ".php";
+        if (!file_exists($compiledTemplateFilename) || (filemtime($templateFilename) > filemtime($compiledTemplateFilename))) {
             $contents = file_get_contents($templateFilename);
             $compiledContents = $this->compile($contents);
-
             try {
-                $templateCacheDirname = dirname($templateCacheFilename);
-                if (!file_exists($templateCacheDirname))
-                    mkdir($templateCacheDirname, 0777, true);
-                file_put_contents($templateCacheFilename, $compiledContents);
+                $compiledTemplatesDirectory = dirname($compiledTemplateFilename);
+                if (!file_exists($compiledTemplatesDirectory)) {
+                    mkdir($compiledTemplatesDirectory, 0777, true);
+                }
+                file_put_contents($compiledTemplateFilename, $compiledContents);
             }
             catch (Exception $ex) {
-                throw new Exception("Permission denied to create or update template cache file \"$templateCacheFilename\"");
+                throw new RuntimeException("Permission denied to create or update template cache file \"$compiledTemplateFilename\"");
             }
         }
-
-        @include $templateCacheFilename;
+        @include $compiledTemplateFilename;
     }
 
-    protected function onRender() {
-        $this->includeTemplate($this->name);
+    protected function renderContent() {
+        $this->include($this->name);
     }
 }
