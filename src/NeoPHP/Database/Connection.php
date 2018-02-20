@@ -155,7 +155,7 @@ class Connection {
      * @param $table
      * @return ConnectionTable
      */
-    public final function table($table) {
+    public final function getTable($table) {
         return new ConnectionTable($this, $table);
     }
 
