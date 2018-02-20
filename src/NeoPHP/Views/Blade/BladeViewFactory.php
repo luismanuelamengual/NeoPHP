@@ -2,6 +2,15 @@
 
 namespace NeoPHP\Views\Blade;
 
+use Illuminate\Container\Container;
+use Illuminate\Events\Dispatcher;
+use Illuminate\Filesystem\Filesystem;
+use Illuminate\View\Compilers\BladeCompiler;
+use Illuminate\View\Engines\CompilerEngine;
+use Illuminate\View\Engines\EngineResolver;
+use Illuminate\View\Engines\PhpEngine;
+use Illuminate\View\Factory;
+use Illuminate\View\FileViewFinder;
 use NeoPHP\Views\View;
 use NeoPHP\Views\ViewFactory;
 
@@ -11,9 +20,27 @@ use NeoPHP\Views\ViewFactory;
  */
 class BladeViewFactory extends ViewFactory {
 
+    private $viewFactory;
+
+    public function __construct(array $config = []) {
+        parent::__construct($config);
+        $templatesPath = isset($config["templatesPath"]) ? $config["templatesPath"] : getApp()->getResourcesPath() . DIRECTORY_SEPARATOR . "views";
+        $compiledTemplatesPath = isset($config["compiledTemplatesPath"]) ? $config["compiledTemplatesPath"] : getApp()->getStoragePath() . DIRECTORY_SEPARATOR . "framework" . DIRECTORY_SEPARATOR . "views";
+        $filesystem = new Filesystem;
+        $eventDispatcher = new Dispatcher(new Container);
+        $viewResolver = new EngineResolver;
+        $bladeCompiler = new BladeCompiler($filesystem, $compiledTemplatesPath);
+        $viewResolver->register('blade', function () use ($bladeCompiler, $filesystem) {
+            return new CompilerEngine($bladeCompiler, $filesystem);
+        });
+        $viewResolver->register('php', function () {
+            return new PhpEngine;
+        });
+        $viewFinder = new FileViewFinder($filesystem, $templatesPath);
+        $this->viewFactory = new Factory($viewResolver, $viewFinder, $eventDispatcher);
+    }
+
     public function createView($name, array $parameters = []): View {
-        $templatesPath = $this->has("templatesPath")? $this->get("templatesPath") : getApp()->getResourcesPath() . DIRECTORY_SEPARATOR . "views";
-        $compiledTemplatesPath = $this->has("compiledTemplatesPath")? $this->get("compiledTemplatesPath") : getApp()->getStoragePath() . DIRECTORY_SEPARATOR . "framework" . DIRECTORY_SEPARATOR . "views";
-        return new BladeView($templatesPath, $compiledTemplatesPath, $name, $parameters);
+        return new BladeView($this->viewFactory, $name, $parameters);
     }
 }
