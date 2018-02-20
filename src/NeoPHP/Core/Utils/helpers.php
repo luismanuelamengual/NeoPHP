@@ -57,7 +57,7 @@ if (!function_exists('getConnection')) {
      * @return \NeoPHP\Database\Connection
      */
     function getConnection($connectionName=null) {
-        return \NeoPHP\Database\Databases::getConnection($connectionName);
+        return \NeoPHP\Database\Connections::get($connectionName);
     }
 }
 

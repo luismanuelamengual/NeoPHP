@@ -6,10 +6,10 @@ use PDO;
 use RuntimeException;
 
 /**
- * Class Databases
+ * Class Connections
  * @package NeoPHP\Database
  */
-abstract class Databases {
+abstract class Connections {
 
     private static $connections = [];
 
@@ -17,7 +17,7 @@ abstract class Databases {
      * @param null $connectionName
      * @return Connection
      */
-    public static function getConnection($connectionName=null): Connection {
+    public static function get($connectionName=null): Connection {
         if ($connectionName == null) {
             $connectionName = getProperty("database.default");
             if ($connectionName == null) {
