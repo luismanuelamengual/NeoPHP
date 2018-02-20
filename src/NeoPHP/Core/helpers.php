@@ -25,7 +25,7 @@ if (!function_exists('getController')) {
      * @return mixed
      */
     function getController($controllerClass) {
-        return \NeoPHP\Core\Controllers\Controllers::get($controllerClass);
+        return \NeoPHP\Controllers\Controllers::get($controllerClass);
     }
 }
 
@@ -65,10 +65,10 @@ if (!function_exists('getResource')) {
 
     /**
      * @param $resourceName
-     * @return \NeoPHP\Core\Resources\ResourceManager
+     * @return \NeoPHP\Resources\ResourceManager
      */
     function getResource($resourceName) {
-        return \NeoPHP\Core\Resources\Resources::get($resourceName);
+        return \NeoPHP\Resources\Resources::get($resourceName);
     }
 }
 

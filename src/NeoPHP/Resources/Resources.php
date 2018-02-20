@@ -1,6 +1,6 @@
 <?php
 
-namespace NeoPHP\Core\Resources;
+namespace NeoPHP\Resources;
 
 /**
  * Class Resources

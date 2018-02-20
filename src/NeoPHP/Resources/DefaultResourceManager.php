@@ -1,6 +1,6 @@
 <?php
 
-namespace NeoPHP\Core\Resources;
+namespace NeoPHP\Resources;
 
 use NeoPHP\Database\Query\DeleteQuery;
 use NeoPHP\Database\Query\InsertQuery;

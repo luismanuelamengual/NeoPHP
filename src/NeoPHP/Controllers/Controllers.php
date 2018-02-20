@@ -1,6 +1,6 @@
 <?php
 
-namespace NeoPHP\Core\Controllers;
+namespace NeoPHP\Controllers;
 
 /**
  * Class Controllers
