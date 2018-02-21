@@ -2,6 +2,7 @@
 
 namespace NeoPHP\Database\Builder;
 
+use DateTimeInterface;
 use NeoPHP\Database\Query\ConditionGroup;
 use NeoPHP\Database\Query\DeleteQuery;
 use NeoPHP\Database\Query\InsertQuery;
@@ -287,6 +288,10 @@ class BaseQueryBuilder extends QueryBuilder {
             if ($value instanceof Query) {
                 $sql .= "(" . $this->buildSql($value, $bindings) . ")";
             }
+            else if ($value instanceof DateTimeInterface) {
+                $sql .= "?";
+                $bindings[] = date("Y-m-d H:i:s", $value->getTimestamp());
+            }
             else if ($value instanceof RawValue) {
                 $sql .= $value->getValue();
             }
@@ -297,8 +302,7 @@ class BaseQueryBuilder extends QueryBuilder {
                 if ($i > 0) {
                     $sql .= ", ";
                 }
-                $sql .= "?";
-                $bindings[] = $value[$i];
+                $sql .= $this->buildValueSql($value[$i], $bindings);
             }
             $sql .= ")";
         }
