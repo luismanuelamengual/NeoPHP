@@ -141,7 +141,7 @@ class Routes {
                 $notFoundRoutes = self::$notFoundRoutes->getMatchedRoutes($requestMethod, $requestPath);
                 if (!empty($notFoundRoutes)) {
                     foreach ($notFoundRoutes as $route) {
-                        $routeResult = self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters(), ["result" => &$result]));
+                        $routeResult = self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters(), ["path" => $requestPath]));
                         if (!empty($routeResult)) {
                             $result = $routeResult;
                         }
