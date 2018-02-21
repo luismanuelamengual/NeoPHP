@@ -24,6 +24,11 @@ class BladeViewFactory extends ViewFactory {
 
     public function __construct(array $config = []) {
         parent::__construct($config);
+
+        if (!class_exists("Illuminate\View\View")) {
+            throw new \RuntimeException("Package \"illuminate/view\" is missing. Add package via \"composer require illuminate/view\" !!. Tested with version: 5.6.3");
+        }
+
         $templatesPath = isset($config["templatesPath"]) ? $config["templatesPath"] : getApp()->getResourcesPath() . DIRECTORY_SEPARATOR . "views";
         $compiledTemplatesPath = isset($config["compiledTemplatesPath"]) ? $config["compiledTemplatesPath"] : getApp()->getStoragePath() . DIRECTORY_SEPARATOR . "framework" . DIRECTORY_SEPARATOR . "views";
         $filesystem = new Filesystem;
@@ -41,6 +46,6 @@ class BladeViewFactory extends ViewFactory {
     }
 
     public function createView($name, array $parameters = []): View {
-        return new BladeView($this->viewFactory, $name, $parameters);
+        return new BladeView($this->viewFactory->make($name, $parameters));
     }
 }

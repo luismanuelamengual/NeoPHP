@@ -6,14 +6,22 @@ use NeoPHP\Views\View;
 
 class BladeView extends View {
 
-    private $viewFactory;
+    private $view;
 
-    public function __construct($viewFactory, $name, array $parameters = []) {
-        parent::__construct($name, $parameters);
-        $this->viewFactory = $viewFactory;
+    public function __construct(\Illuminate\View\View $view) {
+        $this->view = $view;
+    }
+
+    public function set($name, $value) {
+        $this->view->with($name, $value);
+    }
+
+    public function get($name) {
+        $data = $this->view->getData();
+        return $data[$name];
     }
 
     protected function renderContent() {
-        echo $this->viewFactory->make($this->name, $this->parameters)->render();
+        echo $this->view->render();
     }
 }

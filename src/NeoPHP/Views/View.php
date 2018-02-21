@@ -8,66 +8,17 @@ namespace NeoPHP\Views;
  */
 abstract class View {
 
-    protected $name;
-    protected $parameters;
-
     /**
-     * View constructor.
      * @param $name
-     * @param array $parameters
+     * @param $value
      */
-    public function __construct($name, array $parameters = []) {
-        $this->name = $name;
-        $this->parameters = $parameters;
-    }
+    public abstract function set($name, $value);
 
     /**
      * @param $name
      * @return mixed
      */
-    public function __get($name) {
-        return $this->get($name);
-    }
-
-    /**
-     * @param $name
-     * @return bool
-     */
-    public function __isset($name) {
-        return $this->has($name);
-    }
-
-    /**
-     * @param $name
-     * @param $value
-     */
-    public function __set($name, $value) {
-        $this->set($name, $value);
-    }
-
-    /**
-     * @param $name
-     * @param $value
-     */
-    public final function set($name, $value) {
-        $this->parameters[$name] = $value;
-    }
-
-    /**
-     * @param $name
-     * @return mixed
-     */
-    public final function get($name) {
-        return $this->parameters[$name];
-    }
-
-    /**
-     * @param $name
-     * @return bool
-     */
-    public final function has($name) {
-        return isset($this->parameters[$name]);
-    }
+    public abstract function get($name);
 
     /**
      * @return string
