@@ -15,6 +15,7 @@ class Routes {
     private static $beforeRoutes;
     private static $afterRoutes;
     private static $errorRoutes;
+    private static $notFoundRoutes;
 
     /**
      * Static initialization
@@ -24,6 +25,7 @@ class Routes {
         self::$beforeRoutes = new DefaultRoutesManager();
         self::$afterRoutes = new DefaultRoutesManager();
         self::$errorRoutes = new DefaultRoutesManager();
+        self::$notFoundRoutes = new DefaultRoutesManager();
     }
 
     /**
@@ -48,6 +50,14 @@ class Routes {
      */
     public static function error($path, $action) {
         self::$errorRoutes->registerRoute(null, $path, $action);
+    }
+
+    /**
+     * @param $path
+     * @param $action
+     */
+    public static function notFound($path, $action) {
+        self::$notFoundRoutes->registerRoute(null, $path, $action);
     }
 
     /**
@@ -111,12 +121,12 @@ class Routes {
         $requestMethod = $request->getMethod();
         $requestPath = $request->getPath();
         try {
+            $result = null;
             $routes = self::$routes->getMatchedRoutes($requestMethod, $requestPath);
             if (!empty($routes)) {
                 foreach (self::$beforeRoutes->getMatchedRoutes($requestMethod, $requestPath) as $route) {
                     self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters()));
                 }
-                $result = null;
                 foreach ($routes as $route) {
                     $routeResult = self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters()));
                     if (!empty($routeResult)) {
@@ -126,11 +136,22 @@ class Routes {
                 foreach (self::$afterRoutes->getMatchedRoutes($requestMethod, $requestPath) as $route) {
                     self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters(), ["result"=>&$result]));
                 }
-                self::processResult($result);
             }
             else {
-                throw new RouteNotFoundException("Route \"" . $requestPath . "\" not found !!");
+                $notFoundRoutes = self::$notFoundRoutes->getMatchedRoutes($requestMethod, $requestPath);
+                if (!empty($notFoundRoutes)) {
+                    foreach ($notFoundRoutes as $route) {
+                        $routeResult = self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters(), ["result" => &$result]));
+                        if (!empty($routeResult)) {
+                            $result = $routeResult;
+                        }
+                    }
+                }
+                else {
+                    handleErrorCode(404);
+                }
             }
+            self::processResult($result);
         }
         catch (\Throwable $ex) {
             $routes = self::$errorRoutes->getMatchedRoutes($requestMethod, $requestPath);
@@ -140,12 +161,7 @@ class Routes {
                 }
             }
             else {
-                if ($ex instanceof RouteNotFoundException) {
-                    handleErrorCode(404);
-                }
-                else {
-                    throw $ex;
-                }
+                throw $ex;
             }
         }
     }
@@ -171,8 +187,10 @@ class Routes {
      * @param $result
      */
     private static function processResult ($result) {
-        if ($result instanceof View) {
-            $result->render();
+        if ($result != null) {
+            if ($result instanceof View) {
+                $result->render();
+            }
         }
     }
 }
