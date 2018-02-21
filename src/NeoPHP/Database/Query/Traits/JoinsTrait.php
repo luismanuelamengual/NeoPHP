@@ -15,6 +15,7 @@ trait JoinsTrait {
 
     public function setJoins(array $joins) {
         $this->joins = $joins;
+        return $this;
     }
 
     public function clearJoins () {

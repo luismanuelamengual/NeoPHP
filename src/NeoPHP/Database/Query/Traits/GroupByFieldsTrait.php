@@ -29,5 +29,6 @@ trait GroupByFieldsTrait {
 
     public function setGroupByFields(array $groupByFields) {
         $this->groupByFields = $groupByFields;
+        return $this;
     }
 }

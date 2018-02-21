@@ -26,6 +26,7 @@ trait WhereConditionsTrait {
 
     public function setWhereConditions(ConditionGroup $whereConditions) {
         $this->whereConditions = $whereConditions;
+        return $this;
     }
 
     public function setWhereConnector($connector) {

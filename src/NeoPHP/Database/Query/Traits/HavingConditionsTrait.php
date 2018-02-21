@@ -26,6 +26,7 @@ trait HavingConditionsTrait {
 
     public function setHavingConditions($havingConditions) {
         $this->havingConditions = $havingConditions;
+        return $this;
     }
 
     public function setHavingConnector($connector) {

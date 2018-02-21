@@ -8,6 +8,7 @@ trait SelectFieldsTrait {
 
     public function clearSelectFields() {
         $this->selectFields = [];
+        return $this;
     }
 
     public function addSelectFields(...$fields) {
@@ -52,5 +53,6 @@ trait SelectFieldsTrait {
 
     public function setSelectFields(array $selectFields) {
         $this->selectFields = $selectFields;
+        return $this;
     }
 }
