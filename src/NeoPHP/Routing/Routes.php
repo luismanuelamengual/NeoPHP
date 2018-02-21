@@ -114,18 +114,17 @@ class Routes {
             $routes = self::$routes->getMatchedRoutes($requestMethod, $requestPath);
             if (!empty($routes)) {
                 foreach (self::$beforeRoutes->getMatchedRoutes($requestMethod, $requestPath) as $route) {
-                    self::executeRoute($route);
+                    self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters()));
                 }
                 $result = null;
                 foreach ($routes as $route) {
-                    $routeResult = self::executeRoute($route);
+                    $routeResult = self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters()));
                     if (!empty($routeResult)) {
                         $result = $routeResult;
                     }
                 }
                 foreach (self::$afterRoutes->getMatchedRoutes($requestMethod, $requestPath) as $route) {
-                    $route->setParameters([&$result]);
-                    self::executeRoute($route);
+                    self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters(), ["result"=>&$result]));
                 }
                 self::processResult($result);
             }
@@ -137,8 +136,7 @@ class Routes {
             $routes = self::$errorRoutes->getMatchedRoutes($requestMethod, $requestPath);
             if (!empty($routes)) {
                 foreach ($routes as $route) {
-                    $route->setParameters([$ex]);
-                    self::executeRoute($route);
+                    self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters(), ["exception"=>$ex]));
                 }
             }
             else {
@@ -153,16 +151,17 @@ class Routes {
     }
 
     /**
-     * @param Route $route
+     * @param $action
+     * @param array $parameters
      * @return mixed|null
      */
-    private static function executeRoute (Route $route) {
+    private static function executeAction ($action, array $parameters=[]) {
         $result = null;
-        if (is_callable($route->getAction())) {
-            $result = call_user_func($route->getAction(), $route->getParameters());
+        if (is_callable($action)) {
+            $result = call_user_func($action, $parameters);
         }
         else {
-            $result = getApp()->execute($route->getAction(), $route->getParameters());
+            $result = getApp()->execute($action, $parameters);
         }
         return $result;
     }
