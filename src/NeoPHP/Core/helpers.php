@@ -51,7 +51,6 @@ if (!function_exists('getLogger')) {
 }
 
 if (!function_exists('getConnection')) {
-
     /**
      * @param null $connectionName
      * @return \NeoPHP\Database\Connection
@@ -62,13 +61,22 @@ if (!function_exists('getConnection')) {
 }
 
 if (!function_exists('getResource')) {
-
     /**
      * @param $resourceName
      * @return \NeoPHP\Resources\ResourceManager
      */
     function getResource($resourceName) {
         return \NeoPHP\Resources\Resources::get($resourceName);
+    }
+}
+
+if (!function_exists('createView')) {
+    /**
+     * @param $name
+     * @return \NeoPHP\Views\View
+     */
+    function createView($name, array $parameters = []) {
+        return NeoPHP\Views\Views::createView($name, $parameters);
     }
 }
 
