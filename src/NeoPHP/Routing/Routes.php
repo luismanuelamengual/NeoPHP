@@ -3,6 +3,7 @@
 namespace NeoPHP\Routing;
 
 use NeoPHP\Http\Request;
+use NeoPHP\Views\View;
 
 /**
  * Class Routes
@@ -126,6 +127,7 @@ class Routes {
                     $route->setParameters([&$result]);
                     self::executeRoute($route);
                 }
+                self::processResult($result);
             }
             else {
                 throw new RouteNotFoundException("Route \"" . $requestPath . "\" not found !!");
@@ -163,6 +165,16 @@ class Routes {
             $result = getApp()->execute($route->getAction(), $route->getParameters());
         }
         return $result;
+    }
+
+    /**
+     * Processes the result
+     * @param $result
+     */
+    private static function processResult ($result) {
+        if ($result instanceof View) {
+            $result->render();
+        }
     }
 }
 
