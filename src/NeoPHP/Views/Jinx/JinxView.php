@@ -253,7 +253,7 @@ class JinxView extends View {
         $templateParameters = array_merge($this->parameters, $parameters);
         extract($templateParameters);
 
-        $templateFilename = $this->templatesPath . DIRECTORY_SEPARATOR . str_replace('.', DIRECTORY_SEPARATOR, $templateName) . ".blade.php";
+        $templateFilename = $this->templatesPath . DIRECTORY_SEPARATOR . str_replace('.', DIRECTORY_SEPARATOR, $templateName) . ".jx";
         if (!file_exists($templateFilename)) {
             throw new RuntimeException("Template file \"$templateFilename\" not found !!");
         }
