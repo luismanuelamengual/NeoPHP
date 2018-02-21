@@ -23,7 +23,6 @@ class BladeViewFactory extends ViewFactory {
     private $viewFactory;
 
     public function __construct(array $config = []) {
-        parent::__construct($config);
 
         if (!class_exists("Illuminate\View\View")) {
             throw new \RuntimeException("Package \"illuminate/view\" is missing. Add package via \"composer require illuminate/view\" !!. Tested with version: 5.6.3");
