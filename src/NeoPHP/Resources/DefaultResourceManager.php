@@ -26,7 +26,7 @@ class DefaultResourceManager extends ResourceManager {
      * @return mixed
      */
     protected function getConnectionName() {
-        return getProperty("database.default");
+        return get_property("database.default");
     }
 
     /**

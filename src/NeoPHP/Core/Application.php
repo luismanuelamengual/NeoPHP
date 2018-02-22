@@ -64,7 +64,7 @@ class Application {
             $this->storagePath = $storagePath;
         }
         else if (!isset($this->storagePath)) {
-            $this->storagePath = getProperty("app.storagePath", $this->basePath . DIRECTORY_SEPARATOR . "storage");
+            $this->storagePath = get_property("app.storagePath", $this->basePath . DIRECTORY_SEPARATOR . "storage");
         }
         return $this->storagePath;
     }
@@ -79,7 +79,7 @@ class Application {
             $this->resourcesPath = $resourcesPath;
         }
         else if (!isset($this->resourcesPath)) {
-            $this->resourcesPath = getProperty("app.resourcesPath", $this->basePath . DIRECTORY_SEPARATOR . "resources");
+            $this->resourcesPath = get_property("app.resourcesPath", $this->basePath . DIRECTORY_SEPARATOR . "resources");
         }
         return $this->resourcesPath;
     }
@@ -88,7 +88,7 @@ class Application {
      * @throws Exception
      */
     public function init() {
-        $bootActions = getProperty("app.bootActions", []);
+        $bootActions = get_property("app.bootActions", []);
         foreach ($bootActions as $bootAction) {
             $this->execute($bootAction);
         }

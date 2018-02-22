@@ -16,43 +16,33 @@ if (!function_exists('get_app')) {
     }
 }
 
-if (!function_exists('getProperty')) {
+if (!function_exists('get_property')) {
     /**
      * @param $key
      * @param null $defaultValue
      * @return mixed
      */
-    function getProperty($key, $defaultValue=null) {
+    function get_property($key, $defaultValue=null) {
         return \NeoPHP\Config\Properties::get($key, $defaultValue);
     }
 }
 
-if (!function_exists('getLogger')) {
+if (!function_exists('get_logger')) {
     /**
      * @param null $loggerName
      * @return \Monolog\Logger
      */
-    function getLogger($loggerName=null) {
+    function get_logger($loggerName=null) {
         return \NeoPHP\Log\Loggers::get($loggerName);
     }
 }
 
-if (!function_exists('getResource')) {
-    /**
-     * @param $resourceName
-     * @return \NeoPHP\Resources\ResourceManager
-     */
-    function getResource($resourceName) {
-        return \NeoPHP\Resources\Resources::get($resourceName);
-    }
-}
-
-if (!function_exists('createView')) {
+if (!function_exists('create_view')) {
     /**
      * @param $name
      * @return \NeoPHP\Views\View
      */
-    function createView($name, array $parameters = []) {
+    function create_view($name, array $parameters = []) {
         return NeoPHP\Views\Views::createView($name, $parameters);
     }
 }
@@ -77,7 +67,7 @@ if (!function_exists('handleException')) {
      */
     function handleException($ex) {
 
-        getLogger()->error($ex);
+        get_logger()->error($ex);
 
         if (php_sapi_name() == "cli") {
             $whoops = new \Whoops\Run;
@@ -85,7 +75,7 @@ if (!function_exists('handleException')) {
             $whoops->handleException($ex);
         }
         else {
-            if (getProperty("app.debug")) {
+            if (get_property("app.debug")) {
                 $whoops = new \Whoops\Run;
                 $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
                 $whoops->handleException($ex);

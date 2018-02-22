@@ -19,13 +19,13 @@ abstract class DB {
      */
     public static function connection($connectionName=null): Connection {
         if ($connectionName == null) {
-            $connectionName = getProperty("database.default");
+            $connectionName = get_property("database.default");
             if ($connectionName == null) {
                 throw new RuntimeException("No default database was configured !!");
             }
         }
         if (!isset(self::$connections[$connectionName])) {
-            $connectionsConfig = getProperty("database.connections", []);
+            $connectionsConfig = get_property("database.connections", []);
             if (!isset($connectionsConfig[$connectionName])) {
                 throw new RuntimeException("Database connection with name \"$connectionName\" doesnt exist !!");
             }

@@ -20,12 +20,12 @@ abstract class Loggers {
      */
     public static function get($loggerName=null): Logger {
         if (!self::$initialized) {
-            $loggingConfig = getProperty("logging");
+            $loggingConfig = get_property("logging");
             Cascade::fileConfig($loggingConfig);
             self::$initialized = true;
         }
         if ($loggerName == null) {
-            $loggerName = getProperty("logging.default") ?: "main";
+            $loggerName = get_property("logging.default") ?: "main";
         }
         if (!isset(self::$loggers[$loggerName])) {
             self::$loggers[$loggerName] = Cascade::getLogger($loggerName);

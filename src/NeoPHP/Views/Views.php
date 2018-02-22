@@ -8,10 +8,10 @@ abstract class Views {
 
     public static function getFactory($factoryName=null): ViewFactory {
         if (empty($factoryName)) {
-            $factoryName = getProperty("views.default", "main");
+            $factoryName = get_property("views.default", "main");
         }
         if (!isset(self::$factories[$factoryName])) {
-            $factoriesConfig = getProperty("views.factories", []);
+            $factoriesConfig = get_property("views.factories", []);
             if (!isset($factoriesConfig[$factoryName])) {
                 throw new \RuntimeException("View factory \"$factoryName\" was not configured !!");
             }

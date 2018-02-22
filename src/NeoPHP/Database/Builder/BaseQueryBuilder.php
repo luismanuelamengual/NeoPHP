@@ -136,7 +136,7 @@ class BaseQueryBuilder extends QueryBuilder {
             $sql .= " WHERE ";
             $sql .= $this->buildConditionGroupSql($query->whereConditions(), $bindings);
         }
-        else if (getProperty("database.missingWhereClauseProtection", true)) {
+        else if (get_property("database.missingWhereClauseProtection", true)) {
             throw new \RuntimeException("Missing where clause in update sql. If intentional check \"database.missingWhereClauseProtection\" property");
         }
         return $sql;
@@ -145,14 +145,14 @@ class BaseQueryBuilder extends QueryBuilder {
     protected function buildDeleteSql (DeleteQuery $query, array &$bindings) {
         $sql = "DELETE FROM ";
         $sql .= $query->table();
-        if (!$query->hasWhereConditions() && getProperty("database.missingWhereClauseProtection", true)) {
+        if (!$query->hasWhereConditions() && get_property("database.missingWhereClauseProtection", true)) {
             throw new \RuntimeException("Missing where clause in delete sql. If intentional check \"database.missingWhereClauseProtection\" property");
         }
         if ($query->hasWhereConditions()) {
             $sql .= " WHERE ";
             $sql .= $this->buildConditionGroupSql($query->whereConditions(), $bindings);
         }
-        else if (getProperty("database.missingWhereClauseProtection", true)) {
+        else if (get_property("database.missingWhereClauseProtection", true)) {
             throw new \RuntimeException("Missing where clause in delete sql. If intentional check \"database.missingWhereClauseProtection\" property");
         }
         return $sql;

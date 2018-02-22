@@ -14,7 +14,7 @@ abstract class Resources {
      */
     public static function get($resourceName): ResourceManager {
         $resourceManager = null;
-        $resourceManagers = getProperty("resources.managers");
+        $resourceManagers = get_property("resources.managers");
         if (isset($resourceManagers[$resourceName])) {
             $resourceManagerClass = $resourceManagers[$resourceName];
             if (!is_subclass_of($resourceManagerClass, ResourceManager::class)) {
