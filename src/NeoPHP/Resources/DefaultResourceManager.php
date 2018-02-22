@@ -2,6 +2,7 @@
 
 namespace NeoPHP\Resources;
 
+use NeoPHP\Database\DB;
 use NeoPHP\Database\Query\DeleteQuery;
 use NeoPHP\Database\Query\InsertQuery;
 use NeoPHP\Database\Query\SelectQuery;
@@ -32,7 +33,7 @@ class DefaultResourceManager extends ResourceManager {
      * @return mixed
      */
     protected function getConnection() {
-        return getConnection($this->getConnectionName());
+        return DB::connection($this->getConnectionName());
     }
 
     /**
