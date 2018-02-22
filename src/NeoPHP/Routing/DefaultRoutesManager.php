@@ -24,14 +24,17 @@ class DefaultRoutesManager extends RoutesManager {
      */
     public function registerRoute($method, $path, $action) {
         $pathParts = explode(self::ROUTE_PATH_SEPARATOR, trim($path, self::ROUTE_PATH_SEPARATOR));
-        $routesIndex = &$this->routesIndex[isset($method)? $method : "ANY"];
+        if (empty($method)) {
+            $method = "ANY";
+        }
+        $routesIndex = &$this->routesIndex;
         foreach ($pathParts as $pathPart) {
             if ($pathPart[0] == self::ROUTE_PARAMETER_PREFIX) {
                 $pathPart = self::ROUTE_PARAMETER_WILDCARD;
             }
             $routesIndex = &$routesIndex[$pathPart];
         }
-        $routesIndex[self::ROUTE_ACTION_KEY] = [$path, $action];
+        $routesIndex[self::ROUTE_ACTION_KEY][$method] = [$path, $action];
     }
 
     /**
@@ -42,30 +45,45 @@ class DefaultRoutesManager extends RoutesManager {
     public function getMatchedRoutes($requestMethod, $requestPath) {
         $routes = [];
         $requestPathParts = explode(self::ROUTE_PATH_SEPARATOR, trim($requestPath, self::ROUTE_PATH_SEPARATOR));
-        $routesIndex = &$this->routesIndex[isset($method)? $method : "ANY"];
-        if ($routesIndex != null) {
-            if (array_key_exists(self::ROUTE_GENERIC_PATH, $routesIndex)) {
-                $routes[] = $this->createRoute($requestPathParts, $routesIndex[self::ROUTE_GENERIC_PATH][self::ROUTE_ACTION_KEY]);
+        $routesIndex = &$this->routesIndex;
+        if (array_key_exists(self::ROUTE_GENERIC_PATH, $routesIndex)) {
+            $testRoutes = $routesIndex[self::ROUTE_GENERIC_PATH][self::ROUTE_ACTION_KEY];
+            if (array_key_exists($requestMethod, $testRoutes)) {
+                $routes[] = $this->createRoute($requestPathParts,$testRoutes[$requestMethod]);
             }
-            foreach ($requestPathParts as $requestPathPart) {
-                if (!array_key_exists($requestPathPart, $routesIndex)) {
-                    if (array_key_exists(self::ROUTE_PARAMETER_WILDCARD, $routesIndex)) {
-                        $requestPathPart = self::ROUTE_PARAMETER_WILDCARD;
-                    }
-                    else {
-                        break;
-                    }
-                }
-                $routesIndex = &$routesIndex[$requestPathPart];
-                if (array_key_exists(self::ROUTE_GENERIC_PATH, $routesIndex)) {
-                    $routes[] = $this->createRoute($requestPathParts, $routesIndex[self::ROUTE_GENERIC_PATH][self::ROUTE_ACTION_KEY]);
-                }
-            }
-            if (array_key_exists(self::ROUTE_ACTION_KEY, $routesIndex)) {
-                $routes[] = $this->createRoute($requestPathParts, $routesIndex[self::ROUTE_ACTION_KEY]);
+            if (array_key_exists("ANY", $testRoutes)) {
+                $routes[] = $this->createRoute($requestPathParts,$testRoutes["ANY"]);
             }
         }
-
+        foreach ($requestPathParts as $requestPathPart) {
+            if (!array_key_exists($requestPathPart, $routesIndex)) {
+                if (array_key_exists(self::ROUTE_PARAMETER_WILDCARD, $routesIndex)) {
+                    $requestPathPart = self::ROUTE_PARAMETER_WILDCARD;
+                }
+                else {
+                    break;
+                }
+            }
+            $routesIndex = &$routesIndex[$requestPathPart];
+            if (array_key_exists(self::ROUTE_GENERIC_PATH, $routesIndex)) {
+                $testRoutes = $routesIndex[self::ROUTE_GENERIC_PATH][self::ROUTE_ACTION_KEY];
+                if (array_key_exists($requestMethod, $testRoutes)) {
+                    $routes[] = $this->createRoute($requestPathParts,$testRoutes[$requestMethod]);
+                }
+                if (array_key_exists("ANY", $testRoutes)) {
+                    $routes[] = $this->createRoute($requestPathParts,$testRoutes["ANY"]);
+                }
+            }
+        }
+        if (array_key_exists(self::ROUTE_ACTION_KEY, $routesIndex)) {
+            $testRoutes = $routesIndex[self::ROUTE_ACTION_KEY];
+            if (array_key_exists($requestMethod, $testRoutes)) {
+                $routes[] = $this->createRoute($requestPathParts,$testRoutes[$requestMethod]);
+            }
+            if (array_key_exists("ANY", $testRoutes)) {
+                $routes[] = $this->createRoute($requestPathParts,$testRoutes["ANY"]);
+            }
+        }
         return $routes;
     }
 
