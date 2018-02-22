@@ -117,7 +117,7 @@ class Routes {
      * @throws \Throwable
      */
     public static function handleRequest() {
-        $request = Request::getInstance();
+        $request = get_request();
         $requestMethod = $request->getMethod();
         $requestPath = $request->getPath();
         try {

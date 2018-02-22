@@ -80,16 +80,4 @@ final class Session {
     public function has($name) {
         return isset($_SESSION[$name]);
     }
-
-    public function __set($name, $value) {
-        $this->set($name, $value);
-    }
-
-    public function __get($name) {
-        return $this->get($name);
-    }
-
-    public function __isset($name) {
-        return $this->has($name);
-    }
 }

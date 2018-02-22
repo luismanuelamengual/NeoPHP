@@ -38,6 +38,69 @@ final class Request {
     /**
      * @return mixed
      */
+    public function getHost() {
+        return $_SERVER["HTTP_HOST"];
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getUri() {
+        return $_SERVER["REQUEST_URI"];
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getQuery() {
+        return $_SERVER["REDIRECT_QUERY_STRING"];
+    }
+
+    /**
+     * @param bool $trustForwardedHeader
+     * @return mixed
+     */
+    public function getClientAddress($trustForwardedHeader = false) {
+        return $trustForwardedHeader === true ? $_SERVER["HTTP_X_FORWARDED_FOR"] : $_SERVER["REMOTE_ADDR"];
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getUserAgent() {
+        return $_SERVER["HTTP_USER_AGENT"];
+    }
+
+    /**
+     * @return string
+     */
+    public function getPath() {
+        if (!isset($this->path)) {
+            $this->path = "";
+            if (!empty($_SERVER["REDIRECT_URL"])) {
+                $this->path = $_SERVER["REDIRECT_URL"];
+                if (!empty($_SERVER["CONTEXT_PREFIX"])) {
+                    $this->path = substr($this->path, strlen($_SERVER["CONTEXT_PREFIX"]));
+                }
+            }
+            $this->path = trim($this->path, PATH_SEPARATOR);
+        }
+        return $this->path;
+    }
+
+    /**
+     * @return array
+     */
+    public function getPathParts() {
+        if (!isset($this->pathParts)) {
+            $this->pathParts = explode(PATH_SEPARATOR, $this->getPath());
+        }
+        return $this->pathParts;
+    }
+
+    /**
+     * @return mixed
+     */
     public function getParameters() {
         return $_REQUEST;
     }
@@ -86,7 +149,23 @@ final class Request {
      * @return Cookies
      */
     public function getCookies() {
-        return Cookies::getInstance();
+        return $_COOKIE;
+    }
+
+    /**
+     * @param $name
+     * @return mixed
+     */
+    public function getCookie($name) {
+        return $_COOKIE[$name];
+    }
+
+    /**
+     * @param $name
+     * @return bool
+     */
+    public function hasCookie($name) {
+        return isset($_COOKIE[$name]);
     }
 
     /**
@@ -94,13 +173,6 @@ final class Request {
      */
     public function getSession() {
         return Session::getInstance();
-    }
-
-    /**
-     * @return Server
-     */
-    public function getServer() {
-        return Server::getInstance();
     }
 
     /**
@@ -179,75 +251,5 @@ final class Request {
      */
     public function isSecureRequest() {
         return (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getServerAddress() {
-        return $_SERVER["SERVER_ADDR"];
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getServerName() {
-        return $_SERVER["SERVER_NAME"];
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getHttpHost() {
-        return $_SERVER["HTTP_HOST"];
-    }
-
-    /**
-     * @param bool $trustForwardedHeader
-     * @return mixed
-     */
-    public function getClientAddress($trustForwardedHeader = false) {
-        return $trustForwardedHeader === true ? $_SERVER["HTTP_X_FORWARDED_FOR"] : $_SERVER["REMOTE_ADDR"];
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getUri() {
-        return $_SERVER["REQUEST_URI"];
-    }
-
-    /**
-     * @return string
-     */
-    public function getPath() {
-        if (!isset($this->path)) {
-            $this->path = "";
-            if (!empty($_SERVER["REDIRECT_URL"])) {
-                $this->path = $_SERVER["REDIRECT_URL"];
-                if (!empty($_SERVER["CONTEXT_PREFIX"])) {
-                    $this->path = substr($this->path, strlen($_SERVER["CONTEXT_PREFIX"]));
-                }
-            }
-            $this->path = trim($this->path, PATH_SEPARATOR);
-        }
-        return $this->path;
-    }
-
-    /**
-     * @return array
-     */
-    public function getPathParts() {
-        if (!isset($this->pathParts)) {
-            $this->pathParts = explode(PATH_SEPARATOR, $this->getPath());
-        }
-        return $this->pathParts;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getUserAgent() {
-        return $_SERVER["HTTP_USER_AGENT"];
     }
 }

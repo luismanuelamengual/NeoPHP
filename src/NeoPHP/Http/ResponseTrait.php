@@ -33,7 +33,7 @@ trait ResponseTrait {
     }
 
     public function addCookie($name, $value = null, $expire = null, $path = null, $domain = null, $secure = false, $httponly = false) {
-        ResponseHeaders::getInstance()->addCookieHeader($name, $value, $expire, $path, $domain, $secure, $httponly);
+        setcookie($name, $value, $expire, $path, $domain, $secure, $httponly);
     }
 
     public function getHeaders() {
