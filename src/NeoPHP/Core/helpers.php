@@ -1,10 +1,10 @@
 <?php
 
-if (!function_exists('app')) {
+if (!function_exists('get_app')) {
     /**
      * @return \NeoPHP\Core\Application
      */
-    function app($basePath=null) {
+    function get_app($basePath=null) {
         $app = null;
         if ($basePath != null) {
             $app = \NeoPHP\Core\Application::create($basePath);

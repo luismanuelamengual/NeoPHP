@@ -28,8 +28,8 @@ class BladeViewFactory extends ViewFactory {
             throw new \RuntimeException("Package \"illuminate/view\" is missing. Add package via \"composer require illuminate/view\" !!. Tested with version: 5.6.3");
         }
 
-        $templatesPath = isset($config["templatesPath"]) ? $config["templatesPath"] : app()->resourcesPath() . DIRECTORY_SEPARATOR . "views";
-        $compiledTemplatesPath = isset($config["compiledTemplatesPath"]) ? $config["compiledTemplatesPath"] : app()->storagePath() . DIRECTORY_SEPARATOR . "framework" . DIRECTORY_SEPARATOR . "views";
+        $templatesPath = isset($config["templatesPath"]) ? $config["templatesPath"] : get_app()->resourcesPath() . DIRECTORY_SEPARATOR . "views";
+        $compiledTemplatesPath = isset($config["compiledTemplatesPath"]) ? $config["compiledTemplatesPath"] : get_app()->storagePath() . DIRECTORY_SEPARATOR . "framework" . DIRECTORY_SEPARATOR . "views";
         $filesystem = new Filesystem;
         $eventDispatcher = new Dispatcher(new Container);
         $viewResolver = new EngineResolver;

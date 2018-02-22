@@ -14,8 +14,8 @@ class SmartyViewFactory extends ViewFactory {
     private $useCache = false;
 
     public function __construct(array $config = []) {
-        $this->templatesPath = isset($config["templatesPath"]) ? $config["templatesPath"] : app()->resourcesPath() . DIRECTORY_SEPARATOR . "views";
-        $this->compiledTemplatesPath = isset($config["compiledTemplatesPath"]) ? $config["compiledTemplatesPath"] : app()->storagePath() . DIRECTORY_SEPARATOR . "framework" . DIRECTORY_SEPARATOR . "views";
+        $this->templatesPath = isset($config["templatesPath"]) ? $config["templatesPath"] : get_app()->resourcesPath() . DIRECTORY_SEPARATOR . "views";
+        $this->compiledTemplatesPath = isset($config["compiledTemplatesPath"]) ? $config["compiledTemplatesPath"] : get_app()->storagePath() . DIRECTORY_SEPARATOR . "framework" . DIRECTORY_SEPARATOR . "views";
         if (isset($config["configPath"])) {
             $this->configPath = $config["configPath"];
         }
