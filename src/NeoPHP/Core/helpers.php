@@ -38,10 +38,31 @@ if (!function_exists('get_logger')) {
 }
 
 if (!function_exists('get_request')) {
-
+    /**
+     * @param null $parameterName
+     * @return \NeoPHP\Http\Request|null
+     */
     function get_request($parameterName=null) {
         $request = \NeoPHP\Http\Request::getInstance();
         return isset($parameterName)? $request->get($parameterName) : $request;
+    }
+}
+
+if (!function_exists('get_response')) {
+    /**
+     * @return \NeoPHP\Http\Response
+     */
+    function get_response() {
+        return \NeoPHP\Http\Response::getInstance();
+    }
+}
+
+if (!function_exists('get_session')) {
+    /**
+     * @return \NeoPHP\Http\Session
+     */
+    function get_session() {
+        return \NeoPHP\Http\Session::getInstance();
     }
 }
 
