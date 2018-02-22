@@ -47,7 +47,7 @@ if (!function_exists('create_view')) {
     }
 }
 
-if (!function_exists('handleError')) {
+if (!function_exists('handle_error')) {
     /**
      * @param $errno
      * @param $errstr
@@ -56,16 +56,16 @@ if (!function_exists('handleError')) {
      * @param $errcontext
      * @throws ErrorException
      */
-    function handleError($errno, $errstr, $errfile, $errline, $errcontext) {
+    function handle_error($errno, $errstr, $errfile, $errline, $errcontext) {
         throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
     }
 }
 
-if (!function_exists('handleException')) {
+if (!function_exists('handle_exception')) {
     /**
      * @param $ex
      */
-    function handleException($ex) {
+    function handle_exception($ex) {
 
         get_logger()->error($ex);
 
@@ -81,17 +81,17 @@ if (!function_exists('handleException')) {
                 $whoops->handleException($ex);
             }
             else {
-                handleErrorCode(500);
+                handle_error_code(500);
             }
         }
     }
 }
 
-if (!function_exists('handleErrorCode')) {
+if (!function_exists('handle_error_code')) {
     /**
      * @param $code
      */
-    function handleErrorCode($code) {
+    function handle_error_code($code) {
 
         http_response_code($code);
         include __DIR__ . DIRECTORY_SEPARATOR . "errorPage.php";

@@ -148,7 +148,7 @@ class Routes {
                     }
                 }
                 else {
-                    handleErrorCode(404);
+                    handle_error_code(404);
                 }
             }
             self::processResult($result);

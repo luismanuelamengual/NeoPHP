@@ -39,8 +39,8 @@ class Application {
      */
     private function __construct($basePath) {
         $this->basePath = $basePath;
-        set_error_handler("handleError", E_ALL | E_STRICT);
-        set_exception_handler("handleException");
+        set_error_handler("handle_error", E_ALL | E_STRICT);
+        set_exception_handler("handle_exception");
     }
 
     /**
