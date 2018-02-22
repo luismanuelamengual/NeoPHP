@@ -16,6 +16,7 @@ class Application {
     private $basePath;
     private $storagePath;
     private $resourcesPath;
+    private $configPath;
 
     /**
      * @param $basePath
@@ -82,6 +83,22 @@ class Application {
             $this->resourcesPath = get_property("app.resourcesPath", $this->basePath . DIRECTORY_SEPARATOR . "resources");
         }
         return $this->resourcesPath;
+    }
+
+    /**
+     * @param null $configPath
+     * @return null|string
+     */
+    public function configPath($configPath = null) {
+        if ($configPath != null) {
+            $this->configPath = $configPath;
+        }
+        else {
+            if (!isset($this->configPath)) {
+                $this->configPath = $this->basePath() . DIRECTORY_SEPARATOR . "config";
+            }
+        }
+        return $this->configPath;
     }
 
     /**
