@@ -6,18 +6,15 @@ trait FieldsTrait {
 
     private $fields = [];
 
-    public function clearFields() {
-        $this->fields = [];
-        return $this;
-    }
-
-    public function getFields(): array {
-        return $this->fields;
-    }
-
-    public function setFields(array $fields) {
-        $this->fields = $fields;
-        return $this;
+    public function fields($fields = null) {
+        $result = $this;
+        if ($fields == null) {
+            $result = $this->fields;
+        }
+        else {
+            $this->fields = $fields;
+        }
+        return $result;
     }
 
     public function set($name, $value) {

@@ -8,38 +8,54 @@ trait HavingConditionsTrait {
 
     private $havingConditions = null;
 
-    public function clearHavingConditions() {
-        $this->havingConditions = null;
-        return $this;
-    }
-
     public function hasHavingConditions() {
-        return isset($this->havingConditions) && !$this->havingConditions->isEmpty();
+        return $this->havingConditions != null && !empty($this->havingConditions->conditions());
     }
 
-    public function getHavingConditions(): ConditionGroup {
-        if (!isset($this->havingConditions)) {
-            $this->havingConditions = new ConditionGroup();
+    public function havingConditions(ConditionGroup $havingConditions = null) {
+        $result = $this;
+        if ($havingConditions != null) {
+            $this->havingConditions = $havingConditions;
         }
-        return $this->havingConditions;
+        else {
+            if ($this->havingConditions == null) {
+                $this->havingConditions = new ConditionGroup();
+            }
+            $result = $this->havingConditions;
+        }
+        return $result;
     }
 
-    public function setHavingConditions($havingConditions) {
-        $this->havingConditions = $havingConditions;
+    public function havingConnector($connector=null) {
+        $this->havingConditions()->connector($connector);
+    }
+
+    public function having ($column, $operatorOrValue, $value=null) {
+        $this->havingConditions()->on($column, $operatorOrValue, $value);
         return $this;
     }
 
-    public function setHavingConnector($connector) {
-        $this->getHavingConditions()->setConnector($connector);
+    public function havingGroup(ConditionGroup $group) {
+        $this->havingConditions()->onGroup($group);
+    }
+
+    public function havingRaw($sql, array $bindings = []) {
+        $this->havingConditions()->onRaw($sql, $bindings);
         return $this;
     }
 
-    public function getHavingConnector() {
-        return $this->getHavingConditions()->getConnector();
+    public function havingColumn($column, $operatorOrColumn, $otherColumn) {
+        $this->havingConditions()->onColumn($column, $operatorOrColumn, $otherColumn);
+        return $this;
     }
 
-    public function addHaving(...$arguments) {
-        call_user_func_array([$this->getHavingConditions(), "addCondition"], $arguments);
+    public function havingNull($column) {
+        $this->havingConditions()->onNull($column);
+        return $this;
+    }
+
+    public function havingNotNull($column) {
+        $this->havingConditions()->onNotNull($column);
         return $this;
     }
 }

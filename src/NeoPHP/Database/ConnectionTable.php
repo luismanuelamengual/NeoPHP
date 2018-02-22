@@ -9,10 +9,9 @@ use NeoPHP\Database\Query\Traits\FieldsTrait;
 use NeoPHP\Database\Query\Traits\GroupByFieldsTrait;
 use NeoPHP\Database\Query\Traits\HavingConditionsTrait;
 use NeoPHP\Database\Query\Traits\JoinsTrait;
-use NeoPHP\Database\Query\Traits\ModifiersTrait;
-use NeoPHP\Database\Query\Traits\OffsetAndLimitTrait;
 use NeoPHP\Database\Query\Traits\OrderByFieldsTrait;
 use NeoPHP\Database\Query\Traits\SelectFieldsTrait;
+use NeoPHP\Database\Query\Traits\SelectModifiersTrait;
 use NeoPHP\Database\Query\Traits\TableTrait;
 use NeoPHP\Database\Query\Traits\WhereConditionsTrait;
 use NeoPHP\Database\Query\UpdateQuery;
@@ -25,13 +24,12 @@ class ConnectionTable {
 
     use TableTrait,
         FieldsTrait,
-        ModifiersTrait,
+        SelectModifiersTrait,
         SelectFieldsTrait,
         OrderByFieldsTrait,
         GroupByFieldsTrait,
         WhereConditionsTrait,
         HavingConditionsTrait,
-        OffsetAndLimitTrait,
         JoinsTrait;
 
     private $connection;
@@ -42,7 +40,7 @@ class ConnectionTable {
      * @param $table
      */
     public function __construct($connection, $table) {
-        $this->setTable($table);
+        $this->table($table);
         $this->connection = $connection;
     }
 
@@ -50,16 +48,16 @@ class ConnectionTable {
      * @return mixed
      */
     public function find() {
-        $query = new SelectQuery($this->getTable());
-        $query->setModifiers($this->getModifiers());
-        $query->setSelectFields($this->getSelectFields());
-        $query->setJoins($this->getJoins());
-        $query->setOrderByFields($this->getOrderByFields());
-        $query->setGroupByFields($this->getGroupByFields());
-        $query->setWhereConditions($this->getWhereConditions());
-        $query->setHavingConditions($this->getHavingConditions());
-        $query->setOffset($this->getOffset());
-        $query->setLimit($this->getLimit());
+        $query = new SelectQuery($this->table());
+        $query->limit($this->limit());
+        $query->offset($this->offset());
+        $query->distinct($this->distinct());
+        $query->selectFields($this->selectFields());
+        $query->orderByFields($this->orderByFields());
+        $query->groupByFields($this->groupByFields());
+        $query->whereConditions($this->whereConditions());
+        $query->havingConditions($this->havingConditions());
+        $query->joins($this->joins());
         return $this->connection->query($query);
     }
 
@@ -67,8 +65,8 @@ class ConnectionTable {
      * @return mixed
      */
     public function insert() {
-        $query = new InsertQuery($this->getTable());
-        $query->setFields($this->getFields());
+        $query = new InsertQuery($this->table());
+        $query->fields($this->fields());
         return $this->connection->exec($query);
     }
 
@@ -76,9 +74,9 @@ class ConnectionTable {
      * @return mixed
      */
     public function update() {
-        $query = new UpdateQuery($this->getTable());
-        $query->setFields($this->getFields());
-        $query->setWhereConditions($this->getWhereConditions());
+        $query = new UpdateQuery($this->table());
+        $query->fields($this->fields());
+        $query->whereConditions($this->whereConditions());
         return $this->connection->exec($query);
     }
 
@@ -86,8 +84,8 @@ class ConnectionTable {
      * @return mixed
      */
     public function delete() {
-        $query = new DeleteQuery($this->getTable());
-        $query->setWhereConditions($this->getWhereConditions());
+        $query = new DeleteQuery($this->table());
+        $query->whereConditions($this->whereConditions());
         return $this->connection->exec($query);
     }
 }

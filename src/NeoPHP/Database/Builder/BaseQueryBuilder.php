@@ -33,14 +33,11 @@ class BaseQueryBuilder extends QueryBuilder {
 
     protected function buildSelectSql (SelectQuery $query, array &$bindings) {
         $sql = "SELECT";
-        $modifiers = $query->getModifiers();
-        if (!empty($modifiers)) {
-            foreach ($modifiers as $modifier) {
-                $sql .= " $modifier";
-            }
+        if ($query->distinct()) {
+            $sql .= " DISTINCT";
         }
         $sql .= " ";
-        $selectFields = $query->getSelectFields();
+        $selectFields = $query->selectFields();
         if (empty($selectFields)) {
             $sql .= "*";
         }
@@ -49,13 +46,12 @@ class BaseQueryBuilder extends QueryBuilder {
                 if ($i > 0) {
                     $sql .= ", ";
                 }
-                $selectField = $selectFields[$i];
-                $sql .= $this->buildSelectFieldSql($selectField, $bindings);
+                $sql .= $selectFields[$i];
             }
         }
         $sql .= " FROM ";
-        $sql .= $this->buildTableSql($query->getTable(), $bindings);
-        $joins = $query->getJoins();
+        $sql .= $query->table();
+        $joins = $query->joins();
         if (!empty($joins)) {
             foreach ($joins as $join) {
                 $sql .= " " . $this->buildJoinSql($join, $bindings);
@@ -63,20 +59,19 @@ class BaseQueryBuilder extends QueryBuilder {
         }
         if ($query->hasWhereConditions()) {
             $sql .= " WHERE ";
-            $sql .= $this->buildConditionGroupSql($query->getWhereConditions(), $bindings);
+            $sql .= $this->buildConditionGroupSql($query->whereConditions(), $bindings);
         }
-        $groupByFields = $query->getGroupByFields();
+        $groupByFields = $query->groupByFields();
         if (!empty($groupByFields)) {
             $sql .= " GROUP BY ";
             for ($i = 0; $i < sizeof($groupByFields); $i++) {
                 if ($i > 0) {
                     $sql .= ", ";
                 }
-                $groupByField = $groupByFields[$i];
-                $sql .= $this->buildGroupByFieldSql($groupByField, $bindings);
+                $sql .= $groupByFields[$i];
             }
         }
-        $orderByFields = $query->getOrderByFields();
+        $orderByFields = $query->orderByFields();
         if (!empty($orderByFields)) {
             $sql .= " ORDER BY ";
             for ($i = 0; $i < sizeof($orderByFields); $i++) {
@@ -84,29 +79,32 @@ class BaseQueryBuilder extends QueryBuilder {
                     $sql .= ", ";
                 }
                 $orderByField = $orderByFields[$i];
-                $sql .= $this->buildOrderByFieldSql($orderByField, $bindings);
+                $sql .= $orderByField["column"];
+                if (isset($orderByField["direction"])) {
+                    $sql .= " " . strtoupper($orderByField["direction"]);
+                }
             }
         }
         if ($query->hasHavingConditions()) {
             $sql .= " HAVING ";
-            $sql .= $this->buildConditionGroupSql($query->getHavingConditions(), $bindings);
+            $sql .= $this->buildConditionGroupSql($query->havingConditions(), $bindings);
         }
-        if ($query->getOffset() != null) {
-            $sql .= " OFFSET " . $query->getOffset();
+        if ($query->offset() != null) {
+            $sql .= " OFFSET " . $query->offset();
         }
-        if ($query->getLimit() != null) {
-            $sql .= " LIMIT " . $query->getLimit();
+        if ($query->limit() != null) {
+            $sql .= " LIMIT " . $query->limit();
         }
         return $sql;
     }
 
     protected function buildInsertSql (InsertQuery $query, array &$bindings) {
         $sql = "INSERT INTO ";
-        $sql .= $this->buildTableSql($query->getTable(), $bindings);
+        $sql .= $query->table();
         $fieldsSql = "";
         $valuesSql = "";
         $i = 0;
-        foreach ($query->getFields() as $field => $value) {
+        foreach ($query->fields() as $field => $value) {
             if ($i > 0) {
                 $fieldsSql .= ", ";
                 $valuesSql .= ", ";
@@ -121,10 +119,10 @@ class BaseQueryBuilder extends QueryBuilder {
 
     protected function buildUpdateSql (UpdateQuery $query, array &$bindings) {
         $sql = "UPDATE ";
-        $sql .= $this->buildTableSql($query->getTable(), $bindings);
+        $sql .= $query->table();
         $sql .= " SET ";
         $i = 0;
-        foreach ($query->getFields() as $field => $value) {
+        foreach ($query->fields() as $field => $value) {
             if ($i > 0) {
                 $sql .= ", ";
             }
@@ -133,116 +131,53 @@ class BaseQueryBuilder extends QueryBuilder {
             $sql .= $this->buildValueSql($value, $bindings);
             $i++;
         }
-        if (!$query->hasWhereConditions() && getProperty("database.missingWhereClauseProtection", true)) {
-            throw new \RuntimeException("Missing where clause in update sql. If intentional check \"database.missingWhereClauseProtection\" property");
-        }
+
         if ($query->hasWhereConditions()) {
             $sql .= " WHERE ";
-            $sql .= $this->buildConditionGroupSql($query->getWhereConditions(), $bindings);
+            $sql .= $this->buildConditionGroupSql($query->whereConditions(), $bindings);
+        }
+        else if (getProperty("database.missingWhereClauseProtection", true)) {
+            throw new \RuntimeException("Missing where clause in update sql. If intentional check \"database.missingWhereClauseProtection\" property");
         }
         return $sql;
     }
 
     protected function buildDeleteSql (DeleteQuery $query, array &$bindings) {
         $sql = "DELETE FROM ";
-        $sql .= $this->buildTableSql($query->getTable(), $bindings);
+        $sql .= $query->table();
         if (!$query->hasWhereConditions() && getProperty("database.missingWhereClauseProtection", true)) {
             throw new \RuntimeException("Missing where clause in delete sql. If intentional check \"database.missingWhereClauseProtection\" property");
         }
         if ($query->hasWhereConditions()) {
             $sql .= " WHERE ";
-            $sql .= $this->buildConditionGroupSql($query->getWhereConditions(), $bindings);
+            $sql .= $this->buildConditionGroupSql($query->whereConditions(), $bindings);
         }
-        return $sql;
-    }
-
-    protected function buildTableSql ($table, array &$bindings) {
-        $sql = "";
-        if (is_string($table)) {
-            $sql .= $table;
-        }
-        else if (is_array($table)) {
-            if (isset($table["database"])) {
-                $sql .= $table["database"];
-                $sql .= ".";
-            }
-            $sql .= $table["name"];
-        }
-        return $sql;
-    }
-
-    protected function buildGroupByFieldSql ($field, array &$bindings) {
-        $sql = "";
-        if (is_string($field)) {
-            $sql .= $field;
-        }
-        else if (is_array($field)) {
-            if (isset($field["table"])) {
-                $sql .= $this->buildTableSql($field["table"], $bindings);
-                $sql .= ".";
-            }
-            $sql .= $field["field"];
-        }
-        return $sql;
-    }
-
-    protected function buildSelectFieldSql ($field, array &$bindings) {
-        $sql = "";
-        if (is_string($field)) {
-            $sql .= $field;
-        }
-        else if (is_array($field)) {
-            if (isset($field["table"])) {
-                $sql .= $this->buildTableSql($field["table"], $bindings);
-                $sql .= ".";
-            }
-            $sql .= $field["field"];
-            if (isset($field["alias"])) {
-                $sql .= " AS ";
-                $sql .= $field["alias"];
-            }
-        }
-        return $sql;
-    }
-
-    protected function buildOrderByFieldSql ($field, array &$bindings) {
-        $sql = "";
-        if (is_string($field)) {
-            $sql .= $field;
-        }
-        else if (is_array($field)) {
-            if (isset($field["table"])) {
-                $sql .= $this->buildTableSql($field["table"], $bindings);
-                $sql .= ".";
-            }
-            $sql .= $field["field"];
-            if (isset($field["direction"])) {
-                $sql .= " " . strtoupper($field["direction"]) . " ";
-            }
+        else if (getProperty("database.missingWhereClauseProtection", true)) {
+            throw new \RuntimeException("Missing where clause in delete sql. If intentional check \"database.missingWhereClauseProtection\" property");
         }
         return $sql;
     }
 
     protected function buildJoinSql (Join $join, array &$bindings) {
         $sql = "";
-        switch ($join->getType()) {
+        switch ($join->type()) {
             case Join::TYPE_JOIN: $sql .= "JOIN"; break;
             case Join::TYPE_INNER_JOIN: $sql .= "INNER JOIN"; break;
             case Join::TYPE_OUTER_JOIN: $sql .= "OUTER JOIN"; break;
             case Join::TYPE_LEFT_JOIN: $sql .= "LEFT JOIN"; break;
             case Join::TYPE_RIGHT_JOIN: $sql .= "RIGHT JOIN"; break;
         }
-        $sql .= " " . $join->getTable();
-        if (!$join->getConditions()->isEmpty()) {
-            $sql .= " ON " . $this->buildConditionGroupSql($join->getConditions(), $bindings);
+        $sql .= " " . $join->table();
+        if (!empty($join->conditions())) {
+            $sql .= " ON " . $this->buildConditionGroupSql($join, $bindings);
         }
         return $sql;
     }
 
     protected function buildConditionGroupSql (ConditionGroup $conditionGroup, array &$bindings) {
         $sql = "";
-        $conditions = $conditionGroup->getConditions();
-        $connector = $conditionGroup->getConnector();
+        $conditions = $conditionGroup->conditions();
+        $connector = $conditionGroup->connector();
         if ($connector == ConditionGroup::CONNECTOR_AND) {
             $connector = "AND";
         }
@@ -261,23 +196,37 @@ class BaseQueryBuilder extends QueryBuilder {
 
     protected function buildConditionSql ($condition, array &$bindings) {
         $sql = "";
-        if (is_string($condition)) {
-            $sql .= $condition;
-        }
-        else if (is_object($condition)) {
-            if (is_a($condition, ConditionGroup::class)) {
+        switch ($condition["type"]) {
+            case "basic":
+                $operator = isset($condition["operator"])? $condition["operator"] : "=";
+                $operator = strtoupper($operator);
+                $sql .= $condition["column"];
+                $sql .= " $operator";
+                if (isset($condition["value"])) {
+                    $sql .= " " . $this->buildValueSql($condition["value"], $bindings);
+                }
+                break;
+            case "group":
                 $sql .= "(" . $this->buildConditionGroupSql($condition, $bindings) . ")";
-            }
-        }
-        else if (is_array($condition)) {
-            $operator = isset($condition["operator"])? $condition["operator"] : "=";
-            $operator = strtoupper($operator);
-            $sql .= $condition["field"];
-            $sql .= " $operator";
-            if (isset($condition["value"])) {
-                $value = $condition["value"];
-                $sql .= " " . $this->buildValueSql($value, $bindings);
-            }
+                break;
+            case "raw":
+                $sql .= $condition["sql"];
+                $bindings = array_merge($bindings, $condition["bindings"]);
+                break;
+            case "column":
+                $operator = isset($condition["operator"])? $condition["operator"] : "=";
+                $sql .= $condition["column"];
+                $sql .= " $operator ";
+                $sql .= $condition["otherColumn"];
+                break;
+            case "null":
+                $sql .= $condition["column"];
+                $sql .= " IS NULL";
+                break;
+            case "notNull":
+                $sql .= $condition["column"];
+                $sql .= " IS NOT NULL";
+                break;
         }
         return $sql;
     }

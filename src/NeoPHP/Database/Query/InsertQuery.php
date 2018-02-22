@@ -9,4 +9,8 @@ class InsertQuery extends Query {
 
     use TableTrait,
         FieldsTrait;
+
+    public function __construct($table=null) {
+        $this->table($table);
+    }
 }

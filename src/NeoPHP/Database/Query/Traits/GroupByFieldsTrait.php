@@ -6,29 +6,18 @@ trait GroupByFieldsTrait {
 
     private $groupByFields = [];
 
-    public function clearGroupByFields() {
-        $this->groupByFields = [];
-        return $this;
-    }
-
-    public function addGroupByFields(...$fields) {
-        foreach ($fields as $field) {
-            $this->addGroupByField($field);
+    public function groupByFields ($fields = null) {
+        $result = $this;
+        if ($fields == null) {
+            $result = $this->groupByFields;
         }
-        return $this;
+        else {
+            $this->groupByFields = is_array($fields)? $fields : func_get_args();
+        }
+        return $result;
     }
 
-    public function addGroupByField($field) {
-        $this->groupByFields[] = $field;
-        return $this;
-    }
-
-    public function getGroupByFields(): array {
-        return $this->groupByFields;
-    }
-
-    public function setGroupByFields(array $groupByFields) {
-        $this->groupByFields = $groupByFields;
-        return $this;
+    public function groupBy($column) {
+        $this->groupByFields[] = $column;
     }
 }

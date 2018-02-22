@@ -6,41 +6,19 @@ trait OrderByFieldsTrait {
 
     private $orderByFields = [];
 
-    public function clearOrderByFields() {
-        $this->orderByFields = [];
-        return $this;
-    }
-
-    public function addOrderByFields(...$fields) {
-        foreach ($fields as $field) {
-            $this->addOrderByField($field);
+    public function orderByFields ($fields = null) {
+        $result = $this;
+        if ($fields == null) {
+            $result = $this->orderByFields;
         }
-        return $this;
-    }
-
-    public function addOrderByField(...$fieldArguments) {
-        $field = null;
-        switch (sizeof($fieldArguments)) {
-            case 1:
-                $field = $fieldArguments[0];
-                break;
-            case 2:
-                $field = [
-                    "field" => $fieldArguments[0],
-                    "direction" => $fieldArguments[1]
-                ];
-                break;
+        else {
+            $this->orderByFields = is_array($fields)? $fields : func_get_args();
         }
-        $this->orderByFields[] = $field;
-        return $this;
+        return $result;
     }
 
-    public function getOrderByFields(): array {
-        return $this->orderByFields;
-    }
-
-    public function setOrderByFields(array $orderByFields) {
-        $this->orderByFields = $orderByFields;
+    public function orderBy($column, $direction="ASC") {
+        $this->orderByFields[] = ["column"=>$column, "direction"=>$direction];
         return $this;
     }
 }

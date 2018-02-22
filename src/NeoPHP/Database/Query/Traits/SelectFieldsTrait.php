@@ -6,53 +6,20 @@ trait SelectFieldsTrait {
 
     private $selectFields = [];
 
-    public function clearSelectFields() {
-        $this->selectFields = [];
-        return $this;
-    }
-
-    public function addSelectFields(...$fields) {
-        foreach ($fields as $field) {
-            if (is_array($field)) {
-                call_user_func_array([$this, "addSelectField"], $field);
-            }
-            else {
-                $this->addSelectField($field);
-            }
+    public function selectFields ($fields = null) {
+        $result = $this;
+        if ($fields == null) {
+            $result = $this->selectFields;
         }
-        return $this;
-    }
-
-    public function addSelectField(...$fieldArguments) {
-        $field = null;
-        switch (sizeof($fieldArguments)) {
-            case 1:
-                $field = $fieldArguments[0];
-                break;
-            case 2:
-                $field = [
-                    "field" => $fieldArguments[0],
-                    "alias" => $fieldArguments[1]
-                ];
-                break;
-            case 3:
-                $field = [
-                    "field" => $fieldArguments[0],
-                    "alias" => $fieldArguments[1],
-                    "table" => $fieldArguments[2]
-                ];
-                break;
+        else {
+            $this->selectFields = is_array($fields)? $fields : func_get_args();
         }
-        $this->selectFields[] = $field;
-        return $this;
+        return $result;
     }
 
-    public function getSelectFields(): array {
-        return $this->selectFields;
-    }
-
-    public function setSelectFields(array $selectFields) {
-        $this->selectFields = $selectFields;
+    public function select($fields) {
+        $fields = is_array($fields) ? $fields : func_get_args();
+        $this->selectFields = array_merge($this->selectFields, $fields);
         return $this;
     }
 }

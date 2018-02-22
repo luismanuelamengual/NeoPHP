@@ -8,38 +8,54 @@ trait WhereConditionsTrait {
 
     private $whereConditions = null;
 
-    public function clearWhereConditions() {
-        $this->whereConditions = null;
-        return $this;
-    }
-
     public function hasWhereConditions() {
-        return isset($this->whereConditions) && !$this->whereConditions->isEmpty();
+        return $this->whereConditions != null && !empty($this->whereConditions->conditions());
     }
 
-    public function getWhereConditions(): ConditionGroup {
-        if (!isset($this->whereConditions)) {
-            $this->whereConditions = new ConditionGroup();
+    public function whereConditions(ConditionGroup $whereConditions = null) {
+        $result = $this;
+        if ($whereConditions != null) {
+            $this->whereConditions = $whereConditions;
         }
-        return $this->whereConditions;
+        else {
+            if ($this->whereConditions == null) {
+                $this->whereConditions = new ConditionGroup();
+            }
+            $result = $this->whereConditions;
+        }
+        return $result;
     }
 
-    public function setWhereConditions(ConditionGroup $whereConditions) {
-        $this->whereConditions = $whereConditions;
+    public function whereConnector($connector=null) {
+        $this->whereConditions()->connector($connector);
+    }
+
+    public function where ($column, $operatorOrValue, $value=null) {
+        $this->whereConditions()->on($column, $operatorOrValue, $value);
         return $this;
     }
 
-    public function setWhereConnector($connector) {
-        $this->getWhereConditions()->setConnector($connector);
+    public function whereGroup(ConditionGroup $group) {
+        $this->whereConditions()->onGroup($group);
+    }
+
+    public function whereRaw($sql, array $bindings = []) {
+        $this->whereConditions()->onRaw($sql, $bindings);
         return $this;
     }
 
-    public function getWhereConnector() {
-        return $this->getWhereConditions()->getConnector();
+    public function whereColumn($column, $operatorOrColumn, $otherColumn) {
+        $this->whereConditions()->onColumn($column, $operatorOrColumn, $otherColumn);
+        return $this;
     }
 
-    public function addWhere(...$arguments) {
-        call_user_func_array([$this->getWhereConditions(), "addCondition"], $arguments);
+    public function whereNull($column) {
+        $this->whereConditions()->onNull($column);
+        return $this;
+    }
+
+    public function whereNotNull($column) {
+        $this->whereConditions()->onNotNull($column);
         return $this;
     }
 }

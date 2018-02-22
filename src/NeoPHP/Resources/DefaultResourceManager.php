@@ -18,7 +18,7 @@ class DefaultResourceManager extends ResourceManager {
      * @param $table
      */
     public function __construct($table) {
-        $this->setTable($table);
+        $this->table($table);
     }
 
     /**
@@ -39,16 +39,16 @@ class DefaultResourceManager extends ResourceManager {
      * @return SelectQuery
      */
     protected function createSelectQuery(): SelectQuery {
-        $query = new SelectQuery($this->getTable());
-        $query->setModifiers($this->getModifiers());
-        $query->setSelectFields($this->getSelectFields());
-        $query->setJoins($this->getJoins());
-        $query->setOrderByFields($this->getOrderByFields());
-        $query->setGroupByFields($this->getGroupByFields());
-        $query->setWhereConditions($this->getWhereConditions());
-        $query->setHavingConditions($this->getHavingConditions());
-        $query->setOffset($this->getOffset());
-        $query->setLimit($this->getLimit());
+        $query = new SelectQuery($this->table());
+        $query->limit($this->limit());
+        $query->offset($this->offset());
+        $query->distinct($this->distinct());
+        $query->selectFields($this->selectFields());
+        $query->orderByFields($this->orderByFields());
+        $query->groupByFields($this->groupByFields());
+        $query->whereConditions($this->whereConditions());
+        $query->havingConditions($this->havingConditions());
+        $query->joins($this->joins());
         return $query;
     }
 
@@ -56,8 +56,8 @@ class DefaultResourceManager extends ResourceManager {
      * @return InsertQuery
      */
     protected function createInsertQuery(): InsertQuery {
-        $query = new InsertQuery($this->getTable());
-        $query->setFields($this->getFields());
+        $query = new InsertQuery($this->table());
+        $query->fields($this->fields());
         return $query;
     }
 
@@ -65,9 +65,9 @@ class DefaultResourceManager extends ResourceManager {
      * @return UpdateQuery
      */
     protected function createUpdateQuery(): UpdateQuery {
-        $query = new UpdateQuery($this->getTable());
-        $query->setFields($this->getFields());
-        $query->setWhereConditions($this->getWhereConditions());
+        $query = new UpdateQuery($this->table());
+        $query->fields($this->fields());
+        $query->whereConditions($this->whereConditions());
         return $query;
     }
 
@@ -75,8 +75,8 @@ class DefaultResourceManager extends ResourceManager {
      * @return DeleteQuery
      */
     protected function createDeleteQuery(): DeleteQuery {
-        $query = new DeleteQuery($this->getTable());
-        $query->setWhereConditions($this->getWhereConditions());
+        $query = new DeleteQuery($this->table());
+        $query->whereConditions($this->whereConditions());
         return $query;
     }
 

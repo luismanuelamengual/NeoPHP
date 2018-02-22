@@ -11,4 +11,8 @@ class UpdateQuery extends Query {
     use TableTrait,
         WhereConditionsTrait,
         FieldsTrait;
+
+    public function __construct($table=null) {
+        $this->table($table);
+    }
 }
