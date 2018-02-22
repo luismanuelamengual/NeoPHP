@@ -24,7 +24,7 @@ class DefaultRoutesManager extends RoutesManager {
      */
     public function registerRoute($method, $path, $action) {
         $pathParts = explode(self::ROUTE_PATH_SEPARATOR, trim($path, self::ROUTE_PATH_SEPARATOR));
-        $routesIndex = &$this->routesIndex[$method ?: "ANY"];
+        $routesIndex = &$this->routesIndex[isset($method)? $method : "ANY"];
         foreach ($pathParts as $pathPart) {
             if ($pathPart[0] == self::ROUTE_PARAMETER_PREFIX) {
                 $pathPart = self::ROUTE_PARAMETER_WILDCARD;
@@ -42,7 +42,7 @@ class DefaultRoutesManager extends RoutesManager {
     public function getMatchedRoutes($requestMethod, $requestPath) {
         $routes = [];
         $requestPathParts = explode(self::ROUTE_PATH_SEPARATOR, trim($requestPath, self::ROUTE_PATH_SEPARATOR));
-        $routesIndex = &$this->routesIndex[$requestMethod ?: "ANY"];
+        $routesIndex = &$this->routesIndex[isset($method)? $method : "ANY"];
         if ($routesIndex != null) {
             if (array_key_exists(self::ROUTE_GENERIC_PATH, $routesIndex)) {
                 $routes[] = $this->createRoute($requestPathParts, $routesIndex[self::ROUTE_GENERIC_PATH][self::ROUTE_ACTION_KEY]);
