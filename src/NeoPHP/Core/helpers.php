@@ -1,31 +1,18 @@
 <?php
 
-if (!function_exists('createApp')) {
-    /**
-     * @param $basePath
-     * @return \NeoPHP\Core\Application
-     */
-    function createApp($basePath) {
-        return \NeoPHP\Core\Application::create($basePath);
-    }
-}
-
-if (!function_exists('getApp')) {
+if (!function_exists('app')) {
     /**
      * @return \NeoPHP\Core\Application
      */
-    function getApp() {
-        return \NeoPHP\Core\Application::get();
-    }
-}
-
-if (!function_exists('getController')) {
-    /**
-     * @param $controllerClass
-     * @return mixed
-     */
-    function getController($controllerClass) {
-        return \NeoPHP\Controllers\Controllers::get($controllerClass);
+    function app($basePath=null) {
+        $app = null;
+        if ($basePath != null) {
+            $app = \NeoPHP\Core\Application::create($basePath);
+        }
+        else {
+            $app = \NeoPHP\Core\Application::get();
+        }
+        return $app;
     }
 }
 

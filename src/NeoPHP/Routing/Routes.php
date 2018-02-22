@@ -177,7 +177,7 @@ class Routes {
             $result = call_user_func($action, $parameters);
         }
         else {
-            $result = getApp()->execute($action, $parameters);
+            $result = app()->execute($action, $parameters);
         }
         return $result;
     }

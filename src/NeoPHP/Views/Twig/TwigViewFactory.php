@@ -16,7 +16,7 @@ class TwigViewFactory extends ViewFactory {
             throw new \RuntimeException("Package \"twig/twig\" is missing. Add package via \"composer require twig/twig\" !!");
         }
 
-        $templatesPath = isset($config["templatesPath"]) ? $config["templatesPath"] : getApp()->getResourcesPath() . DIRECTORY_SEPARATOR . "views";
+        $templatesPath = isset($config["templatesPath"]) ? $config["templatesPath"] : app()->getResourcesPath() . DIRECTORY_SEPARATOR . "views";
         $loader = new \Twig_Loader_Filesystem($templatesPath);
         $this->twig = new \Twig_Environment($loader, isset($config["environment"])? $config["environment"] : []);
         $this->filesExtension = isset($config["filesExtension"])? $config["filesExtension"] : "php";
