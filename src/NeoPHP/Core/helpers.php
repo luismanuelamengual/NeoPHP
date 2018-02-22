@@ -37,6 +37,14 @@ if (!function_exists('get_logger')) {
     }
 }
 
+if (!function_exists('get_request')) {
+
+    function get_request($parameterName=null) {
+        $request = \NeoPHP\Http\Request::getInstance();
+        return isset($parameterName)? $request->get($parameterName) : $request;
+    }
+}
+
 if (!function_exists('create_view')) {
     /**
      * @param $name

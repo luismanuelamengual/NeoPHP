@@ -32,12 +32,25 @@ final class Request {
         return $_REQUEST;
     }
 
-    public function getParameter($name) {
+    public function get($name) {
         return isset($_REQUEST[$name]) ? $_REQUEST[$name] : null;
     }
 
+    public function set($name, $value) {
+        $_REQUEST[$name] = $value;
+    }
+
+    public function has($name) {
+        return isset($_REQUEST[$name]);
+    }
+
     public function getHeaders() {
-        return RequestHeaders::getInstance();
+        return apache_request_headers();
+    }
+
+    public function getHeader($name) {
+        $headers = $this->getHeaders();
+        return $headers[$name];
     }
 
     public function getCookies() {
