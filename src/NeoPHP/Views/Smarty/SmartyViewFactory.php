@@ -27,7 +27,7 @@ class SmartyViewFactory extends ViewFactory {
         }
     }
 
-    public function createView($name, array $parameters = []): View {
+    public function create($name, array $parameters = []): View {
         $smarty = new \Smarty();
         $smarty->template_dir = $this->templatesPath;
         $smarty->compile_dir = $this->compiledTemplatesPath;

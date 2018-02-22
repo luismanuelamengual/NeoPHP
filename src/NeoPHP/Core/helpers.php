@@ -43,7 +43,7 @@ if (!function_exists('create_view')) {
      * @return \NeoPHP\Views\View
      */
     function create_view($name, array $parameters = []) {
-        return NeoPHP\Views\Views::createView($name, $parameters);
+        return NeoPHP\Views\Views::create($name, $parameters);
     }
 }
 

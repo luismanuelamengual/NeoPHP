@@ -6,7 +6,7 @@ abstract class Views {
 
     private static $factories = [];
 
-    public static function getFactory($factoryName=null): ViewFactory {
+    public static function factory($factoryName=null): ViewFactory {
         if (empty($factoryName)) {
             $factoryName = get_property("views.default", "main");
         }
@@ -22,7 +22,7 @@ abstract class Views {
         return self::$factories[$factoryName];
     }
 
-    public static function createView($viewName, array $parameters = []) {
-        return self::getFactory()->createView($viewName, $parameters);
+    public static function create($viewName, array $parameters = []) {
+        return self::factory()->create($viewName, $parameters);
     }
 }

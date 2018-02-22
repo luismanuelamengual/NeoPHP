@@ -44,7 +44,7 @@ class BladeViewFactory extends ViewFactory {
         $this->viewFactory = new Factory($viewResolver, $viewFinder, $eventDispatcher);
     }
 
-    public function createView($name, array $parameters = []): View {
+    public function create($name, array $parameters = []): View {
         return new BladeView($this->viewFactory->make($name, $parameters));
     }
 }

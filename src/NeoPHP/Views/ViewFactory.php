@@ -13,5 +13,5 @@ abstract class ViewFactory {
      * @param array $parameters (optional) parameters to the view
      * @return View created View
      */
-    public abstract function createView($name, array $parameters = []): View;
+    public abstract function create($name, array $parameters = []): View;
 }

@@ -22,7 +22,7 @@ class TwigViewFactory extends ViewFactory {
         $this->filesExtension = isset($config["filesExtension"])? $config["filesExtension"] : "php";
     }
 
-    public function createView($name, array $parameters = []): View {
+    public function create($name, array $parameters = []): View {
         $filename = str_replace(".", DIRECTORY_SEPARATOR, $name);
         $filename .= "." . $this->filesExtension;
         return new TwigView($this->twig->load($filename), $parameters);
