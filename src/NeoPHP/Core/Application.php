@@ -44,17 +44,26 @@ class Application {
     }
 
     /**
+     * @param null $basePath
      * @return mixed
      */
-    public function getBasePath() {
+    public function basePath($basePath = null) {
+        if ($basePath != null) {
+            $this->basePath = $basePath;
+        }
         return $this->basePath;
     }
 
     /**
      * Returns the storage path
+     * @param null $storagePath
+     * @return mixed|null
      */
-    public function getStoragePath() {
-        if (!isset($this->storagePath)) {
+    public function storagePath($storagePath = null) {
+        if ($storagePath != null) {
+            $this->storagePath = $storagePath;
+        }
+        else if (!isset($this->storagePath)) {
             $this->storagePath = getProperty("app.storagePath", $this->basePath . DIRECTORY_SEPARATOR . "storage");
         }
         return $this->storagePath;
@@ -62,9 +71,14 @@ class Application {
 
     /**
      * Returns the resources path
+     * @param null $resourcesPath
+     * @return mixed|null
      */
-    public function getResourcesPath() {
-        if (!isset($this->resourcesPath)) {
+    public function resourcesPath($resourcesPath = null) {
+        if ($resourcesPath != null) {
+            $this->resourcesPath = $resourcesPath;
+        }
+        else if (!isset($this->resourcesPath)) {
             $this->resourcesPath = getProperty("app.resourcesPath", $this->basePath . DIRECTORY_SEPARATOR . "resources");
         }
         return $this->resourcesPath;
