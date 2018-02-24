@@ -9,31 +9,28 @@ use NeoPHP\Database\Query\SelectQuery;
 use NeoPHP\Database\Query\UpdateQuery;
 
 /**
- * Class DefaultResourceManager
+ * Class ConnectionResourceManager
  * @package NeoPHP\Core\Resources
  */
-class DefaultResourceManager extends ResourceManager {
+class ConnectionResourceManager extends ResourceManager {
+
+    private $connection;
 
     /**
-     * DefaultResourceManager constructor.
-     * @param $table
+     * ConnectionResourceManager constructor.
+     * @param $config
      */
-    public function __construct($table) {
-        $this->table($table);
-    }
-
-    /**
-     * @return mixed
-     */
-    protected function getConnectionName() {
-        return get_property("database.default");
+    public function __construct(array $config = []) {
+        $this->table(isset($config["tableName"])? $config["tableName"] : $config["resourceName"]);
+        $connectionName = isset($config["databaseName"])? $config["databaseName"] : get_property("database.default");
+        $this->connection = DB::connection($connectionName);
     }
 
     /**
      * @return mixed
      */
     protected function getConnection() {
-        return DB::connection($this->getConnectionName());
+        return $this->connection;
     }
 
     /**
