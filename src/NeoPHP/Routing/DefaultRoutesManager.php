@@ -61,6 +61,7 @@ class DefaultRoutesManager extends RoutesManager {
                     $requestPathPart = self::ROUTE_PARAMETER_WILDCARD;
                 }
                 else {
+                    $routesIndex = null;
                     break;
                 }
             }
@@ -75,13 +76,15 @@ class DefaultRoutesManager extends RoutesManager {
                 }
             }
         }
-        if (array_key_exists(self::ROUTE_ACTION_KEY, $routesIndex)) {
-            $testRoutes = $routesIndex[self::ROUTE_ACTION_KEY];
-            if (array_key_exists($requestMethod, $testRoutes)) {
-                $routes[] = $this->createRoute($requestPathParts,$testRoutes[$requestMethod]);
-            }
-            if (array_key_exists("ANY", $testRoutes)) {
-                $routes[] = $this->createRoute($requestPathParts,$testRoutes["ANY"]);
+        if ($routesIndex != null) {
+            if (array_key_exists(self::ROUTE_ACTION_KEY, $routesIndex)) {
+                $testRoutes = $routesIndex[self::ROUTE_ACTION_KEY];
+                if (array_key_exists($requestMethod, $testRoutes)) {
+                    $routes[] = $this->createRoute($requestPathParts, $testRoutes[$requestMethod]);
+                }
+                if (array_key_exists("ANY", $testRoutes)) {
+                    $routes[] = $this->createRoute($requestPathParts, $testRoutes["ANY"]);
+                }
             }
         }
         return $routes;
