@@ -66,6 +66,17 @@ if (!function_exists('get_session')) {
     }
 }
 
+if (!function_exists('get_message')) {
+    /**
+     * @param $key
+     * @param array ...$replacements
+     * @return null
+     */
+    function get_message($key, ...$replacements) {
+        return \NeoPHP\Messages\Messages::get(func_get_args());
+    }
+}
+
 if (!function_exists('create_view')) {
     /**
      * @param $name
