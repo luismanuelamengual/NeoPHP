@@ -2,85 +2,96 @@
 
 namespace NeoPHP\Messages;
 
-use Exception;
-
 class Messages {
 
-    private $language;
-    private $resourcePaths;
-    private $dictionary;
+    private static $language;
+    private static $messages;
+    private static $messagesPath;
 
-    public function __construct() {
-
+    private static function init() {
         $lang = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2);
         if (empty($lang))
             $lang = "es";
-        $this->language = $lang;
-        $this->resourcePaths = [];
+        self::$language = $lang;
+        self::$messages = [];
+        self::$messagesPath = get_property("app.messagesPath", get_app()->resourcesPath() . DIRECTORY_SEPARATOR . "messages");
     }
 
-    public function setLanguage($language) {
-        $this->language = $language;
+    public static function setLanguage($language) {
+        self::$language = $language;
     }
 
-    public function getLanguage() {
-        return $this->language;
-    }
-
-    public function addResourcePath($resourcePath) {
-        $this->resourcePaths[] = $resourcePath;
-    }
-
-    public function getResourcePaths() {
-        return $this->resourcePaths;
+    public static function getLanguage() {
+        return self::$language;
     }
 
     /**
      * @param $key
-     * @param null $language
-     * @return mixed
-     * @throws Exception
+     * @param array $replacements
+     * @return null
      */
-    public function getMessage($key, $language = null) {
-
-        if (empty($language)) {
-            $language = $this->language;
+    public static function get($key, ...$replacements) {
+        $idx = strrpos($key, ".");
+        $bundleName = null;
+        $bundleKey = null;
+        if ($idx === FALSE) {
+            $bundleName = get_property("messages.default", "main");
+            $bundleKey = $key;
         }
-        if (strpos($key, ".") === FALSE) {
-            $key = "general." . $key;
+        else {
+            $bundleName = substr($key, 0, $idx);
+            $bundleKey = substr($key, $idx+1);
         }
-        if (empty($this->dictionary[$language][$key])) {
-            $dictionarySeparator = strrpos($key, ".");
-            $dictionaryName = substr($key, 0, $dictionarySeparator);
-            $dictionaryKey = substr($key, $dictionarySeparator + 1, strlen($key));
-            $dictionaryRelativeFilename = str_replace(".", DIRECTORY_SEPARATOR, $dictionaryName) . ".lan";
-            $dictionaryFileFound = false;
 
-            foreach ($this->resourcePaths as $resourcePath) {
-                $dictionaryFilename = $resourcePath . DIRECTORY_SEPARATOR . $dictionaryRelativeFilename;
-                if (file_exists($dictionaryFilename)) {
-                    try {
-                        $dictionaryData = @parse_ini_file($dictionaryFilename, true);
-                        if (!empty($dictionaryData) && !empty($dictionaryData[$language]))
-                            foreach ($dictionaryData[$language] as $newDictionaryKey => $newDictionaryText)
-                                $this->dictionary[$language][$dictionaryName . "." . $newDictionaryKey] = $newDictionaryText;
-                    }
-                    catch (Exception $ex) {
-                        throw new Exception("Resource file \"$dictionaryFilename\" could not be parsed");
-                    }
-                    $dictionaryFileFound = true;
-                    break;
+        $bundleNameTokens = explode(".", $bundleName);
+        $messageBundle = &self::$messages[self::$language];
+        $missingBundle = false;
+        foreach ($bundleNameTokens as $bundleNameToken) {
+            if (!isset($messageBundle[$bundleNameToken])) {
+                $messageBundle[$bundleNameToken] = [];
+                $missingBundle = true;
+            }
+            $messageBundle = &$messageBundle[$bundleNameToken];
+        }
+
+        if ($missingBundle) {
+            $messageBundleFileName = self::$messagesPath . DIRECTORY_SEPARATOR . self::$language;
+            foreach ($bundleNameTokens as $bundleNameToken) {
+                $messageBundleFileName .= DIRECTORY_SEPARATOR . $bundleNameToken;
+            }
+            $messageBundleFileName .= ".php";
+            if (file_exists($messageBundleFileName)) {
+                $messageBundle = @include_once($messageBundleFileName);
+                $missingBundle = false;
+            }
+            else {
+                get_logger()->warning("Bundle file \"$messageBundleFileName\" was not found while trying to retrieve bundle key \"$key\" !!");
+            }
+        }
+
+        $bundleKeyValue = null;
+        if (!$missingBundle) {
+            if (isset($messageBundle[$bundleKey])) {
+                if (sizeof($replacements) > 0) {
+                    $bundleKeyValue = call_user_func_array("sprintf", array_merge([$messageBundle[$bundleKey]], $replacements));
+                }
+                else {
+                    $bundleKeyValue = $messageBundle[$bundleKey];
                 }
             }
-
-            if (!$dictionaryFileFound) {
-                throw new Exception ("Resource file \"$dictionaryRelativeFilename\" not found in the translations resource paths");
-            }
-
-            if (empty($this->dictionary[$language][$key])) {
-                throw new Exception('Entry "' . $dictionaryKey . '" for language "' . $language . '" not found in the resource files');
+            else {
+                get_logger()->warning("Bundle key \"$key\" was not found !!");
+                $bundleKeyValue = "[$key]";
             }
         }
-        return $this->dictionary[$language][$key];
+        else {
+            $bundleKeyValue = "[$key]";
+        }
+        return $bundleKeyValue;
     }
 }
+
+$messagesClass = new \ReflectionClass(Messages::class);
+$initMethod = $messagesClass->getMethod("init");
+$initMethod->setAccessible(true);
+$initMethod->invoke(null);
