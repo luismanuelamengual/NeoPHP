@@ -8,12 +8,18 @@
 # NeoPHP
 Great PHP framework for web developers, not for web 'artisans' (wtf ??!!)
 
-Installation
----------------
-
 Getting started
 ---------------
-
+To install the NeoPHP framework we have to run the following command (Composer required), assuming we want to start a new project named "MyApp":
+```
+composer create-project neogroup/neophp-startup-project MyApp
+```
+This command will create an empty NeoPHP project.
+Now we have to add write permissions to the folder "storage" (this is the place where logs and compiled views are stored). In linux system you can run the following commands
+```
+cd MyApp
+chmod 777 -R storage
+```
 Routing & Controllers
 ---------------
 
