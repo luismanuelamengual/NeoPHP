@@ -93,7 +93,8 @@ final class Request {
      */
     public function getPathParts() {
         if (!isset($this->pathParts)) {
-            $this->pathParts = explode(PATH_SEPARATOR, $this->getPath());
+            $path = $this->getPath();
+            $this->pathParts = !empty($path)? explode(PATH_SEPARATOR, $this->getPath()) : [];
         }
         return $this->pathParts;
     }
