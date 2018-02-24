@@ -2,12 +2,19 @@
 
 namespace NeoPHP\Messages;
 
+/**
+ * Class Messages
+ * @package NeoPHP\Messages
+ */
 class Messages {
 
     private static $language;
     private static $messages;
     private static $messagesPath;
 
+    /**
+     * Messages initialization
+     */
     private static function init() {
         $lang = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2);
         if (empty($lang))
@@ -17,12 +24,32 @@ class Messages {
         self::$messagesPath = get_property("app.messagesPath", get_app()->resourcesPath() . DIRECTORY_SEPARATOR . "messages");
     }
 
+    /**
+     * @param $language
+     */
     public static function setLanguage($language) {
         self::$language = $language;
     }
 
+    /**
+     * @return bool|string
+     */
     public static function getLanguage() {
         return self::$language;
+    }
+
+    /**
+     * @param $bundleName
+     * @return string
+     */
+    private static function getBundleFilename ($bundleName) {
+        $bundleNameTokens = explode(".", $bundleName);
+        $messageBundleFileName = self::$messagesPath . DIRECTORY_SEPARATOR . self::$language;
+        foreach ($bundleNameTokens as $bundleNameToken) {
+            $messageBundleFileName .= DIRECTORY_SEPARATOR . $bundleNameToken;
+        }
+        $messageBundleFileName .= ".php";
+        return $messageBundleFileName;
     }
 
     /**
@@ -40,7 +67,7 @@ class Messages {
         }
         else {
             $bundleName = substr($key, 0, $idx);
-            $bundleKey = substr($key, $idx+1);
+            $bundleKey = substr($key, $idx + 1);
         }
 
         $bundleNameTokens = explode(".", $bundleName);
@@ -55,17 +82,10 @@ class Messages {
         }
 
         if ($missingBundle) {
-            $messageBundleFileName = self::$messagesPath . DIRECTORY_SEPARATOR . self::$language;
-            foreach ($bundleNameTokens as $bundleNameToken) {
-                $messageBundleFileName .= DIRECTORY_SEPARATOR . $bundleNameToken;
-            }
-            $messageBundleFileName .= ".php";
+            $messageBundleFileName = self::getBundleFilename($bundleName);
             if (file_exists($messageBundleFileName)) {
                 $messageBundle = @include_once($messageBundleFileName);
                 $missingBundle = false;
-            }
-            else {
-                get_logger()->warning("Bundle file \"$messageBundleFileName\" was not found while trying to retrieve bundle key \"$key\" !!");
             }
         }
 
@@ -80,11 +100,12 @@ class Messages {
                 }
             }
             else {
-                get_logger()->warning("Bundle key \"$key\" was not found !!");
+                get_logger()->warning("Bundle key \"" . $bundleKey . "\" was not found in bundle file \"" . self::getBundleFilename($bundleName) . "\" !!");
                 $bundleKeyValue = "[$key]";
             }
         }
         else {
+            get_logger()->warning("Bundle file \"" . self::getBundleFilename($bundleName) . "\" was not found !!");
             $bundleKeyValue = "[$key]";
         }
         return $bundleKeyValue;
