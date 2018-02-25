@@ -133,6 +133,8 @@ Other type of routes are the ones that executes controller actions. Example:
 ```PHP
 Routes::get("/helloworld", "MyApp\HelloWorldController@sayHello");
 ```
+If we add request parameters to the http request then the controller method can receive them as parameters. For example if run the uri **/helloworld?name=Luis** then the parameter "name" will be passed to the controller action execution and therefore this **parameter "name" will be accesible in the controller method**
+
 These are the **availiable methods** that may be matched with routes
 ```PHP
 Routes::get($uri, $callback);
@@ -144,12 +146,30 @@ Its also possible to match any http method with the **any method**
 ```PHP
 Routes::any($uri, $callback);
 ```
-Wildcards can be used to match any path starting with a desired context. To use wildcards the * is used in the path. These are valid examples
+Wildcards can be used to match any path starting with a desired context. To use wildcards the * is used in the path. These are valid examples ..
 
 ```PHP
 Routes::get("*", "MyApp\MainController@path");
 Routes::post("test/*", "MyApp\Test\TestController");
 Routes::put("/resources/users/*", function() { echo "test"; });
+```
+Routes with **path parameters may be declared using the : prefix** in the path. For example ..
+
+```PHP
+Routes::get("users/:userId", "MyApp\Users\UsersController@findUser");
+```
+Then the "userId" parameter may be accesible as a controller method parameter as follows ..
+```PHP
+<?php
+
+namespace MyApp\Users;
+
+class UsersController {
+    
+    public function findUser ($userId) {
+        echo "Trying to find the user $userId";
+    }
+}
 ```
 
 Data Access
