@@ -144,6 +144,13 @@ Its also possible to match any http method with the **any method**
 ```PHP
 Routes::any($uri, $callback);
 ```
+Wildcards can be used to match any path starting with a desired context. To use wildcards the * is used in the path. These are valid examples
+
+```PHP
+Routes::get("*", "MyApp\MainController@path");
+Routes::post("test/*", "MyApp\Test\TestController");
+Routes::put("/resources/users/*", function() { echo "test"; });
+```
 
 Data Access
 ---------------
