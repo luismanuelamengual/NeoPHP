@@ -80,10 +80,67 @@ if (!function_exists('get_message')) {
 if (!function_exists('create_view')) {
     /**
      * @param $name
+     * @param array $parameters
      * @return \NeoPHP\Views\View
      */
     function create_view($name, array $parameters = []) {
         return NeoPHP\Views\Views::create($name, $parameters);
+    }
+}
+
+if (!function_exists('create_model')) {
+    /**
+     * @param $model
+     * @param array $options
+     * @return mixed
+     */
+    function create_model($model, array $options = []) {
+        return \NeoPHP\Models\Models::createModel($model, $options);
+    }
+}
+
+if (!function_exists('update_model')) {
+    /**
+     * @param $model
+     * @param array $options
+     * @return mixed
+     */
+    function update_model($model, array $options = []) {
+        return \NeoPHP\Models\Models::updateModel($model, $options);
+    }
+}
+
+if (!function_exists('delete_model')) {
+    /**
+     * @param $model
+     * @param array $options
+     * @return mixed
+     */
+    function delete_model($model, array $options = []) {
+        return \NeoPHP\Models\Models::deleteModel($model, $options);
+    }
+}
+
+if (!function_exists('retrieve_model_by_id')) {
+    /**
+     * @param $modelClass
+     * @param $modelId
+     * @param array $options
+     * @return mixed
+     */
+    function retrieve_model_by_id($modelClass, $modelId, array $options = []) {
+        return \NeoPHP\Models\Models::retrieveModelById($modelClass, $modelId, $options);
+    }
+}
+
+if (!function_exists('retrieve_models')) {
+    /**
+     * @param $modelClass
+     * @param array $options
+     * @return mixed
+     */
+    function retrieve_models($modelClass, array $options = []) {
+        return \NeoPHP\Models\Models::retrieveModels($modelClass, $options);
     }
 }
 

@@ -1,14 +1,16 @@
 <?php
 
-namespace NeoPHP\Core\Models;
+namespace NeoPHP\Models;
 
 abstract class ModelManager {
 
-    public abstract function create($model, array $parameters = []);
+    public abstract function create($model, array $options = []);
 
-    public abstract function update($model, array $parameters = []);
+    public abstract function update($model, array $options = []);
 
-    public abstract function delete($model, array $parameters = []);
+    public abstract function delete($model, array $options = []);
 
-    public abstract function retrieve(ModelQuery $modelQuery, array $parameters = []);
+    public abstract function retrieveById ($modelId, array $options = []);
+
+    public abstract function retrieve(array $options = []);
 }
