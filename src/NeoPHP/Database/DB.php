@@ -53,7 +53,7 @@ abstract class DB {
      * @param $bindings
      * @return bool|int
      */
-    public static function exec($sql, $bindings) {
+    public static function exec($sql, array $bindings = []) {
         return self::connection()->exec($sql, $bindings);
     }
 
@@ -62,7 +62,7 @@ abstract class DB {
      * @param $bindings
      * @return array
      */
-    public static function query($sql, $bindings) {
+    public static function query($sql, array $bindings = []) {
         return self::connection()->query($sql, $bindings);
     }
 }
