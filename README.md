@@ -94,6 +94,19 @@ Then its possible to pass the name parameters as follows ...
 ```PHP
 get_app()->execute("MyApp\HelloWorldController@sayHello", ["name"=>"Luis"]);
 ```
+The **Boot controller actions** (Actions that are executed on every php request) can be configured in the configuration file **"app.php" in the config folder** with the **bootActions** property. Suppose we want to execute our sayHello method on every php request then the app.php configuration file could look like this ...
+```PHP
+<?php
+
+return [
+
+    "debug"=>false,
+
+    "bootActions"=> [
+        "MyApp\HelloWorldController@sayHello"
+    ]
+];
+```
 
 Routing
 ---------------
