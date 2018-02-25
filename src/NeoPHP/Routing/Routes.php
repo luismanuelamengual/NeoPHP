@@ -154,6 +154,7 @@ class Routes {
             self::processResult($result);
         }
         catch (\Throwable $ex) {
+            ob_clean();
             $routes = self::$errorRoutes->getMatchedRoutes($requestMethod, $requestPath);
             if (!empty($routes)) {
                 foreach ($routes as $route) {
