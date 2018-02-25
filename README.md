@@ -53,7 +53,49 @@ chmod 777 -R storage/
 ```
 The next and final step is to **configure the public directory**. You should configure your web server's document / web root to be the  public directory. The index.php in this directory serves as the front controller for all HTTP requests entering your application.
 
-Routing & Controllers
+Controllers
+---------------
+Controllers can be any class in the src folder. These controllers are places where we are going to put the business logic. This is an example of a simple controller that writes "hello world" in the browser ...
+
+```PHP
+<?php
+
+namespace MyApp;
+
+class HelloWorldController {
+    
+    public function sayHello () {
+        echo "Hello world !!";
+    }
+}
+```
+This controller method "sayHello" can be executed in the following way
+```PHP
+get_app()->execute("MyApp\HelloWorldController@sayHello");
+```
+If you specify only the controller class then the **index** method will be executed. Example:
+```PHP
+get_app()->execute("MyApp\HelloWorldController");
+```
+Its also possible to pass arguments to the controller methods. If we modify the controller a bit like this ...
+```PHP
+<?php
+
+namespace MyApp;
+
+class HelloWorldController {
+    
+    public function sayHello ($name) {
+        echo "Hi $name, hello world !!";
+    }
+}
+```
+Then its possible to pass the name parameters as follows ...
+```PHP
+get_app()->execute("MyApp\HelloWorldController@sayHello", ["name"=>"Luis"]);
+```
+
+Routing
 ---------------
 
 Data Access
