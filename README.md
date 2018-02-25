@@ -198,8 +198,17 @@ Routes::after("persons", function($result) {
             $result = json_encode($result);
             break;
     }
+    return $result;
+});
 ```
 In this example if we run the uri "/persons?output=json" then response will be in json format
+
+Its possible also to define error routes for certain contexts with the "error" method. The exeption is passed to the controller as follows ..
+```PHP
+Routes::error("resources/*", function($exception) { 
+    echo "Houston we have a problem !!. Message: " . $exception->getMessage();
+});
+```
 
 Data Access
 ---------------
