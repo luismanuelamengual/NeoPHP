@@ -4,7 +4,6 @@ namespace NeoPHP\Database;
 
 use Closure;
 use Exception;
-use NeoPHP\Database\Builder\BaseQueryBuilder;
 use NeoPHP\Database\Builder\QueryBuilder;
 use NeoPHP\Database\Query\Query;
 use PDO;
@@ -25,12 +24,12 @@ class Connection {
      * Connection constructor.
      * @param PDO $pdo
      */
-    public function __construct(PDO $pdo, array $config = []) {
+    public function __construct(PDO $pdo, QueryBuilder $queryBuilder, array $config = []) {
         $this->pdo = $pdo;
         $this->config = $config;
-        $this->readOnly = isset($config["readOnly"])? $config["readOnly"] : false;
-        $this->logQueries = isset($config["logQueries"])? $config["logQueries"] : false;
-        $this->queryBuilder = new BaseQueryBuilder();
+        $this->readOnly = isset($config["readOnly"]) ? $config["readOnly"] : false;
+        $this->logQueries = isset($config["logQueries"]) ? $config["logQueries"] : false;
+        $this->queryBuilder = $queryBuilder;
     }
 
     /**
@@ -164,14 +163,14 @@ class Connection {
      * @param array $bindings
      * @return mixed
      */
-    private function getSqlSentence ($sql, array $bindings = []) {
+    private function getSqlSentence($sql, array $bindings = []) {
         $sqlSentence = $sql;
-        foreach ($bindings as $key=>$value) {
+        foreach ($bindings as $key => $value) {
             if (!is_numeric($value)) {
                 $value = $this->quote($value);
             }
             if (is_numeric($key)) {
-                $sqlSentence = preg_replace('/'.preg_quote("?", '/').'/', $value, $sqlSentence, 1);
+                $sqlSentence = preg_replace('/' . preg_quote("?", '/') . '/', $value, $sqlSentence, 1);
             }
             else {
                 $sqlSentence = str_replace(":$key", $value, $sqlSentence);
@@ -211,7 +210,7 @@ class Connection {
         $results = $queryStatement->fetchAll(PDO::FETCH_OBJ);
         $elapsedTime = microtime(true) - $startTimestamp;
         if ($this->logQueries) {
-            get_logger()->debug("SQL: " . $this->getSqlSentence($sql, $bindings) . " [Time: " . number_format ($elapsedTime, 4) . ", Results: " . sizeof($results) . "]");
+            get_logger()->debug("SQL: " . $this->getSqlSentence($sql, $bindings) . " [Time: " . number_format($elapsedTime, 4) . ", Results: " . sizeof($results) . "]");
         }
         return $results;
     }
@@ -249,7 +248,7 @@ class Connection {
         }
         $elapsedTime = microtime(true) - $startTimestamp;
         if ($this->logQueries) {
-            get_logger()->debug("SQL: " . $this->getSqlSentence($sql, $bindings) . " [Time: " . number_format ($elapsedTime, 4) . ", Affected rows: " . $affectedRows . "]");
+            get_logger()->debug("SQL: " . $this->getSqlSentence($sql, $bindings) . " [Time: " . number_format($elapsedTime, 4) . ", Affected rows: " . $affectedRows . "]");
         }
         return $affectedRows;
     }

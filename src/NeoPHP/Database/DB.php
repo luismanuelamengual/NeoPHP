@@ -2,6 +2,7 @@
 
 namespace NeoPHP\Database;
 
+use NeoPHP\Database\Builder\PostgresQueryBuilder;
 use PDO;
 use RuntimeException;
 
@@ -29,13 +30,30 @@ abstract class DB {
             if (!isset($connectionsConfig[$connectionName])) {
                 throw new RuntimeException("Database connection with name \"$connectionName\" doesnt exist !!");
             }
+
             $connectionConfig = $connectionsConfig[$connectionName];
-            $connectionDsn = $connectionConfig["driver"];
+            $connectionDriver = $connectionConfig["driver"];
+            $connectionQueryBuilder = null;
+            switch ($connectionDriver) {
+                case "pgsql":
+                    $connectionQueryBuilder = new PostgresQueryBuilder();
+                    break;
+                default:
+                    $builderClasses = get_property("database.builders", []);
+                    if (isset($builderClasses[$connectionDriver])) {
+                        $connectionQueryBuilder = $builderClasses[$connectionDriver];
+                    }
+                    else {
+                        throw new RuntimeException("Database driver \"$connectionDriver\" not supported !!. Consider adding a builder class for the driver.");
+                    }
+                    break;
+            }
+            $connectionDsn = $connectionDriver;
             $connectionDsn .= ":host=" . $connectionConfig["host"];
             $connectionDsn .= ";port=" . $connectionConfig["port"];
             $connectionDsn .= ";dbname=" . $connectionConfig["database"];
             $connectionPdo = new PDO($connectionDsn, $connectionConfig["username"], $connectionConfig["password"]);
-            self::$connections[$connectionName] = new Connection($connectionPdo, $connectionConfig);
+            self::$connections[$connectionName] = new Connection($connectionPdo, $connectionQueryBuilder, $connectionConfig);
         }
         return self::$connections[$connectionName];
     }

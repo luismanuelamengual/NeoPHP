@@ -8,11 +8,10 @@ use NeoPHP\Database\Query\DeleteQuery;
 use NeoPHP\Database\Query\InsertQuery;
 use NeoPHP\Database\Query\Join;
 use NeoPHP\Database\Query\Query;
-use NeoPHP\Database\Query\RawValue;
 use NeoPHP\Database\Query\SelectQuery;
 use NeoPHP\Database\Query\UpdateQuery;
 
-class BaseQueryBuilder extends QueryBuilder {
+class PostgresQueryBuilder extends QueryBuilder {
 
     public function buildSql(Query $query, array &$bindings) {
         $sql = null;
@@ -31,7 +30,7 @@ class BaseQueryBuilder extends QueryBuilder {
         return $sql;
     }
 
-    protected function buildSelectSql (SelectQuery $query, array &$bindings) {
+    protected function buildSelectSql(SelectQuery $query, array &$bindings) {
         $sql = "SELECT";
         if ($query->distinct()) {
             $sql .= " DISTINCT";
@@ -98,7 +97,7 @@ class BaseQueryBuilder extends QueryBuilder {
         return $sql;
     }
 
-    protected function buildInsertSql (InsertQuery $query, array &$bindings) {
+    protected function buildInsertSql(InsertQuery $query, array &$bindings) {
         $sql = "INSERT INTO ";
         $sql .= $query->table();
         $fieldsSql = "";
@@ -117,7 +116,7 @@ class BaseQueryBuilder extends QueryBuilder {
         return $sql;
     }
 
-    protected function buildUpdateSql (UpdateQuery $query, array &$bindings) {
+    protected function buildUpdateSql(UpdateQuery $query, array &$bindings) {
         $sql = "UPDATE ";
         $sql .= $query->table();
         $sql .= " SET ";
@@ -142,7 +141,7 @@ class BaseQueryBuilder extends QueryBuilder {
         return $sql;
     }
 
-    protected function buildDeleteSql (DeleteQuery $query, array &$bindings) {
+    protected function buildDeleteSql(DeleteQuery $query, array &$bindings) {
         $sql = "DELETE FROM ";
         $sql .= $query->table();
         if (!$query->hasWhereConditions() && get_property("database.missingWhereClauseProtection", true)) {
@@ -158,14 +157,24 @@ class BaseQueryBuilder extends QueryBuilder {
         return $sql;
     }
 
-    protected function buildJoinSql (Join $join, array &$bindings) {
+    protected function buildJoinSql(Join $join, array &$bindings) {
         $sql = "";
         switch ($join->type()) {
-            case Join::TYPE_JOIN: $sql .= "JOIN"; break;
-            case Join::TYPE_INNER_JOIN: $sql .= "INNER JOIN"; break;
-            case Join::TYPE_OUTER_JOIN: $sql .= "OUTER JOIN"; break;
-            case Join::TYPE_LEFT_JOIN: $sql .= "LEFT JOIN"; break;
-            case Join::TYPE_RIGHT_JOIN: $sql .= "RIGHT JOIN"; break;
+            case Join::TYPE_JOIN:
+                $sql .= "JOIN";
+                break;
+            case Join::TYPE_INNER_JOIN:
+                $sql .= "INNER JOIN";
+                break;
+            case Join::TYPE_OUTER_JOIN:
+                $sql .= "OUTER JOIN";
+                break;
+            case Join::TYPE_LEFT_JOIN:
+                $sql .= "LEFT JOIN";
+                break;
+            case Join::TYPE_RIGHT_JOIN:
+                $sql .= "RIGHT JOIN";
+                break;
         }
         $sql .= " " . $join->table();
         if (!empty($join->conditions())) {
@@ -174,7 +183,7 @@ class BaseQueryBuilder extends QueryBuilder {
         return $sql;
     }
 
-    protected function buildConditionGroupSql (ConditionGroup $conditionGroup, array &$bindings) {
+    protected function buildConditionGroupSql(ConditionGroup $conditionGroup, array &$bindings) {
         $sql = "";
         $conditions = $conditionGroup->conditions();
         $connector = $conditionGroup->connector();
@@ -194,11 +203,11 @@ class BaseQueryBuilder extends QueryBuilder {
         return $sql;
     }
 
-    protected function buildConditionSql ($condition, array &$bindings) {
+    protected function buildConditionSql($condition, array &$bindings) {
         $sql = "";
         switch ($condition["type"]) {
             case "basic":
-                $operator = isset($condition["operator"])? $condition["operator"] : "=";
+                $operator = isset($condition["operator"]) ? $condition["operator"] : "=";
                 $operator = strtoupper($operator);
                 $sql .= $condition["column"];
                 $sql .= " $operator";
@@ -214,7 +223,7 @@ class BaseQueryBuilder extends QueryBuilder {
                 $bindings = array_merge($bindings, $condition["bindings"]);
                 break;
             case "column":
-                $operator = isset($condition["operator"])? $condition["operator"] : "=";
+                $operator = isset($condition["operator"]) ? $condition["operator"] : "=";
                 $sql .= $condition["column"];
                 $sql .= " $operator ";
                 $sql .= $condition["otherColumn"];
@@ -231,7 +240,7 @@ class BaseQueryBuilder extends QueryBuilder {
         return $sql;
     }
 
-    protected function buildValueSql ($value, array &$bindings) {
+    protected function buildValueSql($value, array &$bindings) {
         $sql = "";
         if (is_object($value)) {
             if ($value instanceof Query) {
@@ -240,9 +249,6 @@ class BaseQueryBuilder extends QueryBuilder {
             else if ($value instanceof DateTimeInterface) {
                 $sql .= "?";
                 $bindings[] = date("Y-m-d H:i:s", $value->getTimestamp());
-            }
-            else if ($value instanceof RawValue) {
-                $sql .= $value->getValue();
             }
         }
         else if (is_array($value)) {
