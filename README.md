@@ -78,7 +78,7 @@ class HelloWorldController {
     }
 }
 ```
-This controller method "sayHello" can be executed in the following way
+We can **execute controller methods like "sayHello"** in the following way
 ```PHP
 get_app()->execute("MyApp\HelloWorldController@sayHello");
 ```
@@ -86,7 +86,7 @@ If you dont specify any method for the controller then the **default method "ind
 ```PHP
 get_app()->execute("MyApp\HelloWorldController");
 ```
-Its also possible to pass arguments to the controller methods. If we modify the controller a bit like this ...
+Its also possible to **pass arguments to the controller methods**. If we modify the controller a bit like this ...
 ```PHP
 <?php
 
