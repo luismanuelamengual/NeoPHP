@@ -119,6 +119,31 @@ return [
 
 Routing
 ---------------
+Routes are a way execute a controller method or a basic closure which matches a certain request path and method.
+
+Basic closure routes are routes that executes a simple callback function. This is an example ...
+```PHP
+Routes::get("/helloworld", function () {
+    echo "Hello World !!";
+});
+```
+In this example, when we enter in the browser the url "/helloworld" then "Hello World !!" will be printed in the screen.
+
+Other type of routes are the ones that executes controller actions. Example:
+```PHP
+Routes::get("/helloworld", "MyApp\HelloWorldController@sayHello");
+```
+These are the **availiable methods** that may be matched with routes
+```PHP
+Routes::get($uri, $callback);
+Routes::post($uri, $callback);
+Routes::put($uri, $callback);
+Routes::delete($uri, $callback);
+```
+Its also possible to match any http method with the **any method**
+```PHP
+Routes::any($uri, $callback);
+```
 
 Data Access
 ---------------
