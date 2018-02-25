@@ -23,13 +23,16 @@ chmod 777 -R storage
 Routing & Controllers
 ---------------
 
-Views
----------------
-
 Data Access
 ---------------
 
 Resources
+---------------
+
+Models
+---------------
+
+Views
 ---------------
 
 Properties
