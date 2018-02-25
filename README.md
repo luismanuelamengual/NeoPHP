@@ -57,7 +57,7 @@ Now we have to **add write permissions to the folder "storage"** (this is the pl
 cd MyApp
 chmod 777 -R storage/
 ```
-The next and final step is to **configure the public directory**. You should configure your web server's document / web root to be the  public directory. The index.php in this directory serves as the front controller for all HTTP requests entering your application.
+The next and final step is to configure the **public** directory. You should **configure your web server's document / web root to be the public directory**. The index.php in this directory serves as the front controller for all HTTP requests entering your application.
 
 Properties
 ---------------
@@ -171,6 +171,35 @@ class UsersController {
     }
 }
 ```
+Registering routes that executes before or after certain routes can be achieved using the **before and after methods** as follows ...
+```PHP
+Routes::before("test", function() { echo "This function executes before the test route"; });
+Routes::get("test", function() { echo "This is the actual route"; });
+Routes::after("test", function() { echo "This execute after the test route; });
+```
+The before routes are specially usefull for session validations or for input transformations. Example: 
+```PHP
+Routes::before("site/*", function() { 
+    if (!get_session()->isStarted()) {
+        header("location: portal");
+    }
+});
+```
+In this example all requests to the context "site/" will have session validation and redirect to portal if no session is started
+
+The after routes are specially usefull for output transformations. The result of the route is stored in the result parameter. This result may be modified to return another output. Example ...
+```PHP
+Routes::any("/persons/", function() { 
+    return [{ "name"=>"Luis", "lastname"=>"Amengual", "age"=>35 }];
+});
+Routes::after("persons", function($result) {
+    switch (get_request()->get("output")) {
+        case "json":
+            $result = json_encode($result);
+            break;
+    }
+```
+In this example if we run the uri "/persons?output=json" then response will be in json format
 
 Data Access
 ---------------
