@@ -20,7 +20,7 @@ class Routes {
     /**
      * Static initialization
      */
-    private static function init () {
+    private static function init() {
         self::$routes = new DefaultRoutesManager();
         self::$beforeRoutes = new DefaultRoutesManager();
         self::$afterRoutes = new DefaultRoutesManager();
@@ -33,7 +33,7 @@ class Routes {
      * @param $action
      */
     public static function before($path, $action) {
-        self::$beforeRoutes->registerRoute (null, $path, $action);
+        self::$beforeRoutes->registerRoute(null, $path, $action);
     }
 
     /**
@@ -113,8 +113,8 @@ class Routes {
     }
 
     /**
-     *
-     * @throws \Throwable
+     * Handles a request
+     * Executes the registered routes that matches the request
      */
     public static function handleRequest() {
         $request = get_request();
@@ -134,7 +134,7 @@ class Routes {
                     }
                 }
                 foreach (self::$afterRoutes->getMatchedRoutes($requestMethod, $requestPath) as $route) {
-                    self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters(), ["result"=>&$result]));
+                    self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters(), ["result" => &$result]));
                 }
             }
             else {
@@ -158,11 +158,11 @@ class Routes {
             $routes = self::$errorRoutes->getMatchedRoutes($requestMethod, $requestPath);
             if (!empty($routes)) {
                 foreach ($routes as $route) {
-                    self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters(), ["exception"=>$ex]));
+                    self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters(), ["exception" => $ex]));
                 }
             }
             else {
-                throw $ex;
+                throw new \RuntimeException("Error processing request \"$requestPath\" !!", 0, $ex);
             }
         }
     }
@@ -172,7 +172,7 @@ class Routes {
      * @param array $parameters
      * @return mixed|null
      */
-    private static function executeAction ($action, array $parameters=[]) {
+    private static function executeAction($action, array $parameters = []) {
         $result = null;
         if (is_callable($action)) {
             $result = call_user_func($action, $parameters);
@@ -187,10 +187,28 @@ class Routes {
      * Processes the result
      * @param $result
      */
-    private static function processResult ($result) {
+    private static function processResult($result) {
         if ($result != null) {
-            if ($result instanceof View) {
-                $result->render();
+            if (is_object($result)) {
+                if ($result instanceof View) {
+                    $result->render();
+                }
+                else if (method_exists($result, "__toString")) {
+                    echo $result;
+                }
+                else {
+                    echo "<pre>";
+                    print_r($result);
+                    echo "</pre>";
+                }
+            }
+            else if (is_array($result)) {
+                echo "<pre>";
+                print_r($result);
+                echo "</pre>";
+            }
+            else {
+                echo $result;
             }
         }
     }
