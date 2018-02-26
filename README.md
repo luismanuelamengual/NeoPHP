@@ -239,6 +239,46 @@ Selecting columns
 ```PHP
 DB::table("person")->select("name", "lastname")->find();  //SELECT name, lastname FROM person
 ```
+
+Adding where conditions
+```PHP
+//SELECT * FROM person WHERE name = 'Luis'
+DB::table("person")->where("age", "Luis")->find();                     
+
+//SELECT * FROM person WHERE age > 20
+DB::table("person")->where("age", ">", 20)->find();                
+
+//SELECT * FROM person WHERE personid IN (100, 200)
+DB::table("person")->where("personid", "in", [100,200])->find();   
+```
+
+Adding raw where conditions
+```PHP
+//SELECT * FROM person WHERE personid <> 20
+DB::table("person")->whereRaw("personid <> ?", [20])->find();
+```
+
+Adding column and null where conditions
+```PHP
+//SELECT * FROM person WHERE name = lastname
+DB::table("person")->whereColumn("name", "lastname")->find();
+
+//SELECT * FROM person WHERE name IS NOT NULL
+DB::table("person")->whereNotNull("name")->find();
+
+//SELECT * FROM person WHERE name IS NULL
+DB::table("person")->whereNull("name")->find();
+```
+
+Adding complex where statements
+```PHP
+//SELECT * FROM person WHERE age > 20 AND (name = 'Luis' OR lastname = name)
+$condition = new ConditionGroup(ConditionGroup::CONNECTOR_OR);
+$condition->on("name", "Luis");
+$condition->onColumn("lastname", "name");
+DB::table("person")->where("age", ">", 20)->whereGroup($condition)->find();
+```
+
 Adding joins
 ```PHP
 //SELECT * FROM user INNER JOIN person ON user.personid = person.personid 
