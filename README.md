@@ -230,6 +230,23 @@ Using multiple connections is possible using the connection method as follows
 $persons = DB::connection("secondary")->query("SELECT ...");
 $persons = DB::connection("test")->exec("INSERT INTO ...")
 ```
+Using table connections may be usefull to standarize sql statements. To use table conenctions the method "table" should be used as follows ..
+```PHP
+DB::table("person")->find();                        //SELECT * FROM person
+DB::connection("mysql")->table("person")->find();   //SELECT * FROM person (but from mysql database)
+```
+Selecting columns
+```PHP
+DB::table("person")->select("name", "lastname")->find();  //SELECT name, lastname FROM person
+```
+Adding joins
+```PHP
+//SELECT * FROM user INNER JOIN person ON user.personid = person.personid 
+DB::table("user")->innerJoin("person", "user.personid", "person.personid")->find();  
+
+//SELECT * FROM user LEFT JOIN person ON user.personid = person.personid 
+DB::table("user")->leftJoin("person", "user.personid", "person.personid")->find();  
+```
 
 Resources
 ---------------
