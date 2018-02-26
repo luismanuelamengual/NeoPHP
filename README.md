@@ -210,8 +210,26 @@ Routes::error("resources/*", function($exception) {
 });
 ```
 
-Data Access
+Database
 ---------------
+The database configuration for your application is located at config/database.php. In this file you may define all of your database connections, as well as specify which connection should be used by default.
+
+If no connection is defined then the default connection is used. Raw sql statements can be executed with the methods query and exec of the DB class to the default connection as follows.
+```PHP
+DB::query($sql, array $bindings = []);
+DB::exec($sql, array $bindings = []);
+```
+Examples
+```PHP
+$persons = DB::query("SELECT * FROM person");
+$personsOver20 = DB::query("SELECT * FROM person WHERE age > ?", 20); 
+DB::execute("INSERT INTO person (name, lastname, age) VALUES ('Luis','Amengual',20);
+```
+Using multiple connections is possible using the connection method as follows
+```PHP
+$persons = DB::connection("secondary")->query("SELECT ...");
+$persons = DB::connection("test")->exec("INSERT INTO ...")
+```
 
 Resources
 ---------------
