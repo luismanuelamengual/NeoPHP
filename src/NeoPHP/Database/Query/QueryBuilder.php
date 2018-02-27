@@ -6,7 +6,7 @@ namespace NeoPHP\Database\Query;
  * Class QueryBuilder
  * @package NeoPHP\Database\Query
  */
-class QueryBuilder {
+abstract class QueryBuilder {
 
     /**
      * @param $table
