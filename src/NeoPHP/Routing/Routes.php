@@ -162,7 +162,7 @@ class Routes {
                 }
             }
             else {
-                throw new \RuntimeException($ex->getMessage());
+                throw $ex;
             }
         }
     }
