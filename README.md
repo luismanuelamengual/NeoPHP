@@ -213,6 +213,28 @@ Database
 ---------------
 The database configuration for your application is located at config/database.php. In this file you may define all of your database connections, as well as specify which connection should be used by default.
 
+The following is an example of the database.php configuration file in which is defined a connection named "pgsql"
+```PHP
+<?php
+
+return [
+
+    'default' => 'pgsql',
+
+    'connections' => [
+        'pgsql' => [
+            'driver' => 'pgsql',
+            'host' => '127.0.0.1',
+            'port' => '5432',
+            'database' => 'main',
+            'username' => 'postgres',
+            'password' => 'postgres',
+            'logQueries' => true
+        ]
+    ]
+];
+```
+
 If no connection is defined then the default connection is used. Raw sql statements can be executed with the methods query and exec of the DB class to the default connection as follows.
 ```PHP
 DB::query($sql, array $bindings = []);
