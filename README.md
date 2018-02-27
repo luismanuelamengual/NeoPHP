@@ -297,7 +297,7 @@ DB::table("person")->whereNull("name")->find();
 Adding complex where statements
 ```PHP
 //SELECT * FROM person WHERE age > 20 AND (name = 'Luis' OR lastname = name)
-$conditionGroup = Query::conditionGroup("or")->on("name", "Luis")->onColumn("lastname", "name"); 
+$conditionGroup = QueryBuilder::conditionGroup("or")->on("name", "Luis")->onColumn("lastname", "name"); 
 DB::table("person")->where("age", ">", 20)->whereGroup($conditionGroup)->find();
 ```
 
@@ -320,7 +320,7 @@ DB::table("user")->leftJoin("person", "user.personid", "person.personid")->find(
 Adding complex joins
 ```PHP
 //SELECT * FROM user RIGHT JOIN person ON user.personid = person.personid AND person age < 20
-$join = Query::joinTable("person", Join::TYPE_RIGHT_JOIN)
+$join = QueryBuilder::join("person", Join::TYPE_RIGHT_JOIN)
     ->onColumn("user.personid", "person.personid");
     ->on("age", "<", 20);
 DB::table("user")->join($join)->find();
@@ -413,6 +413,92 @@ Now each time we make a find over the "person" we will add a join to the "user" 
 
 Models
 ---------------
+In NeoPHP **a model can be any php class**. The way the developer interact with model is through the following methods
+```PHP
+create_model($model, array $options = [])
+update_model($model, array $options = [])
+delete_model($model, array $options = [])
+retrieve_models($modelClass, array $options = [])
+retrieve_model_by_id($modelClass, $modelId, array $options = [])
+```
+
+Lets suppose we want to operate over the following model ...
+```PHP
+<?php
+
+namespace MyApp\Persons;
+
+class Person {
+    
+    private $name;
+    private $lastName;
+    
+    public function __construct($name, $lastName) {
+        $this->name = $name;
+        $this->lastName = $lastName;
+    }
+    
+    public function getName() {
+        return $this->name;
+    }
+    
+    public function getLastName() {
+        return $this->lastName;
+    }
+}
+
+```
+
+Then the developer is encouraged to create a model manager for the model like this ...
+```PHP
+<?php
+
+namespace MyApp\Persons;
+
+use NeoPHP\Models\ModelManager;
+
+class PersonManager extends ModelManager {
+    
+    public function create($model, array $options = []) {
+        //TODO: The developer must implement the create method
+    }
+
+    public function update($model, array $options = []) {
+        //TODO: The developer must implement the update method
+    }
+
+    public function delete($model, array $options = []) {
+        //TODO: The developer must implement the update method
+    }
+
+    public function retrieveById ($modelId, array $options = []) {
+        //TODO: The developer must implement the retrieveById method
+    }
+
+    public function retrieve(array $options = []) {
+        //TODO: The developer must implement the retrieve method
+    }
+}
+```
+
+Then the developer must register the model manager so that the framework knows which model manager use when operating over a php object. The managers can be registered in the models.php file in the configuration directory like this ...
+```PHP
+<?php
+
+return [
+    "managers" => [
+        \MyApp\Persons\Person::class => \MyApp\Persons\PersonsManager::class
+    ]
+];
+```
+
+Finally operating over the User model could be as follows ...
+```PHP
+$person = new Person("Luis", "Amengual");
+create_model($person);
+
+$persons = retrieve_models(Person::class, ["client"=>8]);
+```
 
 Views
 ---------------
