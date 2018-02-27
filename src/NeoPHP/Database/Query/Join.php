@@ -5,10 +5,11 @@ namespace NeoPHP\Database\Query;
 class Join extends ConditionGroup {
 
     const TYPE_JOIN = "JOIN";
-    const TYPE_INNER_JOIN = "INNER";
-    const TYPE_OUTER_JOIN = "OUTER";
-    const TYPE_LEFT_JOIN = "LEFT";
-    const TYPE_RIGHT_JOIN = "RIGHT";
+    const TYPE_INNER_JOIN = "INNER JOIN";
+    const TYPE_OUTER_JOIN = "OUTER JOIN";
+    const TYPE_LEFT_JOIN = "LEFT JOIN";
+    const TYPE_RIGHT_JOIN = "RIGHT JOIN";
+    const TYPE_CROSS_JOIN = "CROSS JOIN";
 
     private $table;
     private $type;

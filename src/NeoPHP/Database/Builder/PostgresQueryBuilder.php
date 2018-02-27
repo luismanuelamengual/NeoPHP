@@ -159,23 +159,7 @@ class PostgresQueryBuilder extends QueryBuilder {
 
     protected function buildJoinSql(Join $join, array &$bindings) {
         $sql = "";
-        switch ($join->type()) {
-            case Join::TYPE_JOIN:
-                $sql .= "JOIN";
-                break;
-            case Join::TYPE_INNER_JOIN:
-                $sql .= "INNER JOIN";
-                break;
-            case Join::TYPE_OUTER_JOIN:
-                $sql .= "OUTER JOIN";
-                break;
-            case Join::TYPE_LEFT_JOIN:
-                $sql .= "LEFT JOIN";
-                break;
-            case Join::TYPE_RIGHT_JOIN:
-                $sql .= "RIGHT JOIN";
-                break;
-        }
+        $sql .= strtoupper($join->type());
         $sql .= " " . $join->table();
         if (!empty($join->conditions())) {
             $sql .= " ON " . $this->buildConditionGroupSql($join, $bindings);
@@ -186,13 +170,7 @@ class PostgresQueryBuilder extends QueryBuilder {
     protected function buildConditionGroupSql(ConditionGroup $conditionGroup, array &$bindings) {
         $sql = "";
         $conditions = $conditionGroup->conditions();
-        $connector = $conditionGroup->connector();
-        if ($connector == ConditionGroup::CONNECTOR_AND) {
-            $connector = "AND";
-        }
-        else if ($connector == ConditionGroup::CONNECTOR_OR) {
-            $connector = "OR";
-        }
+        $connector = strtoupper($conditionGroup->connector());
         for ($i = 0; $i < sizeof($conditions); $i++) {
             if ($i > 0) {
                 $sql .= " $connector ";

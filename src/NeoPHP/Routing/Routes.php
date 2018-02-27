@@ -171,6 +171,7 @@ class Routes {
      * @param $action
      * @param array $parameters
      * @return mixed|null
+     * @throws \Exception
      */
     private static function executeAction($action, array $parameters = []) {
         $result = null;

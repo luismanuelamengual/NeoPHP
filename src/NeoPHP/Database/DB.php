@@ -68,7 +68,7 @@ abstract class DB {
 
     /**
      * @param $sql
-     * @param $bindings
+     * @param array $bindings
      * @return bool|int
      */
     public static function exec($sql, array $bindings = []) {
@@ -77,10 +77,19 @@ abstract class DB {
 
     /**
      * @param $sql
-     * @param $bindings
+     * @param array $bindings
      * @return array
      */
     public static function query($sql, array $bindings = []) {
         return self::connection()->query($sql, $bindings);
+    }
+
+    /**
+     * @param $name
+     * @param $arguments
+     * @return mixed
+     */
+    public static function __callStatic($name, $arguments) {
+        return call_user_func([self::connection(), $name], $arguments);
     }
 }
