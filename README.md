@@ -575,6 +575,22 @@ Routes::get("welcome", function() {
 ```
 Logging
 ---------------
+Logging in NeoPHP is powered by monolog loggers.  
 
 Messages & translation
 ---------------
+
+References & Final Notes
+---------------
+### Author
+
+Luis Manuel Amengual - <luismanuelamengual@gmail.com><br />
+See also the list of [contributors](https://github.com/luismanuelamengual/neophp/contributors) which participated in this project.
+
+### License
+
+NeoPHP is licensed under the MIT License - see the `LICENSE` file for details
+
+### Acknowledgements
+
+This library is heavily inspired by Laravel PHP framework (https://laravel.com) library, although many things have been adjusted to be a more a powerfull and flexible framework
