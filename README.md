@@ -338,6 +338,25 @@ Limiting and offseting results
 DB::table("person")->limit(100)->offset(300)->find();
 ```
 
+Insert queries
+```PHP
+//INSERT INTO person (name, age) VALUES ('Luis', 20)
+DB::table("person")->set("name","Luis")->set("age",20)->insert();
+```
+
+Update queries
+```PHP
+//UPDATE person SET lastname = 'Amengual' WHERE personid = 12
+DB::table("person")->set("lastname","Amengual")->where("personid", 12)->update();
+```
+
+Delete queries
+
+```PHP
+//DELETE FROM person WHERE age < 30
+DB::table("person")->where("age","<",30)->delete();
+```
+
 Resources
 ---------------
 
