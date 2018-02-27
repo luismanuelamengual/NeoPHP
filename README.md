@@ -1,3 +1,4 @@
+[![Latest Stable Version](https://img.shields.io/packagist/v/neogroup/neophp.svg)](https://packagist.org/packages/monolog/monolog)
 ![](https://img.shields.io/github/license/luismanuelamengual/NeoPHP.svg)
 ![](https://img.shields.io/github/forks/luismanuelamengual/NeoPHP.svg?style=social&label=Fork)
 ![](https://img.shields.io/github/stars/luismanuelamengual/NeoPHP.svg?style=social&label=Star)
