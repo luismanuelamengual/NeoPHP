@@ -1,4 +1,3 @@
-![](https://img.shields.io/travis/luismanuelamengual/NeoPHP.svg) 
 ![](https://img.shields.io/github/license/luismanuelamengual/NeoPHP.svg)
 ![](https://img.shields.io/github/forks/luismanuelamengual/NeoPHP.svg?style=social&label=Fork)
 ![](https://img.shields.io/github/stars/luismanuelamengual/NeoPHP.svg?style=social&label=Star)
@@ -298,10 +297,8 @@ DB::table("person")->whereNull("name")->find();
 Adding complex where statements
 ```PHP
 //SELECT * FROM person WHERE age > 20 AND (name = 'Luis' OR lastname = name)
-$condition = new ConditionGroup(ConditionGroup::CONNECTOR_OR);
-$condition->on("name", "Luis");
-$condition->onColumn("lastname", "name");
-DB::table("person")->where("age", ">", 20)->whereGroup($condition)->find();
+$conditionGroup = Query::conditionGroup("or")->on("name", "Luis")->onColumn("lastname", "name"); 
+DB::table("person")->where("age", ">", 20)->whereGroup($conditionGroup)->find();
 ```
 
 Adding where statements with subqueries 
@@ -323,9 +320,9 @@ DB::table("user")->leftJoin("person", "user.personid", "person.personid")->find(
 Adding complex joins
 ```PHP
 //SELECT * FROM user RIGHT JOIN person ON user.personid = person.personid AND person age < 20
-$join = new Join("person", Join::TYPE_RIGHT_JOIN);
-$join->on("user.personid", "person.personid");
-$join->on("age", "<", 20);
+$join = Query::joinTable("person", Join::TYPE_RIGHT_JOIN)
+    ->onColumn("user.personid", "person.personid");
+    ->on("age", "<", 20);
 DB::table("user")->join($join)->find();
 ```
 
@@ -339,6 +336,25 @@ Limiting and offseting results
 ```PHP
 //SELECT * FROM person LIMIT 100 OFFSET 300
 DB::table("person")->limit(100)->offset(300)->find();
+```
+
+Insert queries
+```PHP
+//INSERT INTO person (name, age) VALUES ('Luis', 20)
+DB::table("person")->set("name","Luis")->set("age",20)->insert();
+```
+
+Update queries
+```PHP
+//UPDATE person SET lastname = 'Amengual' WHERE personid = 12
+DB::table("person")->set("lastname","Amengual")->where("personid", 12)->update();
+```
+
+Delete queries
+
+```PHP
+//DELETE FROM person WHERE age < 30
+DB::table("person")->where("age","<",30)->delete();
 ```
 
 Resources
