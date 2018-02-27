@@ -219,22 +219,47 @@ If no connection is defined then the default connection is used. Raw sql stateme
 DB::query($sql, array $bindings = []);
 DB::exec($sql, array $bindings = []);
 ```
+
 Examples
 ```PHP
-$persons = DB::query("SELECT * FROM person");
-$personsOver20 = DB::query("SELECT * FROM person WHERE age > ?", 20); 
-DB::execute("INSERT INTO person (name, lastname, age) VALUES ('Luis','Amengual',20);
+DB::query("SELECT * FROM person");
+DB::query("SELECT * FROM person WHERE age > ?", 20); 
+DB::exec("INSERT INTO person (name, lastname, age) VALUES ('Luis','Amengual',20)");
 ```
+
 Using multiple connections is possible using the connection method as follows
 ```PHP
-$persons = DB::connection("secondary")->query("SELECT ...");
-$persons = DB::connection("test")->exec("INSERT INTO ...")
+DB::connection("secondary")->query("SELECT ...");
+DB::connection("test")->exec("INSERT INTO ...")
 ```
+
+Using transactions (Explicit way)
+```PHP
+DB::beginTransaction();
+try {
+    DB::exec("INSERT INTO person (name, lastname) VALUES (?, ?)", ["Luis", "Amengual"]);
+    DB::exec("UPDATE users SET active = ? WHERE personid = ?", [1, 21]);
+    DB::commit();
+}
+catch (Exception $ex) {
+    DB::rollback();
+}
+```
+
+Using transactions (Clousure way)
+```PHP
+DB::transaction(function() {
+    $this->exec("INSERT INTO person (name, lastname) VALUES (?, ?)", ["Luis", "Amengual"]);
+    $this->exec("UPDATE users SET active = ? WHERE personid = ?", [1, 21]);
+});
+```
+
 Using table connections may be usefull to standarize sql statements. To use table conenctions the method "table" should be used as follows ..
 ```PHP
 DB::table("person")->find();                        //SELECT * FROM person
 DB::connection("mysql")->table("person")->find();   //SELECT * FROM person (but from mysql database)
 ```
+
 Selecting columns
 ```PHP
 DB::table("person")->select("name", "lastname")->find();  //SELECT name, lastname FROM person
