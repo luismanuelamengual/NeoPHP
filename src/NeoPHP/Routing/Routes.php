@@ -162,7 +162,7 @@ class Routes {
                 }
             }
             else {
-                throw new \RuntimeException("Error processing request \"$requestPath\" !!", 0, $ex);
+                throw new \RuntimeException($ex->getMessage());
             }
         }
     }

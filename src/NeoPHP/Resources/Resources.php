@@ -8,33 +8,37 @@ namespace NeoPHP\Resources;
  */
 abstract class Resources {
 
+    private static $managers = [];
+    private static $defaultManager;
+
     /**
      * @param $resourceName
-     * @return ResourceManager
+     * @return ResourceManagerProxy
      */
-    public static function get($resourceName): ResourceManager {
-        $resourceManager = null;
-        $resourceManagers = get_property("resources.managers");
-        if (isset($resourceManagers[$resourceName])) {
-            $resourceManagerConfig = $resourceManagers[$resourceName];
-            if (!is_array($resourceManagerConfig)) {
-                $resourceManagerConfig = ["class"=>$resourceManagerConfig];
+    public static function get($resourceName): ResourceManagerProxy {
+
+        if (!isset(self::$managers[$resourceName])) {
+            $resourceManager = null;
+            $resourceManagers = get_property("resources.managers");
+            if (isset($resourceManagers[$resourceName])) {
+                $resourceManagerClass = $resourceManagers[$resourceName];
+                if (!class_exists($resourceManagerClass)) {
+                    throw new \RuntimeException("Class \"$resourceManagerClass\" was not found !!");
+                }
+                if (!is_subclass_of($resourceManagerClass, ResourceManager::class)) {
+                    throw new \RuntimeException("Class \"$resourceManagerClass\" is not a subclass of ResourceManager !!");
+                }
+                $resourceManager = new $resourceManagerClass;
             }
-            if (!isset($resourceManagerConfig["class"])) {
-                $resourceManagerConfig["class"] = ConnectionResourceManager::class;
+            else {
+                if (!isset(self::$defaultManager)) {
+                    self::$defaultManager = new DefaultResourceManager();
+                }
+                $resourceManager = self::$defaultManager;
             }
-            $resourceManagerClass = $resourceManagerConfig["class"];
-            if (!class_exists($resourceManagerClass)) {
-                throw new \RuntimeException("Class \"$resourceManagerClass\" was not found !!");
-            }
-            if (!is_subclass_of($resourceManagerClass, ResourceManager::class)) {
-                throw new \RuntimeException("Class \"$resourceManagerClass\" is not a subclass of ResourceManager !!");
-            }
-            $resourceManager = new $resourceManagerClass(array_merge(["resourceName"=>$resourceName], $resourceManagerConfig));
+
+            self::$managers[$resourceName] = $resourceManager;
         }
-        else {
-            $resourceManager = new ConnectionResourceManager(["resourceName"=>$resourceName]);
-        }
-        return $resourceManager;
+        return new ResourceManagerProxy(self::$managers[$resourceName], $resourceName);
     }
 }

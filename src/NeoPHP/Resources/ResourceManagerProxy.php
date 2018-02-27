@@ -2,35 +2,41 @@
 
 namespace NeoPHP\Resources;
 
-use NeoPHP\Database\DB;
 use NeoPHP\Database\Query\DeleteQuery;
 use NeoPHP\Database\Query\InsertQuery;
 use NeoPHP\Database\Query\SelectQuery;
+use NeoPHP\Database\Query\Traits\FieldsTrait;
+use NeoPHP\Database\Query\Traits\GroupByFieldsTrait;
+use NeoPHP\Database\Query\Traits\HavingConditionsTrait;
+use NeoPHP\Database\Query\Traits\JoinsTrait;
+use NeoPHP\Database\Query\Traits\OrderByFieldsTrait;
+use NeoPHP\Database\Query\Traits\SelectFieldsTrait;
+use NeoPHP\Database\Query\Traits\SelectModifiersTrait;
+use NeoPHP\Database\Query\Traits\TableTrait;
+use NeoPHP\Database\Query\Traits\WhereConditionsTrait;
 use NeoPHP\Database\Query\UpdateQuery;
 
-/**
- * Class ConnectionResourceManager
- * @package NeoPHP\Core\Resources
- */
-class ConnectionResourceManager extends ResourceManager {
+class ResourceManagerProxy {
 
-    private $connection;
+    use TableTrait,
+        FieldsTrait,
+        SelectModifiersTrait,
+        SelectFieldsTrait,
+        OrderByFieldsTrait,
+        GroupByFieldsTrait,
+        WhereConditionsTrait,
+        HavingConditionsTrait,
+        JoinsTrait;
 
-    /**
-     * ConnectionResourceManager constructor.
-     * @param $config
-     */
-    public function __construct(array $config = []) {
-        $this->table(isset($config["tableName"])? $config["tableName"] : $config["resourceName"]);
-        $connectionName = isset($config["databaseName"])? $config["databaseName"] : get_property("database.default");
-        $this->connection = DB::connection($connectionName);
-    }
+    private $resourceManager;
 
     /**
-     * @return mixed
+     * ResourceManagerProxy constructor.
+     * @param ResourceManager $resourceManager
      */
-    protected function getConnection() {
-        return $this->connection;
+    public function __construct(ResourceManager $resourceManager, $resourceName) {
+        $this->resourceManager = $resourceManager;
+        $this->table($resourceName);
     }
 
     /**
@@ -79,33 +85,30 @@ class ConnectionResourceManager extends ResourceManager {
     }
 
     /**
-     * @return array|null|\PDOStatement
+     * @return mixed
      */
     public function find() {
-        return $this->getConnection()->query($this->createSelectQuery());
+        return $this->resourceManager->find($this->createSelectQuery());
     }
 
     /**
-     * @return bool|int
+     * @return mixed
      */
     public function insert() {
-
-        return $this->getConnection()->query($this->createInsertQuery());
+        return $this->resourceManager->insert($this->createInsertQuery());
     }
 
     /**
-     * @return bool|int
+     * @return mixed
      */
     public function update() {
-
-        return $this->getConnection()->query($this->createUpdateQuery());
+        return $this->resourceManager->update($this->createUpdateQuery());
     }
 
     /**
-     * @return bool|int
+     * @return mixed
      */
     public function delete() {
-
-        return $this->getConnection()->query($this->createDeleteQuery());
+        return $this->resourceManager->delete($this->createDeleteQuery());
     }
 }
