@@ -279,6 +279,13 @@ $condition->onColumn("lastname", "name");
 DB::table("person")->where("age", ">", 20)->whereGroup($condition)->find();
 ```
 
+Adding where statements with subqueries 
+```PHP
+//SELECT * FROM users WHERE personid IN (SELECT personid FROM person WHERE age > 20)
+$subquery = Query::selectFrom("person")->select("person")->where("age", ">", 20);
+DB::table("users")->where("personid", "in", $subquery)->find();
+```
+
 Adding joins
 ```PHP
 //SELECT * FROM user INNER JOIN person ON user.personid = person.personid 
@@ -286,6 +293,15 @@ DB::table("user")->innerJoin("person", "user.personid", "person.personid")->find
 
 //SELECT * FROM user LEFT JOIN person ON user.personid = person.personid 
 DB::table("user")->leftJoin("person", "user.personid", "person.personid")->find();  
+```
+
+Adding complex joins
+```PHP
+//SELECT * FROM user RIGHT JOIN person ON user.personid = person.personid AND person age < 20
+$join = new Join("person", Join::TYPE_RIGHT_JOIN);
+$join->on("user.personid", "person.personid");
+$join->on("age", "<", 20);
+DB::table("user")->join($join)->find();
 ```
 
 Resources
