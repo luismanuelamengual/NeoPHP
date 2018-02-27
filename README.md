@@ -304,6 +304,18 @@ $join->on("age", "<", 20);
 DB::table("user")->join($join)->find();
 ```
 
+Grouping results
+```PHP
+//SELECT type, count(*) FROM user GROUP BY type
+DB::table("user")->select("type", "count(*)")->groupBy("type")->find();
+```
+
+Limiting and offseting results
+```PHP
+//SELECT * FROM person LIMIT 100 OFFSET 300
+DB::table("person")->limit(100)->offset(300)->find();
+```
+
 Resources
 ---------------
 
