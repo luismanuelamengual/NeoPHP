@@ -219,22 +219,47 @@ If no connection is defined then the default connection is used. Raw sql stateme
 DB::query($sql, array $bindings = []);
 DB::exec($sql, array $bindings = []);
 ```
+
 Examples
 ```PHP
-$persons = DB::query("SELECT * FROM person");
-$personsOver20 = DB::query("SELECT * FROM person WHERE age > ?", 20); 
-DB::execute("INSERT INTO person (name, lastname, age) VALUES ('Luis','Amengual',20);
+DB::query("SELECT * FROM person");
+DB::query("SELECT * FROM person WHERE age > ?", 20); 
+DB::exec("INSERT INTO person (name, lastname, age) VALUES ('Luis','Amengual',20)");
 ```
+
 Using multiple connections is possible using the connection method as follows
 ```PHP
-$persons = DB::connection("secondary")->query("SELECT ...");
-$persons = DB::connection("test")->exec("INSERT INTO ...")
+DB::connection("secondary")->query("SELECT ...");
+DB::connection("test")->exec("INSERT INTO ...")
 ```
+
+Using transactions (Explicit way)
+```PHP
+DB::beginTransaction();
+try {
+    DB::exec("INSERT INTO person (name, lastname) VALUES (?, ?)", ["Luis", "Amengual"]);
+    DB::exec("UPDATE users SET active = ? WHERE personid = ?", [1, 21]);
+    DB::commit();
+}
+catch (Exception $ex) {
+    DB::rollback();
+}
+```
+
+Using transactions (Clousure way)
+```PHP
+DB::transaction(function() {
+    $this->exec("INSERT INTO person (name, lastname) VALUES (?, ?)", ["Luis", "Amengual"]);
+    $this->exec("UPDATE users SET active = ? WHERE personid = ?", [1, 21]);
+});
+```
+
 Using table connections may be usefull to standarize sql statements. To use table conenctions the method "table" should be used as follows ..
 ```PHP
 DB::table("person")->find();                        //SELECT * FROM person
 DB::connection("mysql")->table("person")->find();   //SELECT * FROM person (but from mysql database)
 ```
+
 Selecting columns
 ```PHP
 DB::table("person")->select("name", "lastname")->find();  //SELECT name, lastname FROM person
@@ -279,6 +304,13 @@ $condition->onColumn("lastname", "name");
 DB::table("person")->where("age", ">", 20)->whereGroup($condition)->find();
 ```
 
+Adding where statements with subqueries 
+```PHP
+//SELECT * FROM users WHERE personid IN (SELECT personid FROM person WHERE age > 20)
+$subquery = Query::selectFrom("person")->select("person")->where("age", ">", 20);
+DB::table("users")->where("personid", "in", $subquery)->find();
+```
+
 Adding joins
 ```PHP
 //SELECT * FROM user INNER JOIN person ON user.personid = person.personid 
@@ -286,6 +318,27 @@ DB::table("user")->innerJoin("person", "user.personid", "person.personid")->find
 
 //SELECT * FROM user LEFT JOIN person ON user.personid = person.personid 
 DB::table("user")->leftJoin("person", "user.personid", "person.personid")->find();  
+```
+
+Adding complex joins
+```PHP
+//SELECT * FROM user RIGHT JOIN person ON user.personid = person.personid AND person age < 20
+$join = new Join("person", Join::TYPE_RIGHT_JOIN);
+$join->on("user.personid", "person.personid");
+$join->on("age", "<", 20);
+DB::table("user")->join($join)->find();
+```
+
+Grouping results
+```PHP
+//SELECT type, count(*) FROM user GROUP BY type
+DB::table("user")->select("type", "count(*)")->groupBy("type")->find();
+```
+
+Limiting and offseting results
+```PHP
+//SELECT * FROM person LIMIT 100 OFFSET 300
+DB::table("person")->limit(100)->offset(300)->find();
 ```
 
 Resources
