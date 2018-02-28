@@ -5,11 +5,11 @@
 ![](https://img.shields.io/github/watchers/luismanuelamengual/NeoPHP.svg?style=social&label=Watch)
 ![](https://img.shields.io/github/followers/luismanuelamengual.svg?style=social&label=Follow)
 
-#NeoPHP
+# NeoPHP
 
 Modern PHP framework for web developers, not for web 'artisans' (wtf ??!!)
 
-##Documentation
+## Documentation
 
 - [Getting started](doc/01-getting_started.md)
 - [Controllers](doc/02-controllers.md)
@@ -21,17 +21,17 @@ Modern PHP framework for web developers, not for web 'artisans' (wtf ??!!)
 - [Logging](doc/08-logging.md)
 - [Messages/translations](doc/09-messages.md)
 
-##About
+## About
 
-###Author
+### Author
 
 Luis Manuel Amengual - <luismanuelamengual@gmail.com><br />
 See also the list of [contributors](https://github.com/luismanuelamengual/neophp/contributors) which participated in this project.
 
-###License
+### License
 
 NeoPHP is licensed under the MIT License - see the `LICENSE` file for details
 
-###Acknowledgements
+### Acknowledgements
 
 This library is heavily inspired by Laravel PHP framework (https://laravel.com) library, although many things have been adjusted to be a more a powerfull and flexible framework
