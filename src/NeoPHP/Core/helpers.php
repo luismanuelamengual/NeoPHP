@@ -144,6 +144,27 @@ if (!function_exists('retrieve_models')) {
     }
 }
 
+if (!function_exists('register_event_listener')) {
+    /**
+     * @param $event
+     * @param $callbackOrAction
+     */
+    function register_event_listener($event, $callbackOrAction) {
+        \NeoPHP\Events\Events::register($event, $callbackOrAction);
+    }
+}
+
+if (!function_exists('fire_event')) {
+    /**
+     * @param $event
+     * @param array $parameters
+     * @throws Exception
+     */
+    function fire_event($event, array $parameters = []) {
+        \NeoPHP\Events\Events::fire($event, $parameters);
+    }
+}
+
 if (!function_exists('handle_error')) {
     /**
      * @param $errno

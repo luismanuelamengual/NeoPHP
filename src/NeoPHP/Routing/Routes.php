@@ -26,6 +26,10 @@ class Routes {
         self::$afterRoutes = new DefaultRoutesManager();
         self::$errorRoutes = new DefaultRoutesManager();
         self::$notFoundRoutes = new DefaultRoutesManager();
+
+        register_event_listener("application_init", function() {
+            self::handleRequest();
+        });
     }
 
     /**
@@ -116,7 +120,7 @@ class Routes {
      * Handles a request
      * Executes the registered routes that matches the request
      */
-    public static function handleRequest() {
+    private static function handleRequest() {
         $request = get_request();
         $requestMethod = $request->getMethod();
         $requestPath = $request->getPath();
