@@ -395,7 +395,7 @@ return [
     ]
 ];
 ```
-Now we can write the UsersResource as follows ..
+Now we can write the PersonsResource as follows ..
 ```PHP
 <?php
 
