@@ -324,7 +324,7 @@ DB::table("person")->where("age", ">", 20)->whereGroup($condition)->find();
 Adding where statements with subqueries 
 ```PHP
 //SELECT * FROM users WHERE personid IN (SELECT personid FROM person WHERE age > 20)
-$subquery = Query::selectFrom("person")->select("person")->where("age", ">", 20);
+$subquery = QueryBuilder::selectFrom("person")->select("person")->where("age", ">", 20);
 DB::table("users")->where("personid", "in", $subquery)->find();
 ```
 
