@@ -1,5 +1,7 @@
 # Getting started
 
+## Installation 
+
 To install the NeoPHP framework we have to **run the following command (Composer required)**, assuming we want to start a new project named "MyApp":
 ```
 composer create-project neogroup/neophp-startup-project MyApp
@@ -42,7 +44,9 @@ MyApp                             Base application path
 └─ README.md                      Readme file
 ```
 
-Now we have to **add write permissions to the folder "storage"** (this is the place where logs and compiled views are stored). In linux system you can run the following commands
+## Configuration
+
+Some configuration is needed for NeoPHP to work property. First we have to **add write permissions to the folder "storage"** (this is the place where logs and compiled views are stored). In linux system you can run the following commands
 ```
 cd MyApp
 chmod 777 -R storage/
