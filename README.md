@@ -19,7 +19,7 @@ Modern PHP framework for web developers, not for web 'artisans' (wtf ??!!)
 - [Models](doc/06-models.md)
 - [Views](doc/07-views.md)
 - [Logging](doc/08-logging.md)
-- [Messages/translations](doc/09-messages.md)
+- [Messages / translations](doc/09-messages.md)
 
 ## About
 
