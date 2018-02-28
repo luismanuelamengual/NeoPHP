@@ -59,9 +59,6 @@ chmod 777 -R storage/
 ```
 The next and final step is to configure the **public** directory. You should **configure your web server's document / web root to be the public directory**. The index.php in this directory serves as the front controller for all HTTP requests entering your application.
 
-Properties
----------------
-
 Controllers
 ---------------
 Controllers can be **any class in the "src" folder**. These controllers are places where we are going to put the business logic. This is an example of a simple controller that writes "hello world" in the browser ...
@@ -673,7 +670,7 @@ Messages may contain replacable values for example ...
 get_message("delete_user_prompt", 35)       
 ```
 
-References & Final Notess
+References & Final Notes
 ---------------
 ### Author
 
