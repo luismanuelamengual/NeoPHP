@@ -14,7 +14,17 @@ class HelloWorldController {
     }
 }
 ```
-We can **execute controller methods like "sayHello"** in the following way
+We can access controllers with the class "Controllers" like this
+```PHP
+Controllers::get( $controllerClass )
+```
+So, accessing the method sayHello in the HelloWorldController can be achieved in the following way
+```PHP
+Controllers::get(HelloWorldController::class)->sayHello();
+```
+
+## Accesing controller actions from the application
+We can also **execute controller actions** from an application instance. This is done in this way ...
 ```PHP
 get_app()->execute("MyApp\HelloWorldController@sayHello");
 ```
