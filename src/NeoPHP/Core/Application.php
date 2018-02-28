@@ -131,17 +131,24 @@ class Application {
             foreach ($controllerMethod->getParameters() as $parameter) {
                 $parameterName = $parameter->getName();
                 $parameterValue = null;
-                if (array_key_exists($parameterName, $parameters)) {
+                if ($parameter->hasType()) {
+                    $typeName = $parameter->getType()->getName();
+                    if (array_key_exists($typeName, $parameters)) {
+                        $parameterValue = $parameters[$typeName];
+                    }
+                }
+                else if (array_key_exists($parameterName, $parameters)) {
                     $parameterValue = $parameters[$parameterName];
                 }
                 else if (array_key_exists($parameterIndex, $parameters)) {
                     $parameterValue = $parameters[$parameterIndex];
+                    $parameterIndex++;
                 }
-                else if ($parameter->isOptional()) {
+
+                if ($parameterValue == null && $parameter->isDefaultValueAvailable()) {
                     $parameterValue = $parameter->getDefaultValue();
                 }
                 $controllerMethodParams[] = $parameterValue;
-                $parameterIndex++;
             }
             $result = call_user_func_array([$controller, $controllerMethodName], $controllerMethodParams);
         }

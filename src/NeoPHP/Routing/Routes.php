@@ -119,6 +119,7 @@ class Routes {
     /**
      * Handles a request
      * Executes the registered routes that matches the request
+     * @throws \Throwable
      */
     private static function handleRequest() {
         $request = get_request();
@@ -129,23 +130,23 @@ class Routes {
             $routes = self::$routes->getMatchedRoutes($requestMethod, $requestPath);
             if (!empty($routes)) {
                 foreach (self::$beforeRoutes->getMatchedRoutes($requestMethod, $requestPath) as $route) {
-                    self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters()));
+                    self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters(), [Request::class=>$request]));
                 }
                 foreach ($routes as $route) {
-                    $routeResult = self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters()));
+                    $routeResult = self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters(), [Request::class=>$request]));
                     if (!empty($routeResult)) {
                         $result = $routeResult;
                     }
                 }
                 foreach (self::$afterRoutes->getMatchedRoutes($requestMethod, $requestPath) as $route) {
-                    self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters(), ["result" => &$result]));
+                    self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters(), ["result"=>&$result, Request::class=>$request]));
                 }
             }
             else {
                 $notFoundRoutes = self::$notFoundRoutes->getMatchedRoutes($requestMethod, $requestPath);
                 if (!empty($notFoundRoutes)) {
                     foreach ($notFoundRoutes as $route) {
-                        $routeResult = self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters(), ["path" => $requestPath]));
+                        $routeResult = self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters(), ["path"=>$requestPath, Request::class=>$request]));
                         if (!empty($routeResult)) {
                             $result = $routeResult;
                         }
@@ -162,7 +163,7 @@ class Routes {
             $routes = self::$errorRoutes->getMatchedRoutes($requestMethod, $requestPath);
             if (!empty($routes)) {
                 foreach ($routes as $route) {
-                    self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters(), ["exception" => $ex]));
+                    self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters(), [\Throwable::class=>$ex, \Exception::class=>$ex, Request::class=>$request]));
                 }
             }
             else {
