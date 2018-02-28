@@ -23,6 +23,10 @@ Modern PHP framework for web developers, not for web 'artisans' (wtf ??!!)
 
 ## About
 
+### Submitting bugs and feature requests
+
+Bugs and feature request are tracked on [GitHub](https://github.com/luismanuelamengual/neophp/issues)
+
 ### Author
 
 Luis Manuel Amengual - <luismanuelamengual@gmail.com><br />
