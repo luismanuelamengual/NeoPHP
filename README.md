@@ -174,7 +174,7 @@ Routes::before("test", function() { echo "This function executes before the test
 Routes::get("test", function() { echo "This is the actual route"; });
 Routes::after("test", function() { echo "This execute after the test route; });
 ```
-The before routes are specially usefull for session validations or for input transformations. Example: 
+The **before routes are specially usefull for session validations or for input transformations**. Example: 
 ```PHP
 Routes::before("site/*", function() { 
     if (!get_session()->isStarted()) {
@@ -184,7 +184,7 @@ Routes::before("site/*", function() {
 ```
 In this example all requests to the context "site/" will have session validation and redirect to portal if no session is started
 
-The after routes are specially usefull for output transformations. The result of the route is stored in the result parameter. This result may be modified to return another output. Example ...
+The **after routes are specially usefull for output transformations**. The result of the route is stored in the result parameter. This result may be modified to return another output. Example ...
 ```PHP
 Routes::any("/persons/", function() { 
     return [{ "name"=>"Luis", "lastname"=>"Amengual", "age"=>35 }];
@@ -233,7 +233,7 @@ return [
 ];
 ```
 
-If no connection is defined then the default connection is used. Raw sql statements can be executed with the methods query and exec of the DB class to the default connection as follows.
+If no connection is defined then the default connection is used. **Raw sql statements** can be executed with the **methods query and exec** of the DB class to the default connection as follows.
 ```PHP
 DB::query($sql, array $bindings = []);
 DB::exec($sql, array $bindings = []);
@@ -246,7 +246,7 @@ DB::query("SELECT * FROM person WHERE age > ?", 20);
 DB::exec("INSERT INTO person (name, lastname, age) VALUES ('Luis','Amengual',20)");
 ```
 
-Using multiple connections is possible using the connection method as follows
+Using **multiple connections** is possible using the connection method as follows
 ```PHP
 DB::connection("secondary")->query("SELECT ...");
 DB::connection("test")->exec("INSERT INTO ...")
@@ -273,7 +273,7 @@ DB::transaction(function() {
 });
 ```
 
-Using table connections may be usefull to standarize sql statements. To use table conenctions the method "table" should be used as follows ..
+Using **table connections** may be usefull to standarize sql statements. To use table conenctions the method "table" should be used as follows ..
 ```PHP
 DB::table("person")->find();                        //SELECT * FROM person
 DB::connection("mysql")->table("person")->find();   //SELECT * FROM person (but from mysql database)
@@ -379,13 +379,13 @@ DB::table("person")->where("age","<",30)->delete();
 
 Resources
 ---------------
-Resources are usefull when the developer needs to add some logic to queries executed in the application. Resource queries have the same syntaxis as database queries and by default they execute the query over the default database connection. The the configuration file for resources is resources.php in the config folder.
+**Resources** are usefull when the developer needs to **add some logic to queries** executed in the application. Resource queries have the same syntaxis as database queries and by default they execute the query over the default database connection. The the configuration file for resources is resources.php in the config folder.
 
 The following is the syntaxis to operate over resources
 ```PHP
 Resources::get("persons")->where("username", "pedro")->find();
 ```
-By default this resource query executes over the default database connection. But the developer can override the default behavour by assigning a resource manager. This assignation is done in the resources configuration file (resources.php in the config directory) like this ...
+**By default this resource query executes over the default database connection**. But the developer can override the default behavour by assigning a resource manager. This assignation is done in the resources configuration file (resources.php in the config directory) like this ...
 ```PHP
 <?php
 
@@ -522,7 +522,7 @@ $persons = retrieve_models(Person::class, ["client"=>8]);
 
 Views
 ---------------
-NeoPHP actually supports 3 view templates engines: Blade, Twig and Smarty. Availiable view factories as well as the default one can be configured in the views.php configuration file inside de config directory. This is the content of the default views configuration file ... 
+NeoPHP actually **supports 3 view templates engines: Blade, Twig and Smarty**. Availiable view factories as well as the default one can be configured in the views.php configuration file inside de config directory. This is the content of the default views configuration file ... 
 ```PHP
 <?php
 
@@ -609,7 +609,7 @@ return [
 ```
 Many loggers can be configured with the "loggers" property and the default logger can be configured with the "default" property.
 
-In NeoPHP we can obtain a monolog logger with the get_logger function like this
+In NeoPHP we can obtain a monolog logger with the **get_logger** function like this
 ```PHP
 get_logger();                   //Returns the default logger
 get_logger("users")             //Returns the logger named "users"
@@ -649,7 +649,7 @@ Retrieving a translated message can be achieved with the **get_message** functio
 ```PHP
 get_message($key, array $replacements = [])
 ```
-The key is a string separated by points that indicates where to find the message. Examples:
+The **key is a string separated by points** that indicates where to find the message. Examples:
 ```PHP
 //Search for property "car" in "resources/messages/es/main.php"
 get_message("car")
@@ -664,7 +664,7 @@ get_message("site.users.search_user")
 Messages::setLanguage("en");
 get_message("site.welcome")
 ```
-Messages may contain replacable values for example ...
+Message **keys may contain replacable values** for example ...
 ```PHP
 //Message "Really delete user %d" shows as "Really delete user 35
 get_message("delete_user_prompt", 35)       
