@@ -43,7 +43,7 @@ if (!function_exists('get_request')) {
      * @return \NeoPHP\Http\Request|null
      */
     function get_request($parameterName=null) {
-        $request = \NeoPHP\Http\Request::getInstance();
+        $request = \NeoPHP\Http\Request::instance();
         return isset($parameterName)? $request->get($parameterName) : $request;
     }
 }
@@ -53,7 +53,7 @@ if (!function_exists('get_response')) {
      * @return \NeoPHP\Http\Response
      */
     function get_response() {
-        return \NeoPHP\Http\Response::getInstance();
+        return \NeoPHP\Http\Response::instance();
     }
 }
 
@@ -62,7 +62,7 @@ if (!function_exists('get_session')) {
      * @return \NeoPHP\Http\Session
      */
     function get_session() {
-        return \NeoPHP\Http\Session::getInstance();
+        return \NeoPHP\Http\Session::instance();
     }
 }
 

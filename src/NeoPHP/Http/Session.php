@@ -15,7 +15,7 @@ final class Session {
     /**
      * @return Session
      */
-    public static function getInstance() {
+    public static function instance() {
         if (!isset(self::$instance))
             self::$instance = new self;
         return self::$instance;
@@ -24,29 +24,15 @@ final class Session {
     /**
      * @return string
      */
-    public function getId() {
-        return session_id();
-    }
-
-    /**
-     * @param $id
-     */
-    public function setId($id) {
-        session_id($id);
+    public function id($id = null) {
+        return session_id($id);
     }
 
     /**
      * @return string
      */
-    public function getName() {
-        return session_name();
-    }
-
-    /**
-     * @param $name
-     */
-    public function setName($name) {
-        session_name($name);
+    public function name($name = null) {
+        return session_name($name);
     }
 
     /**
@@ -95,7 +81,7 @@ final class Session {
     /**
      * @return int
      */
-    public function getStatus() {
+    public function status() {
         return session_status();
     }
 
@@ -103,7 +89,7 @@ final class Session {
      * @return bool
      */
     public function isStarted() {
-        return ($this->getStatus() == PHP_SESSION_ACTIVE);
+        return ($this->status() == PHP_SESSION_ACTIVE);
     }
 
     /**

@@ -29,7 +29,7 @@ final class Request {
     /**
      * @return Request
      */
-    public static function getInstance() {
+    public static function instance() {
         if (!isset(self::$instance))
             self::$instance = new self;
         return self::$instance;
@@ -38,21 +38,21 @@ final class Request {
     /**
      * @return mixed
      */
-    public function getHost() {
+    public function host() {
         return $_SERVER["HTTP_HOST"];
     }
 
     /**
      * @return mixed
      */
-    public function getUri() {
+    public function uri() {
         return $_SERVER["REQUEST_URI"];
     }
 
     /**
      * @return mixed
      */
-    public function getQuery() {
+    public function query() {
         return $_SERVER["REDIRECT_QUERY_STRING"];
     }
 
@@ -60,21 +60,21 @@ final class Request {
      * @param bool $trustForwardedHeader
      * @return mixed
      */
-    public function getClientAddress($trustForwardedHeader = false) {
+    public function clientAddress($trustForwardedHeader = false) {
         return $trustForwardedHeader === true ? $_SERVER["HTTP_X_FORWARDED_FOR"] : $_SERVER["REMOTE_ADDR"];
     }
 
     /**
      * @return mixed
      */
-    public function getUserAgent() {
+    public function userAgent() {
         return $_SERVER["HTTP_USER_AGENT"];
     }
 
     /**
      * @return string
      */
-    public function getPath() {
+    public function path() {
         if (!isset($this->path)) {
             $this->path = "";
             if (!empty($_SERVER["REDIRECT_URL"])) {
@@ -91,10 +91,10 @@ final class Request {
     /**
      * @return array
      */
-    public function getPathParts() {
+    public function pathParts() {
         if (!isset($this->pathParts)) {
-            $path = $this->getPath();
-            $this->pathParts = !empty($path)? explode(PATH_SEPARATOR, $this->getPath()) : [];
+            $path = $this->path();
+            $this->pathParts = !empty($path)? explode(PATH_SEPARATOR, $this->path()) : [];
         }
         return $this->pathParts;
     }
@@ -102,7 +102,7 @@ final class Request {
     /**
      * @return mixed
      */
-    public function getParameters() {
+    public function params() {
         return $_REQUEST;
     }
 
@@ -133,7 +133,7 @@ final class Request {
     /**
      * @return array|false
      */
-    public function getHeaders() {
+    public function headers() {
         return apache_request_headers();
     }
 
@@ -141,15 +141,15 @@ final class Request {
      * @param $name
      * @return mixed
      */
-    public function getHeader($name) {
-        $headers = $this->getHeaders();
+    public function header($name) {
+        $headers = $this->headers();
         return $headers[$name];
     }
 
     /**
-     * @return Cookies
+     * @return mixed
      */
-    public function getCookies() {
+    public function cookies() {
         return $_COOKIE;
     }
 
@@ -157,7 +157,7 @@ final class Request {
      * @param $name
      * @return mixed
      */
-    public function getCookie($name) {
+    public function cookie($name) {
         return $_COOKIE[$name];
     }
 
@@ -172,71 +172,35 @@ final class Request {
     /**
      * @return Session
      */
-    public function getSession() {
-        return Session::getInstance();
+    public function session() {
+        return Session::instance();
     }
 
     /**
      * @return mixed
      */
-    public function getFiles() {
+    public function files() {
         return $_FILES;
     }
 
     /**
      * @return bool|string
      */
-    public function getContent() {
+    public function content() {
         return @file_get_contents("php://input");
     }
 
     /**
      * @return mixed
      */
-    public function getMethod() {
+    public function method() {
         return $_SERVER["REQUEST_METHOD"];
-    }
-
-    /**
-     * @param $method
-     * @return bool
-     */
-    public function isMethod($method) {
-        return is_array($method) ? in_array($this->getMethod(), $method) : $this->getMethod() == $method;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isGet() {
-        return $this->isMethod(self::METHOD_GET);
-    }
-
-    /**
-     * @return bool
-     */
-    public function isPost() {
-        return $this->isMethod(self::METHOD_POST);
-    }
-
-    /**
-     * @return bool
-     */
-    public function isPut() {
-        return $this->isMethod(self::METHOD_PUT);
-    }
-
-    /**
-     * @return bool
-     */
-    public function isDelete() {
-        return $this->isMethod(self::METHOD_DELETE);
     }
 
     /**
      * @return string
      */
-    public function getScheme() {
+    public function scheme() {
         return $this->isSecureRequest() ? "https" : "http";
     }
 

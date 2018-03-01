@@ -123,8 +123,8 @@ class Routes {
      */
     private static function handleRequest() {
         $request = get_request();
-        $requestMethod = $request->getMethod();
-        $requestPath = $request->getPath();
+        $requestMethod = $request->method();
+        $requestPath = $request->path();
         try {
             $result = null;
             $routes = self::$routes->getMatchedRoutes($requestMethod, $requestPath);

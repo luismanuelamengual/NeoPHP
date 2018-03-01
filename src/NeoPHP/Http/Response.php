@@ -19,30 +19,29 @@ final class Response {
     /**
      * @return Response
      */
-    public static function getInstance() {
+    public static function instance() {
         if (!isset(self::$instance))
             self::$instance = new self;
         return self::$instance;
     }
 
     /**
-     * @param $statusCode
-     */
-    public function setStatusCode($statusCode) {
-        http_response_code($statusCode);
-    }
-
-    /**
+     * @param null $statusCode
      * @return int
      */
-    public function getStatusCode() {
-        return http_response_code();
+    public function statusCode($statusCode = null) {
+        if ($statusCode != null) {
+            http_response_code($statusCode);
+        }
+        else {
+            return http_response_code();
+        }
     }
 
     /**
      * @return array
      */
-    public function getHeaders() {
+    public function headers() {
         return headers_list();
     }
 
@@ -75,7 +74,7 @@ final class Response {
     /**
      * @return bool
      */
-    public function isSent() {
+    public function sent() {
         return headers_sent();
     }
 }
