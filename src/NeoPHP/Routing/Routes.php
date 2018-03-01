@@ -27,7 +27,7 @@ class Routes {
         self::$errorRoutes = new DefaultRoutesManager();
         self::$notFoundRoutes = new DefaultRoutesManager();
 
-        register_event_listener("application_init", function() {
+        register_event_listener("application_start", function() {
             self::handleRequest();
         });
     }

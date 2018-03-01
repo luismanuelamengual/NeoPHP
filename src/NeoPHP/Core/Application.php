@@ -106,12 +106,12 @@ class Application {
     /**
      * @throws Exception
      */
-    public function init() {
+    public function start() {
         $bootActions = get_property("app.bootActions", []);
         foreach ($bootActions as $bootAction) {
             $this->execute($bootAction);
         }
-        fire_event("application_init");
+        fire_event("application_start");
     }
 
     /**
