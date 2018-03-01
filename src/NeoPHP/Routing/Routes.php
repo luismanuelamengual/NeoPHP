@@ -179,14 +179,7 @@ class Routes {
      * @throws \Exception
      */
     private static function executeAction($action, array $parameters = []) {
-        $result = null;
-        if (is_callable($action)) {
-            $result = call_user_func($action, $parameters);
-        }
-        else {
-            $result = get_app()->execute($action, $parameters);
-        }
-        return $result;
+        return get_app()->execute($action, $parameters);
     }
 
     /**

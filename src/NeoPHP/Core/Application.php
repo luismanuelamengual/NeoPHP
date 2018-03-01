@@ -4,6 +4,8 @@ namespace NeoPHP\Core;
 
 use Exception;
 use NeoPHP\Controllers\Controllers;
+use ReflectionMethod;
+use ReflectionFunction;
 
 /**
  * Class Application
@@ -120,41 +122,56 @@ class Application {
      */
     public function execute($action, array $parameters = []) {
         $result = null;
-        $actionParts = explode("@", $action);
-        $controllerClass = $actionParts[0];
-        $controllerMethodName = sizeof($actionParts) > 1 ? $actionParts[1] : "index";
-        $controller = Controllers::get($controllerClass);
-        if (method_exists($controller, $controllerMethodName)) {
-            $controllerMethodParams = [];
-            $controllerMethod = new \ReflectionMethod($controller, $controllerMethodName);
-            $parameterIndex = 0;
-            foreach ($controllerMethod->getParameters() as $parameter) {
-                $parameterName = $parameter->getName();
-                $parameterValue = null;
-                if ($parameter->hasType()) {
-                    $typeName = $parameter->getType()->getName();
-                    if (array_key_exists($typeName, $parameters)) {
-                        $parameterValue = $parameters[$typeName];
-                    }
-                }
-                else if (array_key_exists($parameterName, $parameters)) {
-                    $parameterValue = $parameters[$parameterName];
-                }
-                else if (array_key_exists($parameterIndex, $parameters)) {
-                    $parameterValue = $parameters[$parameterIndex];
-                    $parameterIndex++;
-                }
-
-                if ($parameterValue == null && $parameter->isDefaultValueAvailable()) {
-                    $parameterValue = $parameter->getDefaultValue();
-                }
-                $controllerMethodParams[] = $parameterValue;
+        if (is_string($action)) {
+            $actionParts = explode("@", $action);
+            $controllerClass = $actionParts[0];
+            $controllerMethodName = sizeof($actionParts) > 1 ? $actionParts[1] : "index";
+            $controller = Controllers::get($controllerClass);
+            if (method_exists($controller, $controllerMethodName)) {
+                $controllerMethodParams = $this->getParameterValues(new ReflectionMethod($controller, $controllerMethodName), $parameters);
+                $result = call_user_func_array([$controller, $controllerMethodName], $controllerMethodParams);
             }
-            $result = call_user_func_array([$controller, $controllerMethodName], $controllerMethodParams);
+            else {
+                throw new Exception ("Method \"$controllerMethodName\" not found in controller \"$controllerClass\" !!");
+            }
         }
-        else {
-            throw new Exception ("Method \"$controllerMethodName\" not found in controller \"$controllerClass\" !!");
+        else if (is_callable($action)) {
+            $actionParams = $this->getParameterValues(new ReflectionFunction($action), $parameters);
+            $result = call_user_func_array($action, $actionParams);
         }
         return $result;
+    }
+
+    /**
+     * @param ReflectionMethod|ReflectionFunction $function
+     * @param array $parameters
+     * @return array
+     */
+    private function getParameterValues ($function, array $parameters = []) {
+        $functionParams = [];
+        $parameterIndex = 0;
+        foreach ($function->getParameters() as $parameter) {
+            $parameterName = $parameter->getName();
+            $parameterValue = null;
+            if ($parameter->hasType()) {
+                $typeName = $parameter->getType()->getName();
+                if (array_key_exists($typeName, $parameters)) {
+                    $parameterValue = $parameters[$typeName];
+                }
+            }
+            else if (array_key_exists($parameterName, $parameters)) {
+                $parameterValue = $parameters[$parameterName];
+            }
+            else if (array_key_exists($parameterIndex, $parameters)) {
+                $parameterValue = $parameters[$parameterIndex];
+                $parameterIndex++;
+            }
+
+            if ($parameterValue == null && $parameter->isDefaultValueAvailable()) {
+                $parameterValue = $parameter->getDefaultValue();
+            }
+            $functionParams[] = $parameterValue;
+        }
+        return $functionParams;
     }
 }

@@ -29,12 +29,7 @@ abstract class Events {
     public static function fire ($event, array $parameters = []) {
         if (array_key_exists($event, self::$listeners)) {
             foreach (self::$listeners[$event] as $callbackOrAction) {
-                if (is_callable($callbackOrAction)) {
-                    call_user_func($callbackOrAction, $parameters);
-                }
-                else {
-                    get_app()->execute($callbackOrAction, $parameters);
-                }
+                get_app()->execute($callbackOrAction, $parameters);
             }
         }
     }
