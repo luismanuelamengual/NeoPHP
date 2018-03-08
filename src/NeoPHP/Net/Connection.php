@@ -19,7 +19,6 @@ class Connection {
         $this->identifier = null;
         $this->manager = $manager;
         $this->socket = $socket;
-        $this->name = $this->socket->getName();
         $this->lastActivityTimestamp = microtime(true);
     }
 
@@ -60,7 +59,7 @@ class Connection {
 
     public function process() {
         try {
-            $data = $this->socket->receive();
+            $data = $this->socket->read();
             if ($data == false || strlen($data) == 0)
                 throw new Exception ("Socket connection closed");
             $this->lastActivityTimestamp = microtime(true);
@@ -92,6 +91,6 @@ class Connection {
     }
 
     public function __toString() {
-        return "[" . str_pad($this->id, 4, "0", STR_PAD_LEFT) . "] " . (!empty($this->identifier) ? str_pad($this->identifier, 5, "0", STR_PAD_LEFT) : "?????") . "@" . $this->name;
+        return "[" . str_pad($this->id, 4, "0", STR_PAD_LEFT) . "] " . (!empty($this->identifier) ? str_pad($this->identifier, 5, "0", STR_PAD_LEFT) : "?????") . "@" . $this->socket;
     }
 }
