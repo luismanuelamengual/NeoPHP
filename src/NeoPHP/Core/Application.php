@@ -159,16 +159,19 @@ class Application {
                 $parameterValue = $parameters[$parameterName];
             }
             else if ($parameter->hasType()) {
-                $typeName = $parameter->getType()->getName();
-                if (array_key_exists($typeName, $parameters)) {
-                    $parameterValue = $parameters[$typeName];
-                }
-                else if (!$parameter->isDefaultValueAvailable()) {
-                    $typeClass = new ReflectionClass($typeName);
-                    foreach ($typeClass->getMethods(ReflectionMethod::IS_STATIC) as $staticMethod) {
-                        if ($staticMethod->getReturnType() != null && ($staticMethod->getReturnType()->getName() == $typeName) && $staticMethod->getNumberOfParameters() == 0) {
-                            $parameterValue = $staticMethod->invoke(null);
-                            break;
+                $type = $parameter->getType();
+                if (!$type->isBuiltin()) {
+                    $typeName = (string)$type;
+                    if (array_key_exists($typeName, $parameters)) {
+                        $parameterValue = $parameters[$typeName];
+                    }
+                    else if (!$parameter->isDefaultValueAvailable()) {
+                        $typeClass = new ReflectionClass($typeName);
+                        foreach ($typeClass->getMethods(ReflectionMethod::IS_STATIC) as $staticMethod) {
+                            if ($staticMethod->getReturnType() != null && ((string)$staticMethod->getReturnType() == $typeName) && $staticMethod->getNumberOfParameters() == 0) {
+                                $parameterValue = $staticMethod->invoke(null);
+                                break;
+                            }
                         }
                     }
                 }
