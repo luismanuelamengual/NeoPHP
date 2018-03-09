@@ -4,6 +4,7 @@ namespace NeoPHP\Core;
 
 use Exception;
 use NeoPHP\Controllers\Controllers;
+use ReflectionClass;
 use ReflectionMethod;
 use ReflectionFunction;
 
@@ -153,22 +154,34 @@ class Application {
         foreach ($function->getParameters() as $parameter) {
             $parameterName = $parameter->getName();
             $parameterValue = null;
-            if ($parameter->hasType()) {
+
+            if (array_key_exists($parameterName, $parameters)) {
+                $parameterValue = $parameters[$parameterName];
+            }
+            else if ($parameter->hasType()) {
                 $typeName = $parameter->getType()->getName();
                 if (array_key_exists($typeName, $parameters)) {
                     $parameterValue = $parameters[$typeName];
                 }
-            }
-            else if (array_key_exists($parameterName, $parameters)) {
-                $parameterValue = $parameters[$parameterName];
-            }
-            else if (array_key_exists($parameterIndex, $parameters)) {
-                $parameterValue = $parameters[$parameterIndex];
-                $parameterIndex++;
+                else if (!$parameter->isDefaultValueAvailable()) {
+                    $typeClass = new ReflectionClass($typeName);
+                    foreach ($typeClass->getMethods(ReflectionMethod::IS_STATIC) as $staticMethod) {
+                        if ($staticMethod->getReturnType() != null && ($staticMethod->getReturnType()->getName() == $typeName) && $staticMethod->getNumberOfParameters() == 0) {
+                            $parameterValue = $staticMethod->invoke(null);
+                            break;
+                        }
+                    }
+                }
             }
 
-            if ($parameterValue == null && $parameter->isDefaultValueAvailable()) {
-                $parameterValue = $parameter->getDefaultValue();
+            if ($parameterValue == null) {
+                if (array_key_exists($parameterIndex, $parameters)) {
+                    $parameterValue = $parameters[$parameterIndex];
+                    $parameterIndex++;
+                }
+                else if ($parameter->isDefaultValueAvailable()) {
+                    $parameterValue = $parameter->getDefaultValue();
+                }
             }
             $functionParams[] = $parameterValue;
         }

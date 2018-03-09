@@ -29,7 +29,7 @@ final class Request {
     /**
      * @return Request
      */
-    public static function instance() {
+    public static function instance(): Request {
         if (!isset(self::$instance))
             self::$instance = new self;
         return self::$instance;

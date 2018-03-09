@@ -3,7 +3,7 @@
 namespace NeoPHP\Routing;
 
 use NeoPHP\Http\Request;
-use NeoPHP\Views\View;
+use NeoPHP\Http\Response;
 
 /**
  * Class Routes
@@ -123,48 +123,63 @@ class Routes {
      */
     private static function handleRequest() {
         $request = get_request();
+        $response = get_response();
         $requestMethod = $request->method();
         $requestPath = $request->path();
         try {
-            $result = null;
             $routes = self::$routes->getMatchedRoutes($requestMethod, $requestPath);
             if (!empty($routes)) {
                 foreach (self::$beforeRoutes->getMatchedRoutes($requestMethod, $requestPath) as $route) {
-                    self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters(), [Request::class=>$request]));
+                    self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters()));
                 }
-                foreach ($routes as $route) {
-                    $routeResult = self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters(), [Request::class=>$request]));
-                    if (!empty($routeResult)) {
-                        $result = $routeResult;
+                if (!$response->sent()) {
+                    foreach ($routes as $route) {
+                        $routeResult = self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters()));
+                        if (!empty($routeResult)) {
+                            $response->content($routeResult);
+                        }
+                    }
+                    if (!$response->sent()) {
+                        foreach (self::$afterRoutes->getMatchedRoutes($requestMethod, $requestPath) as $route) {
+                            $routeResult = self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters()));
+                            if (!empty($routeResult)) {
+                                $response->content($routeResult);
+                            }
+                        }
                     }
                 }
-                foreach (self::$afterRoutes->getMatchedRoutes($requestMethod, $requestPath) as $route) {
-                    self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters(), ["result"=>&$result, Request::class=>$request]));
-                }
+                $response->send();
             }
             else {
+                $response->clear();
+                $response->statusCode(Response::HTTP_NOT_FOUND);
                 $notFoundRoutes = self::$notFoundRoutes->getMatchedRoutes($requestMethod, $requestPath);
                 if (!empty($notFoundRoutes)) {
                     foreach ($notFoundRoutes as $route) {
-                        $routeResult = self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters(), ["path"=>$requestPath, Request::class=>$request]));
+                        $routeResult = self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters()));
                         if (!empty($routeResult)) {
-                            $result = $routeResult;
+                            $response->content($routeResult);
                         }
                     }
+                    $response->send();
                 }
                 else {
                     handle_error_code(404);
                 }
             }
-            self::processResult($result);
         }
         catch (\Throwable $ex) {
             ob_clean();
+            $response->clear();
             $routes = self::$errorRoutes->getMatchedRoutes($requestMethod, $requestPath);
             if (!empty($routes)) {
                 foreach ($routes as $route) {
-                    self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters(), [\Throwable::class=>$ex, \Exception::class=>$ex, Request::class=>$request]));
+                    $routeResult = self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters(), [\Throwable::class=>$ex, \Exception::class=>$ex]));
+                    if (!empty($routeResult)) {
+                        $response->content($routeResult);
+                    }
                 }
+                $response->send();
             }
             else {
                 throw $ex;
@@ -180,36 +195,6 @@ class Routes {
      */
     private static function executeAction($action, array $parameters = []) {
         return get_app()->execute($action, $parameters);
-    }
-
-    /**
-     * Processes the result
-     * @param $result
-     */
-    private static function processResult($result) {
-        if ($result != null) {
-            if (is_object($result)) {
-                if ($result instanceof View) {
-                    $result->render();
-                }
-                else if (method_exists($result, "__toString")) {
-                    echo $result;
-                }
-                else {
-                    echo "<pre>";
-                    print_r($result);
-                    echo "</pre>";
-                }
-            }
-            else if (is_array($result)) {
-                echo "<pre>";
-                print_r($result);
-                echo "</pre>";
-            }
-            else {
-                echo $result;
-            }
-        }
     }
 }
 

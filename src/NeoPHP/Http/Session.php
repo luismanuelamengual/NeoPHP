@@ -15,7 +15,7 @@ final class Session {
     /**
      * @return Session
      */
-    public static function instance() {
+    public static function instance(): Session {
         if (!isset(self::$instance))
             self::$instance = new self;
         return self::$instance;
