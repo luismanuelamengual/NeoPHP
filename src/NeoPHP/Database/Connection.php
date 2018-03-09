@@ -15,77 +15,60 @@ use PDO;
 class Connection {
 
     private $pdo;
-    private $config;
     private $readOnly;
-    private $logQueries;
+    private $logEnabled;
     private $queryBuilder;
 
     /**
      * Connection constructor.
      * @param PDO $pdo
+     * @param QueryBuilder $queryBuilder
+     * @param array $config
      */
     public function __construct(PDO $pdo, QueryBuilder $queryBuilder, array $config = []) {
         $this->pdo = $pdo;
-        $this->config = $config;
         $this->readOnly = isset($config["readOnly"]) ? $config["readOnly"] : false;
-        $this->logQueries = isset($config["logQueries"]) ? $config["logQueries"] : false;
+        $this->logEnabled = isset($config["logQueries"]) ? $config["logQueries"] : false;
         $this->queryBuilder = $queryBuilder;
     }
 
     /**
      * @return PDO
      */
-    public function getPdo(): PDO {
+    public function pdo(): PDO {
         return $this->pdo;
-    }
-
-    /**
-     * @return array
-     */
-    public function getConfig(): array {
-        return $this->config;
     }
 
     /**
      * @return QueryBuilder
      */
-    public function getQueryBuilder(): QueryBuilder {
+    public function queryBuilder(): QueryBuilder {
         return $this->queryBuilder;
     }
 
     /**
-     * @param QueryBuilder $queryBuilder
+     * @param null $readOnly
+     * @return bool|mixed
      */
-    public function setQueryBuilder(QueryBuilder $queryBuilder) {
-        $this->queryBuilder = $queryBuilder;
-    }
-
-    /**
-     * @param $readOnly
-     */
-    public function setReadOnly($readOnly) {
-        $this->readOnly = $readOnly;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isReadOnly() {
-        return $this->readOnly;
+    public function readOnly($readOnly=null) {
+        if (isset($readOnly)) {
+            $this->readOnly = $readOnly;
+        }
+        else {
+            return $this->readOnly;
+        }
     }
 
     /**
      * @return bool|mixed
      */
-    public function getLogQueries() {
-        return $this->logQueries;
-    }
-
-    /**
-     * @param bool|mixed $logQueries
-     */
-    public function setLogQueries($logQueries) {
-        $this->logQueries = $logQueries;
+    public function logEnabled($logEnabled=null) {
+        if (isset($logEnabled)) {
+            $this->logEnabled = $logEnabled;
+        }
+        else {
+            return $this->logEnabled;
+        }
     }
 
     /**
@@ -209,7 +192,7 @@ class Connection {
         }
         $results = $queryStatement->fetchAll(PDO::FETCH_OBJ);
         $elapsedTime = microtime(true) - $startTimestamp;
-        if ($this->logQueries) {
+        if ($this->logEnabled) {
             get_logger()->debug("SQL: " . $this->getSqlSentence($sql, $bindings) . " [Time: " . number_format($elapsedTime, 4) . ", Results: " . sizeof($results) . "]");
         }
         return $results;
@@ -247,7 +230,7 @@ class Connection {
             }
         }
         $elapsedTime = microtime(true) - $startTimestamp;
-        if ($this->logQueries) {
+        if ($this->logEnabled) {
             get_logger()->debug("SQL: " . $this->getSqlSentence($sql, $bindings) . " [Time: " . number_format($elapsedTime, 4) . ", Affected rows: " . $affectedRows . "]");
         }
         return $affectedRows;

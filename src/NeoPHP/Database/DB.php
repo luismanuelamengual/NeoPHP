@@ -85,6 +85,21 @@ abstract class DB {
     }
 
     /**
+     * @param null $readOnly
+     * @return bool|mixed
+     */
+    public static function readOnly($readOnly=null) {
+        return self::connection()->readOnly($readOnly);
+    }
+
+    /**
+     * @return bool|mixed
+     */
+    public static function logEnabled($logEnabled=null) {
+        return self::connection()->logEnabled($logEnabled);
+    }
+
+    /**
      * @param $name
      * @param $arguments
      * @return mixed
