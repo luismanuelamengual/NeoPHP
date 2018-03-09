@@ -45,6 +45,21 @@ class ConnectionTable {
     }
 
     /**
+     * @param $field
+     * @return array
+     */
+    public function findField($field) {
+        $fieldResults = [];
+        $this->select([$field]);
+        $results = $this->find();
+        foreach ($results as $result) {
+            $resultVars = get_object_vars($result);
+            $fieldResults[] = reset($resultVars);
+        }
+        return $fieldResults;
+    }
+
+    /**
      * @return mixed
      */
     public function find() {
