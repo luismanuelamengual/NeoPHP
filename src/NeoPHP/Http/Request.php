@@ -134,7 +134,7 @@ final class Request {
      * @return array|false
      */
     public function headers() {
-        return apache_request_headers();
+        return getallheaders();
     }
 
     /**
