@@ -40,7 +40,7 @@ if (!function_exists('get_logger')) {
 if (!function_exists('get_request')) {
     /**
      * @param null $parameterName
-     * @return \NeoPHP\Http\Request|null
+     * @return \NeoPHP\Http\Request
      */
     function get_request($parameterName=null) {
         $request = \NeoPHP\Http\Request::instance();
@@ -59,10 +59,12 @@ if (!function_exists('get_response')) {
 
 if (!function_exists('get_session')) {
     /**
+     * @param null $parameterName
      * @return \NeoPHP\Http\Session
      */
-    function get_session() {
-        return \NeoPHP\Http\Session::instance();
+    function get_session($parameterName=null) {
+        $session = \NeoPHP\Http\Session::instance();
+        return isset($parameterName)? $session->get($parameterName) : $session;
     }
 }
 
