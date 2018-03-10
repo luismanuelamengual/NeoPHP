@@ -38,4 +38,4 @@ NeoPHP is licensed under the MIT License - see the `LICENSE` file for details
 
 ### Acknowledgements
 
-This library is heavily inspired by Laravel PHP framework (https://laravel.com) library, although many things have been adjusted to be a more a powerfull and flexible framework
+This library is heavily inspired by Laravel PHP framework (https://laravel.com) library, although many things have been adjusted to be a faster and more powerfull framework
