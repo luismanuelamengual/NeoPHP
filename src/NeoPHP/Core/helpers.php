@@ -16,6 +16,27 @@ if (!function_exists('get_app')) {
     }
 }
 
+if (!function_exists('get_url')) {
+    /**
+     * @param string|null $path
+     * @return string
+     */
+    function get_url(string $path=null) {
+        $request = get_request();
+        $url = $request->scheme();
+        $url .= "://";
+        $url .= $request->host();
+        $url .= $request->baseContext();
+        if ($path != null) {
+            if ($path[0] != '/') {
+                $url .= "/";
+            }
+            $url .= $path;
+        }
+        return $url;
+    }
+}
+
 if (!function_exists('get_property')) {
     /**
      * @param $key

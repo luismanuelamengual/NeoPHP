@@ -208,7 +208,7 @@ final class Request {
      * @return string
      */
     public function scheme() {
-        return $this->isSecureRequest() ? "https" : "http";
+        return isset($_SERVER["REQUEST_SCHEME"])? $_SERVER["REQUEST_SCHEME"] : ($this->isSecureRequest() ? "https" : "http");
     }
 
     /**
