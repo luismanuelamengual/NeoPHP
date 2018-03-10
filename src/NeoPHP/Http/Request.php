@@ -53,7 +53,7 @@ final class Request {
      * @return mixed
      */
     public function query() {
-        return $_SERVER["REDIRECT_QUERY_STRING"];
+        return isset($_SERVER["REDIRECT_QUERY_STRING"])? $_SERVER["REDIRECT_QUERY_STRING"] : null;
     }
 
     /**
@@ -69,6 +69,13 @@ final class Request {
      */
     public function userAgent() {
         return $_SERVER["HTTP_USER_AGENT"];
+    }
+
+    /**
+     * Returns the base context
+     */
+    public function baseContext() {
+        return $_SERVER["CONTEXT_PREFIX"];
     }
 
     /**
