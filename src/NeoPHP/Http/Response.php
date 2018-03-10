@@ -205,6 +205,18 @@ final class Response {
     }
 
     /**
+     * Configures the response before sending
+     */
+    private function sendConfig() {
+        if ($this->content != null) {
+            if (($this->content instanceof \stdClass) || is_array($this->content)) {
+                $this->contentType("application/json");
+                $this->content = json_encode($this->content);
+            }
+        }
+    }
+
+    /**
      * Sends the content of the response
      */
     private function sendContent() {
@@ -235,6 +247,7 @@ final class Response {
      */
     public function send() {
         if (!$this->sent) {
+            $this->sendConfig();
             $this->sendHeaders();
             $this->sendContent();
             $this->sent = true;
