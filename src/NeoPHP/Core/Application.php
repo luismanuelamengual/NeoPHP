@@ -25,7 +25,7 @@ class Application {
      * @param $basePath
      * @return Application
      */
-    public static function create($basePath) {
+    public static function create($basePath): Application {
         self::$instance = new Application($basePath);
         return self::$instance;
     }
@@ -33,7 +33,7 @@ class Application {
     /**
      * @return Application
      */
-    public static function get() {
+    public static function get(): Application {
         return self::$instance;
     }
 
