@@ -60,23 +60,23 @@ Routes::after("test", function() { echo "This execute after the test route; });
 ```
 The **before routes are specially usefull for session validations or for input transformations**. Example: 
 ```PHP
-Routes::before("site/*", function() { 
+Routes::before("site/*", function(Request $request) { 
     if (!get_session()->isStarted()) {
-        header("location: portal");
+        $request->redirectRoute("portal");
     }
 });
 ```
 In this example all requests to the context "site/" will have session validation and redirect to portal if no session is started
 
-The **after routes are specially usefull for output transformations**. The result of the route is stored in the result parameter. This result may be modified to return another output. Example ...
+The **after routes are specially usefull for output transformations**. The response content may be modified to return another output. Example ...
 ```PHP
 Routes::any("/persons/", function() { 
     return [{ "name"=>"Luis", "lastname"=>"Amengual", "age"=>35 }];
 });
-Routes::after("persons", function($result) {
-    switch (get_request()->get("output")) {
+Routes::after("persons", function(Request $request, Response $response) {
+    switch ($request->get("output")) {
         case "json":
-            $result = json_encode($result);
+            $result = json_encode($response->content());
             break;
     }
     return $result;
