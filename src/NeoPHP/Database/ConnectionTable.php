@@ -48,7 +48,7 @@ class ConnectionTable {
      * @param $field
      * @return array
      */
-    public function findField($field) {
+    public function pluck($field) {
         $fieldResults = [];
         $this->select([$field]);
         $results = $this->find();
