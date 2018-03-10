@@ -164,7 +164,7 @@ class Routes {
                     $response->send();
                 }
                 else {
-                    handle_error_code(404);
+                    handle_error_code(Response::HTTP_NOT_FOUND);
                 }
             }
         }

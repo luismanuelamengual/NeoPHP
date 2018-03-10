@@ -174,6 +174,35 @@ final class Response {
     }
 
     /**
+     * @param $route
+     * @param array $parameters
+     * @param bool $permanent
+     */
+    public function redirectRoute ($route, array $parameters = [], $permanent=false) {
+        $url = get_url($route);
+        if (!empty($parameters)) {
+            $queryParameters = [];
+            foreach ($parameters as $key=>$value) {
+                $queryParameters[] = $key . "=" . urlencode($value);
+            }
+            $url .= "?";
+            $url .= implode("&", $queryParameters);
+        }
+        $this->redirect($url, $permanent);
+    }
+
+    /**
+     * @param $url
+     * @param bool $permanent
+     */
+    public function redirect ($url, $permanent=false) {
+        $this->clear();
+        $this->header("Location", $url);
+        $this->statusCode($permanent? self::HTTP_PERMANENTLY_REDIRECT : self::HTTP_TEMPORARY_REDIRECT);
+        $this->send();
+    }
+
+    /**
      * @param null $content
      * @return Response|null
      */
@@ -221,24 +250,7 @@ final class Response {
      */
     private function sendContent() {
         if ($this->content != null) {
-            if (is_object($this->content)) {
-                if (method_exists($this->content, "__toString")) {
-                    echo $this->content;
-                }
-                else {
-                    echo "<pre>";
-                    print_r($this->content);
-                    echo "</pre>";
-                }
-            }
-            else if (is_array($this->content)) {
-                echo "<pre>";
-                print_r($this->content);
-                echo "</pre>";
-            }
-            else {
-                echo $this->content;
-            }
+            echo $this->content;
         }
     }
 
