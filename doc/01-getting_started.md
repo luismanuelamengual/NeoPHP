@@ -4,7 +4,7 @@
 
 To install the NeoPHP framework we have to **run the following command (Composer required)**, assuming we want to start a new project named "MyApp":
 ```
-composer create-project neogroup/neophp-startup-project MyApp
+composer create-project neogroup/neophp-project MyApp
 ```
 This command will create an empty NeoPHP project. The structure of the created proyect will be as follows ...
 
