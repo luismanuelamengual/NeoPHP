@@ -4,7 +4,7 @@ namespace NeoPHP\Resources;
 
 /**
  * Class Resources
- * @package NeoPHP\Core\Resources
+ * @package NeoPHP\Resources
  */
 abstract class Resources {
 

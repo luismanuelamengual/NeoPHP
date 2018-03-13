@@ -1,6 +1,6 @@
 <?php
 
-namespace NeoPHP\Core;
+namespace NeoPHP;
 
 use Exception;
 use NeoPHP\Controllers\Controllers;
@@ -10,7 +10,7 @@ use ReflectionFunction;
 
 /**
  * Class Application
- * @package NeoPHP\Core
+ * @package NeoPHP
  */
 class Application {
 

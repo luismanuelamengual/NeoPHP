@@ -1,6 +1,6 @@
 <?php
 
-namespace NeoPHP\Config;
+namespace NeoPHP\Properties;
 
 /**
  * Class Properties

@@ -2,15 +2,15 @@
 
 if (!function_exists('get_app')) {
     /**
-     * @return \NeoPHP\Core\Application
+     * @return \NeoPHP\Application
      */
     function get_app($basePath=null) {
         $app = null;
         if ($basePath != null) {
-            $app = \NeoPHP\Core\Application::create($basePath);
+            $app = \NeoPHP\Application::create($basePath);
         }
         else {
-            $app = \NeoPHP\Core\Application::get();
+            $app = \NeoPHP\Application::get();
         }
         return $app;
     }
@@ -44,7 +44,7 @@ if (!function_exists('get_property')) {
      * @return mixed
      */
     function get_property($key, $defaultValue=null) {
-        return \NeoPHP\Config\Properties::get($key, $defaultValue);
+        return \NeoPHP\Properties\Properties::get($key, $defaultValue);
     }
 }
 
