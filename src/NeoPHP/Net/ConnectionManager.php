@@ -58,15 +58,17 @@ class ConnectionManager implements ConnectionListener {
             $this->resources[$this->getResourceId($masterResource)] = $masterResource;
         }
         $masterResource = $this->masterSocket->getResource();
+        $readResources = $this->resources;
         $writeResources = [];
         $errorResources = [];
-        $streamsCount = socket_select($this->resources, $writeResources, $errorResources, null);
+
+        $streamsCount = socket_select($readResources, $writeResources, $errorResources, null);
 
         if ($streamsCount === false) {
             throw new RuntimeException("Error reading stream resources. " . socket_strerror(socket_last_error()));
         }
 
-        foreach ($this->resources as $resource) {
+        foreach ($readResources as $resource) {
             if ($resource == $masterResource)
                 $this->processMasterSocket();
             else
