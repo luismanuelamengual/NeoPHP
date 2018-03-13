@@ -14,6 +14,9 @@ class Socket extends AbstractSocket {
     }
 
     public function read($length = null) {
-        return socket_read($this->resource, 1024, PHP_NORMAL_READ);
+        if ($length === null) {
+            $length = 1024;
+        }
+        return stream_get_contents($this->resource, $length);
     }
 }

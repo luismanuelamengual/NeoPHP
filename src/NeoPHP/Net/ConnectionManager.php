@@ -58,8 +58,8 @@ class ConnectionManager implements ConnectionListener {
         }
         $masterResource = $this->masterSocket->getResource();
         $readResources = $this->resources;
-        $writeResources = null;
-        $errorResources = null;
+        $writeResources = [];
+        $errorResources = [];
         stream_select($readResources, $writeResources, $errorResources, 0, 200000);
         foreach ($readResources as $resource) {
             if ($resource == $masterResource)
