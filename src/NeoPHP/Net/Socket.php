@@ -13,10 +13,7 @@ class Socket extends AbstractSocket {
         return socket_write($this->resource, $data);
     }
 
-    public function read($length = null) {
-        if ($length === null) {
-            $length = 1024;
-        }
-        return stream_get_contents($this->resource, $length);
+    public function read($length = 1024) {
+        return socket_read($this->resource, $length, PHP_NORMAL_READ);
     }
 }
