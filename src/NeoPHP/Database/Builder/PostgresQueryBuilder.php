@@ -226,7 +226,7 @@ class PostgresQueryBuilder extends QueryBuilder {
             }
             else if ($value instanceof DateTimeInterface) {
                 $sql .= "?";
-                $bindings[] = date("Y-m-d H:i:s", $value->getTimestamp());
+                $bindings[] = gmdate("Y-m-d H:i:s", $value->getTimestamp());
             }
         }
         else if (is_array($value)) {

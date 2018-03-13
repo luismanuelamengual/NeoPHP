@@ -27,15 +27,13 @@ class Messages {
     /**
      * @param $language
      */
-    public static function setLanguage($language) {
-        self::$language = $language;
-    }
-
-    /**
-     * @return bool|string
-     */
-    public static function getLanguage() {
-        return self::$language;
+    public static function language ($language=null) {
+        if ($language != null) {
+            self::$language = $language;
+        }
+        else {
+            return self::$language;
+        }
     }
 
     /**
