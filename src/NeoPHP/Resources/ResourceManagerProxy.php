@@ -57,20 +57,22 @@ class ResourceManagerProxy {
     }
 
     /**
+     * @param array $fields
      * @return InsertQuery
      */
-    protected function createInsertQuery(): InsertQuery {
+    protected function createInsertQuery(array $fields = []): InsertQuery {
         $query = new InsertQuery($this->table());
-        $query->fields($this->fields());
+        $query->fields(!empty($fields)? $fields : $this->fields());
         return $query;
     }
 
     /**
+     * @param array $fields
      * @return UpdateQuery
      */
-    protected function createUpdateQuery(): UpdateQuery {
+    protected function createUpdateQuery(array $fields = []): UpdateQuery {
         $query = new UpdateQuery($this->table());
-        $query->fields($this->fields());
+        $query->fields(!empty($fields)? $fields : $this->fields());
         $query->whereConditions($this->whereConditions());
         return $query;
     }
@@ -94,15 +96,15 @@ class ResourceManagerProxy {
     /**
      * @return mixed
      */
-    public function insert() {
-        return $this->resourceManager->insert($this->createInsertQuery());
+    public function insert(array $fields = []) {
+        return $this->resourceManager->insert($this->createInsertQuery($fields));
     }
 
     /**
      * @return mixed
      */
-    public function update() {
-        return $this->resourceManager->update($this->createUpdateQuery());
+    public function update(array $fields = []) {
+        return $this->resourceManager->update($this->createUpdateQuery($fields));
     }
 
     /**
