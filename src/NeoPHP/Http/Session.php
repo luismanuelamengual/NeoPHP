@@ -25,14 +25,24 @@ final class Session {
      * @return string
      */
     public function id($id = null) {
-        return session_id($id);
+        if (isset($id)) {
+            session_id($id);
+        }
+        else {
+            return session_id();
+        }
     }
 
     /**
      * @return string
      */
     public function name($name = null) {
-        return session_name($name);
+        if (isset($name)) {
+            session_name($name);
+        }
+        else {
+            return session_name();
+        }
     }
 
     /**

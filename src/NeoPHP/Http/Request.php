@@ -214,8 +214,8 @@ final class Request {
     /**
      * @return bool
      */
-    public function isAjax() {
-        return $_SERVER["HTTP_X_REQUESTED_WITH"] == "XMLHttpRequest";
+    public function ajax() {
+        return isset($_SERVER["HTTP_X_REQUESTED_WITH"]) && ($_SERVER["HTTP_X_REQUESTED_WITH"] == "XMLHttpRequest");
     }
 
     /**

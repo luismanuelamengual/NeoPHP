@@ -62,6 +62,15 @@ class ConnectionTable {
     /**
      * @return mixed
      */
+    public function first() {
+        $this->limit(1);
+        $results = $this->find();
+        return reset($results);
+    }
+
+    /**
+     * @return mixed
+     */
     public function find() {
         $query = new SelectQuery($this->table());
         $query->limit($this->limit());
