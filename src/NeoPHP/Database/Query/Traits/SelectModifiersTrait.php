@@ -25,7 +25,7 @@ trait SelectModifiersTrait {
             $this->offset = $offset;
         }
         else {
-            $result = $this->limit;
+            $result = $this->offset;
         }
         return $result;
     }
