@@ -44,7 +44,7 @@ trait WhereConditionsTrait {
         return $this;
     }
 
-    public function whereColumn($column, $operatorOrColumn, $otherColumn) {
+    public function whereColumn($column, $operatorOrColumn, $otherColumn=null) {
         $this->whereConditions()->onColumn($column, $operatorOrColumn, $otherColumn);
         return $this;
     }

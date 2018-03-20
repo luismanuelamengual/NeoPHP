@@ -44,7 +44,7 @@ trait HavingConditionsTrait {
         return $this;
     }
 
-    public function havingColumn($column, $operatorOrColumn, $otherColumn) {
+    public function havingColumn($column, $operatorOrColumn, $otherColumn=null) {
         $this->havingConditions()->onColumn($column, $operatorOrColumn, $otherColumn);
         return $this;
     }

@@ -194,7 +194,7 @@ class PostgresQueryBuilder extends QueryBuilder {
                 }
                 break;
             case "group":
-                $sql .= "(" . $this->buildConditionGroupSql($condition, $bindings) . ")";
+                $sql .= "(" . $this->buildConditionGroupSql($condition["group"], $bindings) . ")";
                 break;
             case "raw":
                 $sql .= $condition["sql"];

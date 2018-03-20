@@ -36,6 +36,10 @@ class ConditionGroup {
         return $result;
     }
 
+    public function isEmpty() {
+        return empty($this->conditions);
+    }
+
     public function on ($column, $operatorOrValue, $value=null) {
         $type = "basic";
         if ($value != null) {

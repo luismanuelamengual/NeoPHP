@@ -87,6 +87,30 @@ class ResourceManagerProxy {
     }
 
     /**
+     * @param $field
+     * @return array
+     */
+    public function pluck($field) {
+        $fieldResults = [];
+        $this->select([$field]);
+        $results = $this->find();
+        foreach ($results as $result) {
+            $resultVars = get_object_vars($result);
+            $fieldResults[] = reset($resultVars);
+        }
+        return $fieldResults;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function first() {
+        $this->limit(1);
+        $results = $this->find();
+        return reset($results);
+    }
+
+    /**
      * @return mixed
      */
     public function find() {
