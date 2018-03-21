@@ -92,7 +92,7 @@ class ResourceManagerProxy {
      */
     public function pluck($field) {
         $fieldResults = [];
-        $this->select([$field]);
+        $this->selectFields([$field]);
         $results = $this->find();
         foreach ($results as $result) {
             $resultVars = get_object_vars($result);
