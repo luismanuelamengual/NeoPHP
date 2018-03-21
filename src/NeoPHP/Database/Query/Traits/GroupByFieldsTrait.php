@@ -19,5 +19,6 @@ trait GroupByFieldsTrait {
 
     public function groupBy($column) {
         $this->groupByFields[] = $column;
+        return $this;
     }
 }
