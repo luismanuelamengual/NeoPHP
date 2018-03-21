@@ -87,7 +87,7 @@ final class Request {
             if (!empty($_SERVER["REQUEST_URI"])) {
                 $this->path = $_SERVER["REQUEST_URI"];
 
-                $queryPos = strpos($this->path(), "?");
+                $queryPos = strpos($this->path, "?");
                 if ($queryPos !== false) {
                     $this->path = substr($this->path, 0, $queryPos);
                 }
