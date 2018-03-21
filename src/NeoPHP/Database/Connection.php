@@ -7,6 +7,7 @@ use Exception;
 use NeoPHP\Database\Builder\QueryBuilder;
 use NeoPHP\Database\Query\Query;
 use PDO;
+use stdClass;
 
 /**
  * Class Connection
@@ -18,6 +19,7 @@ class Connection {
     private $readOnly;
     private $logEnabled;
     private $queryBuilder;
+    private $listeners;
 
     /**
      * Connection constructor.
@@ -30,6 +32,26 @@ class Connection {
         $this->readOnly = isset($config["readOnly"]) ? $config["readOnly"] : false;
         $this->logEnabled = isset($config["logQueries"]) ? $config["logQueries"] : false;
         $this->queryBuilder = $queryBuilder;
+        $this->listeners = [];
+
+        $this->listen(function ($sqlData) {
+            if ($this->logEnabled) {
+                $logSentence = "SQL: ";
+                $logSentence .= $sqlData->sql;
+                $logSentence .= " [Time: ";
+                $logSentence .= number_format($sqlData->elapsedTime, 4);
+                if (isset($sqlData->results)) {
+                    $logSentence .= ", Results: ";
+                    $logSentence .= sizeof($sqlData->results);
+                }
+                if (isset($sqlData->affectedRows)) {
+                    $logSentence .= ", Affected rows: ";
+                    $logSentence .= $sqlData->affectedRows;
+                }
+                $logSentence .= "]";
+                get_logger()->debug($logSentence);
+            }
+        });
     }
 
     /**
@@ -50,7 +72,7 @@ class Connection {
      * @param null $readOnly
      * @return bool|mixed
      */
-    public function readOnly($readOnly=null) {
+    public function readOnly($readOnly = null) {
         if (isset($readOnly)) {
             $this->readOnly = $readOnly;
         }
@@ -62,7 +84,7 @@ class Connection {
     /**
      * @return bool|mixed
      */
-    public function logEnabled($logEnabled=null) {
+    public function logEnabled($logEnabled = null) {
         if (isset($logEnabled)) {
             $this->logEnabled = $logEnabled;
         }
@@ -163,6 +185,25 @@ class Connection {
     }
 
     /**
+     * Registra una entidad que va a escuchar las sentencias
+     * sql que se ejecutan sobre esta conexión
+     * @param callable $listener Funcion de callback
+     */
+    public function listen(callable $listener) {
+        $this->listeners[] = $listener;
+    }
+
+    /**
+     * Envia un evento de sql con la informacion de la sentencia
+     * @param stdClass $sqlData de la sentencia sql
+     */
+    private function fire(stdClass $sqlData) {
+        foreach ($this->listeners as $listener) {
+            $listener($sqlData);
+        }
+    }
+
+    /**
      * @param $sql
      * @param array $bindings
      * @return array
@@ -191,10 +232,14 @@ class Connection {
             }
         }
         $results = $queryStatement->fetchAll(PDO::FETCH_OBJ);
-        $elapsedTime = microtime(true) - $startTimestamp;
-        if ($this->logEnabled) {
-            get_logger()->debug("SQL: " . $this->getSqlSentence($sql, $bindings) . " [Time: " . number_format($elapsedTime, 4) . ", Results: " . sizeof($results) . "]");
-        }
+
+        $sqlData = new stdClass();
+        $sqlData->results = $results;
+        $sqlData->elapsedTime = microtime(true) - $startTimestamp;
+        $sqlData->sql = $this->getSqlSentence($sql, $bindings);
+        $sqlData->rawSql = $sql;
+        $sqlData->bindings = $bindings;
+        $this->fire($sqlData);
         return $results;
     }
 
@@ -229,10 +274,14 @@ class Connection {
                 $affectedRows = $preparedStatement->rowCount();
             }
         }
-        $elapsedTime = microtime(true) - $startTimestamp;
-        if ($this->logEnabled) {
-            get_logger()->debug("SQL: " . $this->getSqlSentence($sql, $bindings) . " [Time: " . number_format($elapsedTime, 4) . ", Affected rows: " . $affectedRows . "]");
-        }
+
+        $sqlData = new stdClass();
+        $sqlData->affectedRows = $affectedRows;
+        $sqlData->elapsedTime = microtime(true) - $startTimestamp;
+        $sqlData->sql = $this->getSqlSentence($sql, $bindings);
+        $sqlData->rawSql = $sql;
+        $sqlData->bindings = $bindings;
+        $this->fire($sqlData);
         return $affectedRows;
     }
 }

@@ -100,6 +100,14 @@ abstract class DB {
     }
 
     /**
+     * Registra un nuevo listener de sentencias sql
+     * @param callable $listener
+     */
+    public static function listen(callable $listener) {
+        self::connection()->listen($listener);
+    }
+
+    /**
      * @param $name
      * @param $arguments
      * @return mixed
