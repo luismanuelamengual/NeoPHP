@@ -75,7 +75,7 @@ final class Request {
      * Returns the base context
      */
     public function baseContext() {
-        return $_SERVER["CONTEXT_PREFIX"];
+        return !empty($_SERVER["CONTEXT_PREFIX"])? $_SERVER["CONTEXT_PREFIX"] : "";
     }
 
     /**
@@ -84,8 +84,8 @@ final class Request {
     public function path() {
         if (!isset($this->path)) {
             $this->path = "";
-            if (!empty($_SERVER["REDIRECT_URL"])) {
-                $this->path = $_SERVER["REDIRECT_URL"];
+            if (!empty($_SERVER["REQUEST_URI"])) {
+                $this->path = $_SERVER["REQUEST_URI"];
                 if (!empty($_SERVER["CONTEXT_PREFIX"])) {
                     $this->path = substr($this->path, strlen($_SERVER["CONTEXT_PREFIX"]));
                 }
