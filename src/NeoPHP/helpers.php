@@ -1,7 +1,5 @@
 <?php
 
-use NeoPHP\Http\Response;
-
 if (!function_exists('create_app')) {
     /**
      * Crea una aplicación NeoPHP
