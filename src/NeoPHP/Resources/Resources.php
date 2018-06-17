@@ -7,7 +7,7 @@ use NeoPHP\Utils\StringUtils;
 
 /**
  * Class Resources
- * @package Sitrack\Core\Resources
+ * @package NeoPHP\Resources
  */
 abstract class Resources {
 

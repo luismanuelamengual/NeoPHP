@@ -11,7 +11,7 @@ use stdClass;
 
 /**
  * Class Connection
- * @package Sitrack\Database
+ * @package NeoPHP\Database
  */
 class Connection {
 

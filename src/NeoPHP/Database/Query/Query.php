@@ -4,7 +4,7 @@ namespace NeoPHP\Database\Query;
 
 /**
  * Class Query
- * @package Sitrack\Database\Query
+ * @package NeoPHP\Database\Query
  */
 abstract class Query {
 

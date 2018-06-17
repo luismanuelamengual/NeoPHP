@@ -11,7 +11,7 @@ use Throwable;
 
 /**
  * Class Routes
- * @package Sitrack\Routing
+ * @package NeoPHP\Routing
  */
 class Routes {
 

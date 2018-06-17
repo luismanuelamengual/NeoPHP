@@ -13,7 +13,7 @@ use stdClass;
 
 /**
  * Class RemoteResource
- * @package Sitrack\Resources
+ * @package NeoPHP\Resources
  */
 class RemoteResourceManager extends ResourceManager {
 

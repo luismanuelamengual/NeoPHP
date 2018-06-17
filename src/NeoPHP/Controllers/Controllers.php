@@ -7,7 +7,7 @@ use ReflectionException;
 
 /**
  * Class Controllers
- * @package Sitrack\mvc\controllers
+ * @package NeoPHP\mvc\controllers
  */
 abstract class Controllers {
 

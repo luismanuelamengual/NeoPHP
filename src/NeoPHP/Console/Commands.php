@@ -7,7 +7,7 @@ use NeoPHP\ActionNotFoundException;
 
 /**
  * Class Commands
- * @package Sitrack\Console
+ * @package NeoPHP\Console
  */
 abstract class Commands {
 

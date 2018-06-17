@@ -4,7 +4,7 @@ namespace NeoPHP\Properties;
 
 /**
  * Class Properties
- * @package Sitrack\Config
+ * @package NeoPHP\Properties
  */
 abstract class Properties {
 

@@ -18,7 +18,7 @@ use NeoPHP\Database\Query\UpdateQuery;
 
 /**
  * Class ConnectionTable
- * @package Sitrack\Database
+ * @package NeoPHP\Database
  */
 class ConnectionTable {
 

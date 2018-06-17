@@ -8,7 +8,7 @@ use RuntimeException;
 
 /**
  * Class Connections
- * @package Sitrack\Database
+ * @package NeoPHP\Database
  */
 abstract class DB {
 

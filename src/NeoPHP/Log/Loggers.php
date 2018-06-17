@@ -7,7 +7,7 @@ use Monolog\Logger;
 
 /**
  * Class Loggers
- * @package Sitrack\Log
+ * @package NeoPHP\Log
  */
 abstract class Loggers {
 

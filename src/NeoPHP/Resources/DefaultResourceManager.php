@@ -10,7 +10,7 @@ use NeoPHP\Database\Query\UpdateQuery;
 
 /**
  * Class ConnectionResourceManager
- * @package Sitrack\Core\Resources
+ * @package NeoPHP\Resources
  */
 class DefaultResourceManager extends ResourceManager {
 

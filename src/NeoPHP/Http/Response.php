@@ -7,7 +7,7 @@ use stdClass;
 
 /**
  * Class Response
- * @package Sitrack\Http
+ * @package NeoPHP\Http
  */
 final class Response {
 

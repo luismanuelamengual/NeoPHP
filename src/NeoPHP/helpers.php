@@ -1,6 +1,6 @@
 <?php
 
-use Sitrack\Http\Response;
+use NeoPHP\Http\Response;
 
 if (!function_exists('create_app')) {
     /**
@@ -18,7 +18,7 @@ if (!function_exists('get_app')) {
      * @return \NeoPHP\Application
      */
     function get_app() {
-        return \Sitrack\Application::get();
+        return \NeoPHP\Application::get();
     }
 }
 
@@ -135,7 +135,7 @@ if (!function_exists('create_view')) {
     /**
      * @param $name
      * @param array $parameters
-     * @return \Sitrack\Views\View
+     * @return \NeoPHP\Views\View
      */
     function create_view($name, array $parameters = []) {
         return NeoPHP\Views\Views::create($name, $parameters);
@@ -198,7 +198,7 @@ if (!function_exists('handle_exception')) {
                     $error->message = $ex->getMessage();
                     $error->trace = $ex->getTrace();
                     $response = get_response();
-                    $response->statusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
+                    $response->statusCode(\NeoPHP\Http\Response::HTTP_INTERNAL_SERVER_ERROR);
                     $response->content($error);
                     $response->send();
                 }
@@ -209,7 +209,7 @@ if (!function_exists('handle_exception')) {
                 }
             }
             else {
-                handle_error_code(Response::HTTP_INTERNAL_SERVER_ERROR);
+                handle_error_code(\NeoPHP\Http\Response::HTTP_INTERNAL_SERVER_ERROR);
             }
         }
     }

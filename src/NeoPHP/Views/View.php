@@ -4,7 +4,7 @@ namespace NeoPHP\Views;
 
 /**
  * Class View
- * @package Sitrack\Views
+ * @package NeoPHP\Views
  */
 abstract class View {
 

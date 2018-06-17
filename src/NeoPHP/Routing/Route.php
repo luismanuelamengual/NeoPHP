@@ -4,7 +4,7 @@ namespace NeoPHP\Routing;
 
 /**
  * Class Route
- * @package Sitrack\Routing
+ * @package NeoPHP\Routing
  */
 class Route {
 

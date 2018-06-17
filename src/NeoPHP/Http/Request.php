@@ -4,7 +4,7 @@ namespace NeoPHP\Http;
 
 /**
  * Class Request
- * @package Sitrack\Http
+ * @package NeoPHP\Http
  */
 final class Request {
 

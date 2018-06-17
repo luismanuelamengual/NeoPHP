@@ -6,7 +6,7 @@ use Exception;
 
 /**
  * Class Session
- * @package Sitrack\Http
+ * @package NeoPHP\Http
  */
 final class Session {
 
