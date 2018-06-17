@@ -4,7 +4,7 @@ namespace NeoPHP\Http;
 
 /**
  * Class Request
- * @package NeoPHP\Http
+ * @package Sitrack\Http
  */
 final class Request {
 
@@ -75,7 +75,11 @@ final class Request {
      * Returns the base context
      */
     public function baseContext() {
-        return !empty($_SERVER["CONTEXT_PREFIX"])? $_SERVER["CONTEXT_PREFIX"] : "";
+        $baseContext = get_property("web.base_context", "");
+        if (empty($baseContext)) {
+            $baseContext = !empty($_SERVER["CONTEXT_PREFIX"])? $_SERVER["CONTEXT_PREFIX"] : "";
+        }
+        return $baseContext;
     }
 
     /**
@@ -92,11 +96,14 @@ final class Request {
                     $this->path = substr($this->path, 0, $queryPos);
                 }
 
-                if (!empty($_SERVER["CONTEXT_PREFIX"])) {
-                    $this->path = substr($this->path, strlen($_SERVER["CONTEXT_PREFIX"]));
+                $baseContext = $this->baseContext();
+                if (!empty($baseContext)) {
+                    $baseContextLength = strlen($baseContext);
+                    if (substr($this->path, 0, $baseContextLength) == $baseContext) {
+                        $this->path = substr($this->path, $baseContextLength);
+                    }
                 }
             }
-            $this->path = trim($this->path, PATH_SEPARATOR);
         }
         return $this->path;
     }
@@ -107,7 +114,15 @@ final class Request {
     public function pathParts() {
         if (!isset($this->pathParts)) {
             $path = $this->path();
-            $this->pathParts = !empty($path)? explode(PATH_SEPARATOR, $this->path()) : [];
+            if (!empty($path)) {
+                $this->pathParts = explode(self::PATH_SEPARATOR, $path);
+                if (!empty($this->pathParts) && empty($this->pathParts[0])) {
+                    $this->pathParts = array_slice($this->pathParts, 1);
+                }
+            }
+            else {
+                $this->pathParts = [];
+            }
         }
         return $this->pathParts;
     }
@@ -115,16 +130,35 @@ final class Request {
     /**
      * @return mixed
      */
-    public function params() {
-        return $_REQUEST;
+    public function &params() {
+        if (!isset($this->parameters)) {
+            $this->parameters = &$_REQUEST;
+            if ($this->method() != self::METHOD_POST) {
+                $contentTypeHeader = $this->header('Content-Type');
+                if (!empty($contentTypeHeader) && strpos($contentTypeHeader, 'application/x-www-form-urlencoded') !== false) {
+                    $content = $this->content();
+                    if (!empty($content)) {
+                        $contentTokens = explode('&', $content);
+                        foreach ($contentTokens as $contentToken) {
+                            $contentTokenParts = explode('=', $contentToken);
+                            $key = $contentTokenParts[0];
+                            $value = urldecode($contentTokenParts[1]);
+                            $this->parameters[$key] = $value;
+                        }
+                    }
+                }
+            }
+        }
+        return $this->parameters;
     }
 
     /**
      * @param $name
      * @return null
      */
-    public function get($name) {
-        return isset($_REQUEST[$name]) ? $_REQUEST[$name] : null;
+    public function get($name, $defaultValue=null) {
+        $params = &$this->params();
+        return isset($params[$name]) ? $params[$name] : $defaultValue;
     }
 
     /**
@@ -132,7 +166,8 @@ final class Request {
      * @param $value
      */
     public function set($name, $value) {
-        $_REQUEST[$name] = $value;
+        $params = &$this->params();
+        $params[$name] = $value;
     }
 
     /**
@@ -140,23 +175,40 @@ final class Request {
      * @return bool
      */
     public function has($name) {
-        return isset($_REQUEST[$name]);
+        $params = &$this->params();
+        return isset($params[$name]);
     }
 
     /**
      * @return array|false
      */
-    public function headers() {
-        return getallheaders();
+    public function &headers() {
+        if (!isset($this->headers)) {
+            if (function_exists('getallheaders')) {
+                $this->headers = getallheaders();
+            }
+            else {
+                $this->headers = [];
+                if (is_array($_SERVER)) {
+                    foreach ($_SERVER as $name => $value) {
+                        if (substr($name, 0, 5) == 'HTTP_') {
+                            $this->headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
+                        }
+                    }
+                }
+            }
+        }
+        return $this->headers;
     }
 
     /**
      * @param $name
+     * @param string $defaultValue
      * @return mixed
      */
-    public function header($name) {
-        $headers = $this->headers();
-        return $headers[$name];
+    public function header($name, $defaultValue='') {
+        $headers = &$this->headers();
+        return isset($headers[$name])? $headers[$name] : $defaultValue;
     }
 
     /**
@@ -214,7 +266,16 @@ final class Request {
      * @return string
      */
     public function scheme() {
-        return isset($_SERVER["REQUEST_SCHEME"])? $_SERVER["REQUEST_SCHEME"] : ($this->isSecureRequest() ? "https" : "http");
+        if (isset($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
+            $scheme = $_SERVER['HTTP_X_FORWARDED_PROTO'];
+        }
+        else if (isset($_SERVER["REQUEST_SCHEME"])) {
+            $scheme = $_SERVER["REQUEST_SCHEME"];
+        }
+        else {
+            $scheme = $this->isSecureRequest() ? "https" : "http";
+        }
+        return $scheme;
     }
 
     /**

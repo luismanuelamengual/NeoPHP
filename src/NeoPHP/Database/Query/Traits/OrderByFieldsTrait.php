@@ -2,23 +2,38 @@
 
 namespace NeoPHP\Database\Query\Traits;
 
+use stdClass;
+
 trait OrderByFieldsTrait {
 
     private $orderByFields = [];
 
-    public function orderByFields ($fields = null) {
-        $result = $this;
-        if ($fields == null) {
-            $result = $this->orderByFields;
-        }
-        else {
-            $this->orderByFields = is_array($fields)? $fields : func_get_args();
-        }
-        return $result;
+    public function orderByFields (array $orderByFields) {
+        $this->orderByFields = $orderByFields;
+        return $this;
     }
 
-    public function orderBy($column, $direction="ASC") {
-        $this->orderByFields[] = ["column"=>$column, "direction"=>$direction];
+    public function &getOrderByFields () : array {
+        return $this->orderByFields;
+    }
+
+    public function orderBy(...$fields) {
+        foreach ($fields as $field) {
+            if (is_array($field) && sizeof($field) == 2) {
+                $this->orderByField($field[0], $field[1]);
+            }
+            else {
+                $this->orderByField($field);
+            }
+        }
+        return $this;
+    }
+
+    public function orderByField($field, $direction="ASC") {
+        $order = new stdClass();
+        $order->field = $field;
+        $order->direction = $direction;
+        $this->orderByFields[] = $order;
         return $this;
     }
 }

@@ -20,25 +20,21 @@ class Join extends ConditionGroup {
         $this->type = $type;
     }
 
-    public function table($table=null) {
-        $result = $this;
-        if ($table != null) {
-            $this->table = $table;
-        }
-        else {
-            $result = $this->table;
-        }
-        return $result;
+    public function table($table) {
+        $this->table = $table;
+        return $this;
     }
 
-    public function type($type=null) {
-        $result = $this;
-        if ($type != null) {
-            $this->type = $type;
-        }
-        else {
-            $result = $this->type;
-        }
-        return $result;
+    public function &getTable() {
+        return $this->table;
+    }
+
+    public function type($type) {
+        $this->type = $type;
+        return $this;
+    }
+
+    public function &getType() {
+        return $this->type;
     }
 }

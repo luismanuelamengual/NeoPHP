@@ -4,7 +4,7 @@ namespace NeoPHP\Views;
 
 /**
  * Class ViewFactory
- * @package NeoPHP\mvc\views
+ * @package Sitrack\mvc\views
  */
 abstract class ViewFactory {
 

@@ -18,7 +18,7 @@ use NeoPHP\Database\Query\UpdateQuery;
 
 /**
  * Class ConnectionTable
- * @package NeoPHP\Database
+ * @package Sitrack\Database
  */
 class ConnectionTable {
 
@@ -40,26 +40,49 @@ class ConnectionTable {
      * @param $table
      */
     public function __construct($connection, $table) {
-        $this->table($table);
+        $this->source($table);
         $this->connection = $connection;
     }
 
     /**
-     * @param $field
-     * @return array
+     * Obtiene una columna de los resultados en un array
+     * @param string $field campo a mostrar en un array
+     * @param string $indexField campo a utilizar como indice
+     * @return array resultado
      */
-    public function pluck($field) {
+    public function pluck($field, $indexField=null) {
         $fieldResults = [];
-        $this->selectFields([$field]);
+        $selectFields = [$field];
+        if ($indexField != null) {
+            $selectFields[] = $indexField;
+        }
+        $this->selectFields($selectFields);
+
+        $returnField = $field;
+        if (($pos = strpos($returnField, '.')) !== false) {
+            $returnField = substr($returnField, $pos + 1);
+        }
+        $returnIndexField = $indexField;
+        if ($returnIndexField != null) {
+            if (($pos = strpos($returnIndexField, '.')) !== false) {
+                $returnIndexField = substr($returnIndexField, $pos + 1);
+            }
+        }
+
         $results = $this->find();
         foreach ($results as $result) {
-            $resultVars = get_object_vars($result);
-            $fieldResults[] = reset($resultVars);
+            if ($returnIndexField != null) {
+                $fieldResults[$result->$returnIndexField] = $result->$returnField;
+            }
+            else {
+                $fieldResults[] = $result->$returnField;
+            }
         }
         return $fieldResults;
     }
 
     /**
+     * Obtiene el primer resultado
      * @return mixed
      */
     public function first() {
@@ -69,47 +92,102 @@ class ConnectionTable {
     }
 
     /**
-     * @return mixed
+     * Pagina resultados. Util cuando se tienen que renderizar
+     * un gran número de resultados en pantalla y poder hacerlo
+     * de manera gradual (por chunks) y ocupando poca cantidad
+     * de memoria en cada chunk
+     * @param int $size cantidad de resultados por chunk
+     * @param callable $clousure funcion a ser llamada con cada chunk
+     * @return $this referencia a la Connection table
      */
-    public function find() {
-        $query = new SelectQuery($this->table());
-        $query->limit($this->limit());
-        $query->offset($this->offset());
-        $query->distinct($this->distinct());
-        $query->selectFields($this->selectFields());
-        $query->orderByFields($this->orderByFields());
-        $query->groupByFields($this->groupByFields());
-        $query->whereConditions($this->whereConditions());
-        $query->havingConditions($this->havingConditions());
-        $query->joins($this->joins());
-        return $this->connection->query($query);
+    public function chunk ($size, callable $clousure) {
+        $initialOffset = $this->getOffset();
+        $initialLimit = $this->getLimit();
+        $position = isset($initialOffset)? $initialOffset : 0;
+        while (true) {
+            $limit = $size;
+            $limitPosition = $position + $size;
+            if (!empty($initialLimit) && ($limitPosition > $initialLimit)) {
+                $limit = $initialLimit - $position;
+            }
+            $this->offset($position);
+            $this->limit($limit);
+            $chunkResults = $this->find();
+            if (empty($chunkResults)) {
+                break;
+            }
+            $clousure($chunkResults);
+            if (sizeof($chunkResults) < $size) {
+                break;
+            }
+            $position = $limitPosition;
+        }
+        $this->offset($initialOffset);
+        $this->limit($initialLimit);
+        return $this;
     }
 
     /**
+     * Obtiene resultados
+     * @param $indexField
+     * @return mixed
+     */
+    public function find($indexField=null) {
+        $query = new SelectQuery($this->getSource());
+        $query->limit($this->getLimit());
+        $query->offset($this->getOffset());
+        $query->distinct($this->getDistinct());
+        $query->selectFields($this->getSelectFields());
+        $query->orderByFields($this->getOrderByFields());
+        $query->groupByFields($this->getGroupByFields());
+        $query->whereConditionGroup($this->getWhereConditionGroup());
+        $query->havingConditionGroup($this->getHavingConditionGroup());
+        $query->joins($this->getJoins());
+        $results = $this->connection->query($query);
+        if (!empty($results) && $indexField != null) {
+            $returnIndexField = $indexField;
+            if (($pos = strpos($returnIndexField, '.')) !== false) {
+                $returnIndexField = substr($returnIndexField, $pos + 1);
+            }
+            $indexedResults = [];
+            foreach ($results as $result) {
+                $indexedResults[$result->$returnIndexField] = $result;
+            }
+            $results = $indexedResults;
+        }
+        return $results;
+    }
+
+    /**
+     * Inserta un nuevo registro
+     * @param array $fields
      * @return mixed
      */
     public function insert(array $fields = []) {
-        $query = new InsertQuery($this->table());
-        $query->fields(!empty($fields)? $fields : $this->fields());
+        $query = new InsertQuery($this->getSource());
+        $query->fields(!empty($fields)? $fields : $this->getFields());
         return $this->connection->exec($query);
     }
 
     /**
+     * Actualiza un registro
+     * @param array $fields
      * @return mixed
      */
     public function update(array $fields = []) {
-        $query = new UpdateQuery($this->table());
-        $query->fields(!empty($fields)? $fields : $this->fields());
-        $query->whereConditions($this->whereConditions());
+        $query = new UpdateQuery($this->getSource());
+        $query->fields(!empty($fields)? $fields : $this->getFields());
+        $query->whereConditionGroup($this->getWhereConditionGroup());
         return $this->connection->exec($query);
     }
 
     /**
+     * Borra un registro
      * @return mixed
      */
     public function delete() {
-        $query = new DeleteQuery($this->table());
-        $query->whereConditions($this->whereConditions());
+        $query = new DeleteQuery($this->getSource());
+        $query->whereConditionGroup($this->getWhereConditionGroup());
         return $this->connection->exec($query);
     }
 }

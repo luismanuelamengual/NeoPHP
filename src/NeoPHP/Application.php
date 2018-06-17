@@ -3,14 +3,16 @@
 namespace NeoPHP;
 
 use Exception;
-use NeoPHP\Controllers\Controllers;
 use ReflectionClass;
-use ReflectionMethod;
 use ReflectionFunction;
+use ReflectionMethod;
+use NeoPHP\Console\Commands;
+use NeoPHP\Controllers\Controllers;
+use NeoPHP\Routing\Routes;
 
 /**
  * Class Application
- * @package NeoPHP
+ * @package NeoPHP\Core
  */
 class Application {
 
@@ -20,6 +22,9 @@ class Application {
     private $storagePath;
     private $resourcesPath;
     private $configPath;
+    private $localConfigPath;
+
+    private $modules = [];
 
     /**
      * @param $basePath
@@ -105,14 +110,44 @@ class Application {
     }
 
     /**
+     * @param null $localConfigPath
+     * @return null|string
+     */
+    public function localConfigPath($localConfigPath = null) {
+        if ($localConfigPath != null) {
+            $this->localConfigPath = $localConfigPath;
+        }
+        else {
+            if (!isset($this->localConfigPath)) {
+                $this->localConfigPath = $this->basePath() . DIRECTORY_SEPARATOR . "config.local";
+            }
+        }
+        return $this->localConfigPath;
+    }
+
+    /**
+     * Agrega un nuevo modulo a la aplicación
+     * @param Module $module
+     */
+    public function addModule (Module $module) {
+        $this->modules[] = $module;
+    }
+
+    /**
+     * Inicializa la aplicación
      * @throws Exception
      */
     public function start() {
-        $bootActions = get_property("app.bootActions", []);
-        foreach ($bootActions as $bootAction) {
-            $this->execute($bootAction);
+        foreach ($this->modules as $module) {
+            $module->start();
         }
-        fire_event("application_start");
+
+        if (php_sapi_name() == "cli") {
+            Commands::handleCommand();
+        }
+        else {
+            Routes::handleRequest();
+        }
     }
 
     /**
@@ -128,12 +163,15 @@ class Application {
             $controllerClass = $actionParts[0];
             $controllerMethodName = sizeof($actionParts) > 1 ? $actionParts[1] : "index";
             $controller = Controllers::get($controllerClass);
+            if ($controller == null) {
+                throw new ActionNotFoundException ( "Controller \"$controllerClass\" not found !!");
+            }
             if (method_exists($controller, $controllerMethodName)) {
                 $controllerMethodParams = $this->getParameterValues(new ReflectionMethod($controller, $controllerMethodName), $parameters);
                 $result = call_user_func_array([$controller, $controllerMethodName], $controllerMethodParams);
             }
             else {
-                throw new Exception ("Method \"$controllerMethodName\" not found in controller \"$controllerClass\" !!");
+                throw new ActionNotFoundException ("Method \"$controllerMethodName\" not found in controller \"$controllerClass\" !!");
             }
         }
         else if (is_callable($action)) {
@@ -147,6 +185,7 @@ class Application {
      * @param ReflectionMethod|ReflectionFunction $function
      * @param array $parameters
      * @return array
+     * @throws \ReflectionException
      */
     private function getParameterValues ($function, array $parameters = []) {
         $functionParams = [];

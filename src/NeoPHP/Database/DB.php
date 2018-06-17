@@ -8,7 +8,7 @@ use RuntimeException;
 
 /**
  * Class Connections
- * @package NeoPHP\Database
+ * @package Sitrack\Database
  */
 abstract class DB {
 
@@ -97,6 +97,14 @@ abstract class DB {
      */
     public static function logEnabled($logEnabled=null) {
         return self::connection()->logEnabled($logEnabled);
+    }
+
+    /**
+     * @param null $debugEnabled
+     * @return bool|mixed
+     */
+    public static function debugEnabled($debugEnabled=null) {
+        return self::connection()->debugEnabled($debugEnabled);
     }
 
     /**

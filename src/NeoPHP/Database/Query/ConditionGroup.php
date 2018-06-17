@@ -2,6 +2,8 @@
 
 namespace NeoPHP\Database\Query;
 
+use stdClass;
+
 class ConditionGroup {
 
     const CONNECTOR_AND = "AND";
@@ -14,75 +16,144 @@ class ConditionGroup {
         $this->connector = $connector;
     }
 
-    public function connector($connector=null) {
-        $result = $this;
-        if ($connector == null) {
-            $result = $this->connector;
-        }
-        else {
-            $this->connector = $connector;
-        }
-        return $result;
+    public function connector($connector) {
+        $this->connector = $connector;
+        return $this;
     }
 
-    public function conditions($conditions=null) {
-        $result = $this;
-        if ($conditions == null) {
-            $result = $this->conditions;
-        }
-        else {
-            $this->conditions = $conditions;
-        }
-        return $result;
+    public function getConnector() {
+        return $this->connector;
+    }
+
+    public function conditions($conditions) {
+        $this->conditions = $conditions;
+        return $this;
+    }
+
+    public function &getConditions() {
+        return $this->conditions;
     }
 
     public function isEmpty() {
         return empty($this->conditions);
     }
 
-    public function on ($column, $operatorOrValue, $value=null) {
-        $type = "basic";
-        if ($value != null) {
-            $operator = $operatorOrValue;
+    public function on ($field, $operatorOrValue, $value=null) {
+        if ($value !== null) {
+            $operator = ConditionOperator::getOperator($operatorOrValue);
         }
-        else {
-            $operator = "=";
+        else if (is_array($operatorOrValue)) {
+            if (sizeof($operatorOrValue) == 1) {
+                $value = $operatorOrValue[0];
+                $operator = ConditionOperator::EQUALS;
+            } else {
+                $value = $operatorOrValue;
+                $operator = ConditionOperator::IN;
+            }
+        } else {
             $value = $operatorOrValue;
+            $operator = ConditionOperator::EQUALS;
         }
-        $this->conditions[] = compact("type", "column", "operator", "value");
+        $condition = new stdClass();
+        $condition->type = ConditionType::BASIC;
+        $condition->field = $field;
+        $condition->operator = $operator;
+        $condition->value = $value;
+        $this->conditions[] = $condition;
         return $this;
     }
 
     public function onGroup(ConditionGroup $group) {
-        $this->conditions[] = ["type"=>"group", "group"=>$group];
+        $condition = new stdClass();
+        $condition->type = ConditionType::GROUP;
+        $condition->group = $group;
+        $this->conditions[] = $condition;
         return $this;
     }
 
     public function onRaw($sql, array $bindings = []) {
-        $this->conditions[] = ["type"=>"raw", "sql"=>$sql, "bindings"=>$bindings];
+        $condition = new stdClass();
+        $condition->type = ConditionType::RAW;
+        $condition->sql = $sql;
+        $condition->bindings = $bindings;
+        $this->conditions[] = $condition;
         return $this;
     }
 
-    public function onColumn($column, $operatorOrColumn, $otherColumn=null) {
-        $type = "column";
-        if ($otherColumn != null) {
-            $operator = $operatorOrColumn;
+    public function onField($field, $operatorOrField, $otherField=null) {
+        if ($otherField != null) {
+            $operator = ConditionOperator::getOperator($operatorOrField);
         }
         else {
-            $operator = "=";
-            $otherColumn = $operatorOrColumn;
+            $operator = ConditionOperator::EQUALS_FIELD;
+            $otherField = $operatorOrField;
         }
-        $this->conditions[] = compact("type", "column", "operator", "otherColumn");
+        $condition = new stdClass();
+        $condition->type = ConditionType::BASIC;
+        $condition->field = $field;
+        $condition->operator = $operator;
+        $condition->value = $otherField;
+        $this->conditions[] = $condition;
         return $this;
     }
 
-    public function onNull($column) {
-        $this->conditions[] = ["type"=>"null", "column"=>$column];
+    public function onNull($field) {
+        $condition = new stdClass();
+        $condition->type = ConditionType::BASIC;
+        $condition->operator = ConditionOperator::NULL;
+        $condition->field = $field;
+        $this->conditions[] = $condition;
         return $this;
     }
 
-    public function onNotNull($column) {
-        $this->conditions[] = ["type"=>"notNull", "column"=>$column];
+    public function onNotNull($field) {
+        $condition = new stdClass();
+        $condition->type = ConditionType::BASIC;
+        $condition->operator = ConditionOperator::NOT_NULL;
+        $condition->field = $field;
+        $this->conditions[] = $condition;
+        return $this;
+    }
+
+    public function onIn($field, $value) {
+        $condition = new stdClass();
+        $condition->type = ConditionType::BASIC;
+        $condition->field = $field;
+        $condition->operator = ConditionOperator::IN;
+        $condition->value = $value;
+        $this->conditions[] = $condition;
+        return $this;
+    }
+
+    public function onNotIn($field, $value) {
+        $condition = new stdClass();
+        $condition->type = ConditionType::BASIC;
+        $condition->field = $field;
+        $condition->operator = ConditionOperator::NOT_IN;
+        $condition->value = $value;
+        $this->conditions[] = $condition;
+        return $this;
+    }
+
+    public function onLike($field, $value, $caseSensitive=false) {
+        $condition = new stdClass();
+        $condition->type = ConditionType::BASIC;
+        $condition->field = $field;
+        $condition->operator = ConditionOperator::LIKE;
+        $condition->value = $value;
+        $condition->caseSensitive = $caseSensitive;
+        $this->conditions[] = $condition;
+        return $this;
+    }
+
+    public function onNotLike($field, $value, $caseSensitive=false) {
+        $condition = new stdClass();
+        $condition->type = ConditionType::BASIC;
+        $condition->field = $field;
+        $condition->operator = ConditionOperator::NOT_LIKE;
+        $condition->value = $value;
+        $condition->caseSensitive = $caseSensitive;
+        $this->conditions[] = $condition;
         return $this;
     }
 }

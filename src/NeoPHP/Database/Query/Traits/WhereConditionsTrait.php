@@ -9,53 +9,73 @@ trait WhereConditionsTrait {
     private $whereConditions = null;
 
     public function hasWhereConditions() {
-        return $this->whereConditions != null && !empty($this->whereConditions->conditions());
+        return $this->whereConditions != null && !empty($this->whereConditions->getConditions());
     }
 
-    public function whereConditions(ConditionGroup $whereConditions = null) {
-        $result = $this;
-        if ($whereConditions != null) {
-            $this->whereConditions = $whereConditions;
+    public function whereConditionGroup(ConditionGroup $whereConditions) {
+        $this->whereConditions = $whereConditions;
+        return $this;
+    }
+
+    public function &getWhereConditionGroup () {
+        if ($this->whereConditions == null) {
+            $this->whereConditions = new ConditionGroup();
         }
-        else {
-            if ($this->whereConditions == null) {
-                $this->whereConditions = new ConditionGroup();
-            }
-            $result = $this->whereConditions;
-        }
-        return $result;
+        return $this->whereConditions;
     }
 
     public function whereConnector($connector=null) {
-        $this->whereConditions()->connector($connector);
+        $this->getWhereConditionGroup()->connector($connector);
+        return $this;
     }
 
-    public function where ($column, $operatorOrValue, $value=null) {
-        $this->whereConditions()->on($column, $operatorOrValue, $value);
+    public function where ($field, $operatorOrValue, $value=null) {
+        $this->getWhereConditionGroup()->on($field, $operatorOrValue, $value);
         return $this;
     }
 
     public function whereGroup(ConditionGroup $group) {
-        $this->whereConditions()->onGroup($group);
+        $this->getWhereConditionGroup()->onGroup($group);
+        return $this;
     }
 
     public function whereRaw($sql, array $bindings = []) {
-        $this->whereConditions()->onRaw($sql, $bindings);
+        $this->getWhereConditionGroup()->onRaw($sql, $bindings);
         return $this;
     }
 
-    public function whereColumn($column, $operatorOrColumn, $otherColumn=null) {
-        $this->whereConditions()->onColumn($column, $operatorOrColumn, $otherColumn);
+    public function whereField($field, $operatorOrField, $otherField=null) {
+        $this->getWhereConditionGroup()->onField($field, $operatorOrField, $otherField);
         return $this;
     }
 
-    public function whereNull($column) {
-        $this->whereConditions()->onNull($column);
+    public function whereNull($field) {
+        $this->getWhereConditionGroup()->onNull($field);
         return $this;
     }
 
-    public function whereNotNull($column) {
-        $this->whereConditions()->onNotNull($column);
+    public function whereNotNull($field) {
+        $this->getWhereConditionGroup()->onNotNull($field);
+        return $this;
+    }
+
+    public function whereIn($field, $value) {
+        $this->getWhereConditionGroup()->onIn($field, $value);
+        return $this;
+    }
+
+    public function whereNotIn($field, $value) {
+        $this->getWhereConditionGroup()->onNotIn($field, $value);
+        return $this;
+    }
+
+    public function whereLike($field, $value, $caseSensitive=false) {
+        $this->getWhereConditionGroup()->onLike($field, $value, $caseSensitive);
+        return $this;
+    }
+
+    public function whereNotLike($field, $value, $caseSensitive=false) {
+        $this->getWhereConditionGroup()->onNotLike($field, $value, $caseSensitive);
         return $this;
     }
 }

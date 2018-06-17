@@ -2,9 +2,12 @@
 
 namespace NeoPHP\Resources;
 
+use RuntimeException;
+use NeoPHP\Utils\StringUtils;
+
 /**
  * Class Resources
- * @package NeoPHP\Resources
+ * @package Sitrack\Core\Resources
  */
 abstract class Resources {
 
@@ -20,21 +23,56 @@ abstract class Resources {
         if (!isset(self::$managers[$resourceName])) {
             $resourceManager = null;
             $resourceManagers = get_property("resources.managers");
-            if (isset($resourceManagers[$resourceName])) {
-                $resourceManagerClass = $resourceManagers[$resourceName];
+            if (isset($resourceManagers) && isset($resourceManagers[$resourceName])) {
+                $resourceManagerConfig = $resourceManagers[$resourceName];
+                if (is_array($resourceManagerConfig)) {
+                    $resourceManagerClass = $resourceManagerConfig["class"];
+                    unset($resourceManagerConfig["class"]);
+                }
+                else {
+                    $resourceManagerClass = $resourceManagerConfig;
+                    $resourceManagerConfig = [];
+                }
                 if (!class_exists($resourceManagerClass)) {
-                    throw new \RuntimeException("Class \"$resourceManagerClass\" was not found !!");
+                    throw new RuntimeException("Class \"$resourceManagerClass\" was not found !!");
                 }
                 if (!is_subclass_of($resourceManagerClass, ResourceManager::class)) {
-                    throw new \RuntimeException("Class \"$resourceManagerClass\" is not a subclass of ResourceManager !!");
+                    throw new RuntimeException("Class \"$resourceManagerClass\" is not a subclass of ResourceManager !!");
                 }
                 $resourceManager = new $resourceManagerClass;
+                foreach ($resourceManagerConfig as $property => $value) {
+                    $propertySetterMethod = "set" . ucfirst($property);
+                    $resourceManager->$propertySetterMethod($value);
+                }
             }
             else {
-                if (!isset(self::$defaultManager)) {
-                    self::$defaultManager = new DefaultResourceManager();
+                $resourcesNamespace = get_property("resources.base_namespace");
+                if (isset($resourcesNamespace)) {
+                    $resourceManagerClass = $resourcesNamespace . "\\" .  ucfirst($resourceName) . "Resource";
+                    if (class_exists($resourceManagerClass) && is_subclass_of($resourceManagerClass, ResourceManager::class)) {
+                        $resourceManager = new $resourceManagerClass;
+                    }
                 }
-                $resourceManager = self::$defaultManager;
+
+                if ($resourceManager == null) {
+                    $resourcesRemoteUrl = get_property("resources.remoteUrl");
+                    if (!empty($resourcesRemoteUrl)) {
+                        $resourceRemoteUrl = $resourcesRemoteUrl;
+                        if (!StringUtils::endsWith($resourceRemoteUrl, '/')) {
+                            $resourceRemoteUrl .= '/';
+                        }
+                        $resourceRemoteUrl .= 'resources/';
+                        $resourceRemoteUrl .= $resourceName;
+                        $resourceManager = new RemoteResourceManager();
+                        $resourceManager->setRemoteUrl($resourceRemoteUrl);
+                    }
+                    else {
+                        if (!isset(self::$defaultManager)) {
+                            self::$defaultManager = new DefaultResourceManager();
+                        }
+                        $resourceManager = &self::$defaultManager;
+                    }
+                }
             }
 
             self::$managers[$resourceName] = $resourceManager;

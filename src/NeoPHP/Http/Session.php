@@ -6,7 +6,7 @@ use Exception;
 
 /**
  * Class Session
- * @package NeoPHP\Http
+ * @package Sitrack\Http
  */
 final class Session {
 
@@ -71,14 +71,21 @@ final class Session {
     }
 
     /**
-     * Removes all data associated with the session
+     *
      */
     public function clear () {
         $_SESSION = [];
     }
 
     /**
-     * Destroys the session and removes all data
+     *
+     */
+    public function closeWrite () {
+        @session_write_close();
+    }
+
+    /**
+     *
      */
     public function destroy() {
         $this->clear();
@@ -120,8 +127,8 @@ final class Session {
      * @param null $name
      * @return mixed
      */
-    public function get($name = null) {
-        return $name == null ? $_SESSION : $_SESSION[$name];
+    public function get($name = null, $defaultValue = null) {
+        return $name == null ? $_SESSION : (isset($_SESSION[$name])? $_SESSION[$name] : $defaultValue);
     }
 
     /**

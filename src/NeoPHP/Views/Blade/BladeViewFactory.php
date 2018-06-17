@@ -16,7 +16,7 @@ use NeoPHP\Views\ViewFactory;
 
 /**
  * Class BladeViewFactory
- * @package NeoPHP\mvc\views
+ * @package Sitrack\mvc\views
  */
 class BladeViewFactory extends ViewFactory {
 

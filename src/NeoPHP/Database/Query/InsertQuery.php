@@ -11,6 +11,6 @@ class InsertQuery extends Query {
         FieldsTrait;
 
     public function __construct($table=null) {
-        $this->table($table);
+        $this->source($table);
     }
 }

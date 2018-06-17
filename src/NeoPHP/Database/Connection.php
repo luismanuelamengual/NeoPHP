@@ -4,22 +4,23 @@ namespace NeoPHP\Database;
 
 use Closure;
 use Exception;
+use PDO;
 use NeoPHP\Database\Builder\QueryBuilder;
 use NeoPHP\Database\Query\Query;
-use PDO;
 use stdClass;
 
 /**
  * Class Connection
- * @package NeoPHP\Database
+ * @package Sitrack\Database
  */
 class Connection {
 
     private $pdo;
     private $readOnly;
-    private $logEnabled;
     private $queryBuilder;
     private $listeners;
+    private $logEnabled;
+    private $debugEnabled;
 
     /**
      * Connection constructor.
@@ -30,7 +31,8 @@ class Connection {
     public function __construct(PDO $pdo, QueryBuilder $queryBuilder, array $config = []) {
         $this->pdo = $pdo;
         $this->readOnly = isset($config["readOnly"]) ? $config["readOnly"] : false;
-        $this->logEnabled = isset($config["logQueries"]) ? $config["logQueries"] : false;
+        $this->logEnabled = isset($config["logEnabled"]) ? $config["logEnabled"] : false;
+        $this->debugEnabled = isset($config["debugEnabled"]) ? $config["debugEnabled"] : false;
         $this->queryBuilder = $queryBuilder;
         $this->listeners = [];
 
@@ -50,6 +52,17 @@ class Connection {
                 }
                 $logSentence .= "]";
                 get_logger()->debug($logSentence);
+            }
+
+            if ($this->debugEnabled) {
+                $separator = (php_sapi_name() == "cli")? "\n" : "<br>";
+                $logSentence = "SQL: ";
+                $logSentence .= $sqlData->sql;
+                $logSentence .= " [Time: ";
+                $logSentence .= number_format($sqlData->elapsedTime, 4);
+                $logSentence .= "]";
+                $logSentence .= $separator;
+                echo $logSentence;
             }
         });
     }
@@ -90,6 +103,19 @@ class Connection {
         }
         else {
             return $this->logEnabled;
+        }
+    }
+
+    /**
+     * @param bool|null $debugEnabled
+     * @return bool|mixed
+     */
+    public function debugEnabled($debugEnabled = null) {
+        if (isset($debugEnabled)) {
+            $this->debugEnabled = $debugEnabled;
+        }
+        else {
+            return $this->debugEnabled;
         }
     }
 

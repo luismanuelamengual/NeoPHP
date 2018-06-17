@@ -8,36 +8,30 @@ trait SelectModifiersTrait {
     private $limit = null;
     private $offset = null;
 
-    public function limit($limit = null) {
-        $result = $this;
-        if ($limit != null) {
-            $this->limit = $limit;
-        }
-        else {
-            $result = $this->limit;
-        }
-        return $result;
+    public function limit($limit) {
+        $this->limit = $limit;
+        return $this;
     }
 
-    public function offset($offset = null) {
-        $result = $this;
-        if ($offset != null) {
-            $this->offset = $offset;
-        }
-        else {
-            $result = $this->offset;
-        }
-        return $result;
+    public function &getLimit() {
+        return $this->limit;
     }
 
-    public function distinct($distinct = null) {
-        $result = $this;
-        if ($distinct != null) {
-            $this->distinct = $distinct;
-        }
-        else {
-            $result = $this->distinct;
-        }
-        return $result;
+    public function offset($offset) {
+        $this->offset = $offset;
+        return $this;
+    }
+
+    public function &getOffset() {
+        return $this->offset;
+    }
+
+    public function distinct($distinct) {
+        $this->distinct = $distinct;
+        return $this;
+    }
+
+    public function &getDistinct() {
+        return $this->distinct;
     }
 }

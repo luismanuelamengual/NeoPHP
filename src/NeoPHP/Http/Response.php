@@ -2,9 +2,12 @@
 
 namespace NeoPHP\Http;
 
+use NeoPHP\Views\View;
+use stdClass;
+
 /**
  * Class Response
- * @package NeoPHP\Http
+ * @package Sitrack\Http
  */
 final class Response {
 
@@ -179,23 +182,23 @@ final class Response {
      * @param bool $permanent
      */
     public function redirectRoute ($route, array $parameters = [], $permanent=false) {
-        $url = get_url($route);
+        $this->redirect(get_url($route), $parameters, $permanent);
+    }
+
+    /**
+     * @param $url
+     * @param array $parameters
+     * @param bool $permanent
+     */
+    public function redirect ($url, array $parameters = [], $permanent=false) {
         if (!empty($parameters)) {
             $queryParameters = [];
             foreach ($parameters as $key=>$value) {
                 $queryParameters[] = $key . "=" . urlencode($value);
             }
-            $url .= "?";
+            $url .= strpos($url, "?") === false? "?" : "&";
             $url .= implode("&", $queryParameters);
         }
-        $this->redirect($url, $permanent);
-    }
-
-    /**
-     * @param $url
-     * @param bool $permanent
-     */
-    public function redirect ($url, $permanent=false) {
         $this->clear();
         $this->header("Location", $url);
         $this->statusCode($permanent? self::HTTP_PERMANENTLY_REDIRECT : self::HTTP_TEMPORARY_REDIRECT);
@@ -208,7 +211,7 @@ final class Response {
      */
     public function content($content=null) {
         $response = null;
-        if ($content != null) {
+        if ($content !== null) {
             $this->content = $content;
             $response = $this;
         }
@@ -237,10 +240,13 @@ final class Response {
      * Configures the response before sending
      */
     private function sendConfig() {
-        if ($this->content != null) {
-            if (($this->content instanceof \stdClass) || is_array($this->content)) {
-                $this->contentType("application/json");
-                $this->content = json_encode($this->content);
+        if ($this->content !== null) {
+            if (($this->content instanceof stdClass) || is_array($this->content)) {
+                $content = ob_get_contents();
+                if (empty($content)) {
+                    $this->contentType("application/json");
+                    $this->content = json_encode($this->content);
+                }
             }
         }
     }
@@ -249,8 +255,18 @@ final class Response {
      * Sends the content of the response
      */
     private function sendContent() {
-        if ($this->content != null) {
-            echo $this->content;
+        if ($this->content !== null) {
+            if ($this->content instanceof View) {
+                $this->content->render();
+            }
+            else if (($this->content instanceof stdClass) || is_array($this->content)) {
+                echo "<pre>";
+                print_r ($this->content);
+                echo "</pre>";
+            }
+            else {
+                echo $this->content;
+            }
         }
     }
 

@@ -9,53 +9,71 @@ trait HavingConditionsTrait {
     private $havingConditions = null;
 
     public function hasHavingConditions() {
-        return $this->havingConditions != null && !empty($this->havingConditions->conditions());
+        return $this->havingConditions != null && !empty($this->havingConditions->getConditions());
     }
 
-    public function havingConditions(ConditionGroup $havingConditions = null) {
-        $result = $this;
-        if ($havingConditions != null) {
-            $this->havingConditions = $havingConditions;
+    public function havingConditionGroup(ConditionGroup $havingConditions) {
+        $this->havingConditions = $havingConditions;
+        return $this;
+    }
+
+    public function &getHavingConditionGroup () {
+        if ($this->havingConditions == null) {
+            $this->havingConditions = new ConditionGroup();
         }
-        else {
-            if ($this->havingConditions == null) {
-                $this->havingConditions = new ConditionGroup();
-            }
-            $result = $this->havingConditions;
-        }
-        return $result;
+        return $this->havingConditions;
     }
 
     public function havingConnector($connector=null) {
-        $this->havingConditions()->connector($connector);
+        $this->getHavingConditionGroup()->connector($connector);
     }
 
-    public function having ($column, $operatorOrValue, $value=null) {
-        $this->havingConditions()->on($column, $operatorOrValue, $value);
+    public function having ($field, $operatorOrValue, $value=null) {
+        $this->getHavingConditionGroup()->on($field, $operatorOrValue, $value);
         return $this;
     }
 
     public function havingGroup(ConditionGroup $group) {
-        $this->havingConditions()->onGroup($group);
+        $this->getHavingConditionGroup()->onGroup($group);
     }
 
     public function havingRaw($sql, array $bindings = []) {
-        $this->havingConditions()->onRaw($sql, $bindings);
+        $this->getHavingConditionGroup()->onRaw($sql, $bindings);
         return $this;
     }
 
-    public function havingColumn($column, $operatorOrColumn, $otherColumn=null) {
-        $this->havingConditions()->onColumn($column, $operatorOrColumn, $otherColumn);
+    public function havingField($field, $operatorOrField, $otherField=null) {
+        $this->getHavingConditionGroup()->onField($field, $operatorOrField, $otherField);
         return $this;
     }
 
-    public function havingNull($column) {
-        $this->havingConditions()->onNull($column);
+    public function havingNull($field) {
+        $this->getHavingConditionGroup()->onNull($field);
         return $this;
     }
 
-    public function havingNotNull($column) {
-        $this->havingConditions()->onNotNull($column);
+    public function havingNotNull($field) {
+        $this->getHavingConditionGroup()->onNotNull($field);
+        return $this;
+    }
+
+    public function havingIn($field, $value) {
+        $this->getHavingConditionGroup()->onIn($field, $value);
+        return $this;
+    }
+
+    public function havingNotIn($field, $value) {
+        $this->getHavingConditionGroup()->onNotIn($field, $value);
+        return $this;
+    }
+
+    public function havingLike($field, $value, $caseSensitive=false) {
+        $this->getHavingConditionGroup()->onLike($field, $value, $caseSensitive);
+        return $this;
+    }
+
+    public function havingNotLike($field, $value, $caseSensitive=false) {
+        $this->getHavingConditionGroup()->onNotLike($field, $value, $caseSensitive);
         return $this;
     }
 }

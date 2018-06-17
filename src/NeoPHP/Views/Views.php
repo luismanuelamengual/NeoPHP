@@ -23,6 +23,10 @@ abstract class Views {
     }
 
     public static function create($viewName, array $parameters = []) {
+        $output = get_request(get_property("views.view_type_parameter_name"));
+        if (!empty($output)) {
+            $viewName .= '_' . $output;
+        }
         return self::factory()->create($viewName, $parameters);
     }
 }

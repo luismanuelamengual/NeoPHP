@@ -8,15 +8,13 @@ trait JoinsTrait {
 
     private $joins = [];
 
-    public function joins($joins = null) {
-        $result = $this;
-        if ($joins != null) {
-            $this->joins = is_array($joins)? $joins : func_get_args();
-        }
-        else {
-            $result = $this->joins;
-        }
-        return $result;
+    public function joins($joins) {
+        $this->joins = is_array($joins)? $joins : func_get_args();
+        return $this;
+    }
+
+    public function &getJoins () {
+        return $this->joins;
     }
 
     public function innerJoin($table, $originField, $destinationField) {
@@ -36,7 +34,6 @@ trait JoinsTrait {
     }
 
     public function join ($join) {
-
         if ($join instanceof Join) {
             $this->joins[] = $join;
         }
@@ -49,7 +46,7 @@ trait JoinsTrait {
             if (isset($args[3])) {
                 $joinObj->type($args[3]);
             }
-            $joinObj->onColumn($originField, $destinationField);
+            $joinObj->onField($originField, $destinationField);
             $this->joins[] = $joinObj;
         }
         return $this;

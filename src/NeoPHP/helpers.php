@@ -1,31 +1,50 @@
 <?php
 
-if (!function_exists('get_app')) {
+use Sitrack\Http\Response;
+
+if (!function_exists('create_app')) {
     /**
+     * Crea una aplicación NeoPHP
      * @return \NeoPHP\Application
      */
-    function get_app($basePath=null) {
-        $app = null;
-        if ($basePath != null) {
-            $app = \NeoPHP\Application::create($basePath);
-        }
-        else {
-            $app = \NeoPHP\Application::get();
-        }
-        return $app;
+    function create_app($basePath=null) {
+        return \NeoPHP\Application::create($basePath);
+    }
+}
+
+if (!function_exists('get_app')) {
+    /**
+     * Obtiene una aplicación NeoPHP
+     * @return \NeoPHP\Application
+     */
+    function get_app() {
+        return \Sitrack\Application::get();
+    }
+}
+
+if (!function_exists('get_host_url')) {
+    /**
+     * Obtiene la url host del servidor
+     * @return string
+     */
+    function get_host_url() {
+        $request = get_request();
+        $url = $request->scheme();
+        $url .= "://";
+        $url .= $request->host();
+        return $url;
     }
 }
 
 if (!function_exists('get_url')) {
     /**
+     * Obtiene la url base del sitio php
      * @param string|null $path
      * @return string
      */
     function get_url(string $path=null) {
         $request = get_request();
-        $url = $request->scheme();
-        $url .= "://";
-        $url .= $request->host();
+        $url = get_host_url();
         $url .= $request->baseContext();
         if ($path != null) {
             if ($path[0] != '/') {
@@ -48,6 +67,16 @@ if (!function_exists('get_property')) {
     }
 }
 
+if (!function_exists('set_property')) {
+    /**
+     * @param $key
+     * @param $value
+     */
+    function set_property($key, $value) {
+        \NeoPHP\Properties\Properties::set($key, $value);
+    }
+}
+
 if (!function_exists('get_logger')) {
     /**
      * @param null $loggerName
@@ -61,11 +90,12 @@ if (!function_exists('get_logger')) {
 if (!function_exists('get_request')) {
     /**
      * @param null $parameterName
+     * @param null $defaultValue
      * @return \NeoPHP\Http\Request
      */
-    function get_request($parameterName=null) {
+    function get_request($parameterName=null, $defaultValue=null) {
         $request = \NeoPHP\Http\Request::instance();
-        return isset($parameterName)? $request->get($parameterName) : $request;
+        return isset($parameterName)? $request->get($parameterName, $defaultValue) : $request;
     }
 }
 
@@ -81,11 +111,12 @@ if (!function_exists('get_response')) {
 if (!function_exists('get_session')) {
     /**
      * @param null $parameterName
+     * @param null $defaultValue
      * @return \NeoPHP\Http\Session
      */
-    function get_session($parameterName=null) {
+    function get_session($parameterName=null, $defaultValue=null) {
         $session = \NeoPHP\Http\Session::instance();
-        return isset($parameterName)? $session->get($parameterName) : $session;
+        return isset($parameterName)? $session->get($parameterName, $defaultValue) : $session;
     }
 }
 
@@ -104,66 +135,10 @@ if (!function_exists('create_view')) {
     /**
      * @param $name
      * @param array $parameters
-     * @return \NeoPHP\Views\View
+     * @return \Sitrack\Views\View
      */
     function create_view($name, array $parameters = []) {
         return NeoPHP\Views\Views::create($name, $parameters);
-    }
-}
-
-if (!function_exists('create_model')) {
-    /**
-     * @param $model
-     * @param array $options
-     * @return mixed
-     */
-    function create_model($model, array $options = []) {
-        return \NeoPHP\Models\Models::createModel($model, $options);
-    }
-}
-
-if (!function_exists('update_model')) {
-    /**
-     * @param $model
-     * @param array $options
-     * @return mixed
-     */
-    function update_model($model, array $options = []) {
-        return \NeoPHP\Models\Models::updateModel($model, $options);
-    }
-}
-
-if (!function_exists('delete_model')) {
-    /**
-     * @param $model
-     * @param array $options
-     * @return mixed
-     */
-    function delete_model($model, array $options = []) {
-        return \NeoPHP\Models\Models::deleteModel($model, $options);
-    }
-}
-
-if (!function_exists('retrieve_model_by_id')) {
-    /**
-     * @param $modelClass
-     * @param $modelId
-     * @param array $options
-     * @return mixed
-     */
-    function retrieve_model_by_id($modelClass, $modelId, array $options = []) {
-        return \NeoPHP\Models\Models::retrieveModelById($modelClass, $modelId, $options);
-    }
-}
-
-if (!function_exists('retrieve_models')) {
-    /**
-     * @param $modelClass
-     * @param array $options
-     * @return mixed
-     */
-    function retrieve_models($modelClass, array $options = []) {
-        return \NeoPHP\Models\Models::retrieveModels($modelClass, $options);
     }
 }
 
@@ -216,13 +191,25 @@ if (!function_exists('handle_exception')) {
             $whoops->handleException($ex);
         }
         else {
-            if (get_property("app.debug")) {
-                $whoops = new \Whoops\Run;
-                $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
-                $whoops->handleException($ex);
+            if (get_property("app.debug") || get_request("debug")) {
+                $request = get_request();
+                if ($request->ajax()) {
+                    $error = new stdClass();
+                    $error->message = $ex->getMessage();
+                    $error->trace = $ex->getTrace();
+                    $response = get_response();
+                    $response->statusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
+                    $response->content($error);
+                    $response->send();
+                }
+                else {
+                    $whoops = new \Whoops\Run;
+                    $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
+                    $whoops->handleException($ex);
+                }
             }
             else {
-                handle_error_code(500);
+                handle_error_code(Response::HTTP_INTERNAL_SERVER_ERROR);
             }
         }
     }
@@ -236,5 +223,6 @@ if (!function_exists('handle_error_code')) {
 
         http_response_code($code);
         include __DIR__ . DIRECTORY_SEPARATOR . "errorPage.php";
+        exit;
     }
 }

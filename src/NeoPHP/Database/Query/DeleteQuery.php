@@ -11,6 +11,6 @@ class DeleteQuery extends Query {
         WhereConditionsTrait;
 
     public function __construct($table=null) {
-        $this->table($table);
+        $this->source($table);
     }
 }

@@ -23,6 +23,11 @@ class SelectQuery extends Query {
         JoinsTrait;
 
     public function __construct($table=null) {
-        $this->table($table);
+        $this->source($table);
+    }
+
+    public function __clone() {
+        $this->whereConditions = clone $this->whereConditions;
+        $this->havingConditions = clone $this->havingConditions;
     }
 }

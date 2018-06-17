@@ -6,15 +6,13 @@ trait FieldsTrait {
 
     private $fields = [];
 
-    public function fields($fields = null) {
-        $result = $this;
-        if ($fields == null) {
-            $result = $this->fields;
-        }
-        else {
-            $this->fields = $fields;
-        }
-        return $result;
+    public function fields($fields) {
+        $this->fields = is_array($fields)? $fields : func_get_args();;
+        return $this;
+    }
+
+    public function &getFields() {
+        return $this->fields;
     }
 
     public function set($name, $value) {

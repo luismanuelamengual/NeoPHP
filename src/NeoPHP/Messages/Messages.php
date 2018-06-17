@@ -4,7 +4,7 @@ namespace NeoPHP\Messages;
 
 /**
  * Class Messages
- * @package NeoPHP\Messages
+ * @package Sitrack\Messages
  */
 class Messages {
 

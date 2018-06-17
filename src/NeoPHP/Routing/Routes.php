@@ -2,12 +2,16 @@
 
 namespace NeoPHP\Routing;
 
+use Exception;
+use ReflectionClass;
+use NeoPHP\ActionNotFoundException;
 use NeoPHP\Http\Request;
 use NeoPHP\Http\Response;
+use Throwable;
 
 /**
  * Class Routes
- * @package NeoPHP\Routing
+ * @package Sitrack\Routing
  */
 class Routes {
 
@@ -21,15 +25,43 @@ class Routes {
      * Static initialization
      */
     private static function init() {
-        self::$routes = new DefaultRoutesManager();
-        self::$beforeRoutes = new DefaultRoutesManager();
-        self::$afterRoutes = new DefaultRoutesManager();
-        self::$errorRoutes = new DefaultRoutesManager();
-        self::$notFoundRoutes = new DefaultRoutesManager();
+        self::$routes = new RoutesManager();
+        self::$beforeRoutes = new RoutesManager();
+        self::$afterRoutes = new RoutesManager();
+        self::$errorRoutes = new RoutesManager();
+        self::$notFoundRoutes = new RoutesManager();
+    }
 
-        register_event_listener("application_start", function() {
-            self::handleRequest();
-        });
+    /**
+     * @param $path
+     * @param $action
+     */
+    public static function beforeGet($path, $action) {
+        self::$beforeRoutes->registerRoute(Request::METHOD_GET, $path, $action);
+    }
+
+    /**
+     * @param $path
+     * @param $action
+     */
+    public static function beforePost($path, $action) {
+        self::$beforeRoutes->registerRoute(Request::METHOD_POST, $path, $action);
+    }
+
+    /**
+     * @param $path
+     * @param $action
+     */
+    public static function beforePut($path, $action) {
+        self::$beforeRoutes->registerRoute(Request::METHOD_PUT, $path, $action);
+    }
+
+    /**
+     * @param $path
+     * @param $action
+     */
+    public static function beforeDelete($path, $action) {
+        self::$beforeRoutes->registerRoute(Request::METHOD_DELETE, $path, $action);
     }
 
     /**
@@ -38,6 +70,38 @@ class Routes {
      */
     public static function before($path, $action) {
         self::$beforeRoutes->registerRoute(null, $path, $action);
+    }
+
+    /**
+     * @param $path
+     * @param $action
+     */
+    public static function afterGet($path, $action) {
+        self::$afterRoutes->registerRoute(Request::METHOD_GET, $path, $action);
+    }
+
+    /**
+     * @param $path
+     * @param $action
+     */
+    public static function afterPost($path, $action) {
+        self::$afterRoutes->registerRoute(Request::METHOD_POST, $path, $action);
+    }
+
+    /**
+     * @param $path
+     * @param $action
+     */
+    public static function afterPut($path, $action) {
+        self::$afterRoutes->registerRoute(Request::METHOD_PUT, $path, $action);
+    }
+
+    /**
+     * @param $path
+     * @param $action
+     */
+    public static function afterDelete($path, $action) {
+        self::$afterRoutes->registerRoute(Request::METHOD_DELETE, $path, $action);
     }
 
     /**
@@ -69,7 +133,7 @@ class Routes {
      * @param $action
      */
     public static function get($path, $action) {
-        self::$routes->registerRoute("GET", $path, $action);
+        self::$routes->registerRoute(Request::METHOD_GET, $path, $action);
     }
 
     /**
@@ -77,7 +141,7 @@ class Routes {
      * @param $action
      */
     public static function post($path, $action) {
-        self::$routes->registerRoute("POST", $path, $action);
+        self::$routes->registerRoute(Request::METHOD_POST, $path, $action);
     }
 
     /**
@@ -85,7 +149,7 @@ class Routes {
      * @param $action
      */
     public static function put($path, $action) {
-        self::$routes->registerRoute("PUT", $path, $action);
+        self::$routes->registerRoute(Request::METHOD_PUT, $path, $action);
     }
 
     /**
@@ -93,7 +157,7 @@ class Routes {
      * @param $action
      */
     public static function delete($path, $action) {
-        self::$routes->registerRoute("DELETE", $path, $action);
+        self::$routes->registerRoute(Request::METHOD_DELETE, $path, $action);
     }
 
     /**
@@ -109,81 +173,138 @@ class Routes {
      * @param $controllerClass
      */
     public static function resource($resourcePath, $controllerClass) {
-        self::$routes->registerRoute("GET", $resourcePath, $controllerClass . "@getResources");
-        self::$routes->registerRoute("GET", $resourcePath . Request::PATH_SEPARATOR . ":id", $controllerClass . "@getResource");
-        self::$routes->registerRoute("POST", $resourcePath . Request::PATH_SEPARATOR . ":id", $controllerClass . "@updateResource");
-        self::$routes->registerRoute("PUT", $resourcePath, $controllerClass . "@createResource");
-        self::$routes->registerRoute("DELETE", $resourcePath . Request::PATH_SEPARATOR . ":id", $controllerClass . "@deleteResource");
+        self::$routes->registerRoute(Request::METHOD_GET, $resourcePath, $controllerClass . "@getResources");
+        self::$routes->registerRoute(Request::METHOD_GET, $resourcePath . Request::PATH_SEPARATOR . ":id", $controllerClass . "@getResource");
+        self::$routes->registerRoute(Request::METHOD_POST, $resourcePath . Request::PATH_SEPARATOR . ":id", $controllerClass . "@updateResource");
+        self::$routes->registerRoute(Request::METHOD_PUT, $resourcePath, $controllerClass . "@createResource");
+        self::$routes->registerRoute(Request::METHOD_DELETE, $resourcePath . Request::PATH_SEPARATOR . ":id", $controllerClass . "@deleteResource");
     }
 
     /**
-     * Handles a request
-     * Executes the registered routes that matches the request
-     * @throws \Throwable
+     * @param $path
+     * @param $namespace
      */
-    private static function handleRequest() {
-        $request = get_request();
+    public static function routeGet ($path, $namespace = null) {
+        self::$routes->registerAutoGenerationRoute(Request::METHOD_GET, $path, $namespace);
+    }
+
+    /**
+     * @param $path
+     * @param $namespace
+     */
+    public static function routePut ($path, $namespace = null) {
+        self::$routes->registerAutoGenerationRoute(Request::METHOD_PUT, $path, $namespace);
+    }
+
+    /**
+     * @param $path
+     * @param $namespace
+     */
+    public static function routePost ($path, $namespace = null) {
+        self::$routes->registerAutoGenerationRoute(Request::METHOD_POST, $path, $namespace);
+    }
+
+    /**
+     * @param $path
+     * @param $namespace
+     */
+    public static function routeDelete ($path, $namespace = null) {
+        self::$routes->registerAutoGenerationRoute(Request::METHOD_DELETE, $path, $namespace);
+    }
+
+    /**
+     * @param $path
+     * @param $namespace
+     */
+    public static function route ($path, $namespace = null) {
+        self::$routes->registerAutoGenerationRoute(null, $path, $namespace);
+    }
+
+    /**
+     * Procesa una ruta no encontrada
+     * @throws Exception
+     */
+    private static function handleRequestNotFound () {
         $response = get_response();
-        $requestMethod = $request->method();
-        $requestPath = $request->path();
+        $response->clear();
+        $response->statusCode(Response::HTTP_NOT_FOUND);
+        $notFoundRoute = self::$notFoundRoutes->getRoute();
+        if (!empty($notFoundRoute)) {
+            $routeResult = self::executeAction($notFoundRoute->getAction(), array_merge($_REQUEST, $notFoundRoute->getParameters()));
+            if (isset($routeResult)) {
+                $response->content($routeResult);
+            }
+            $response->send();
+        }
+        else {
+            handle_error_code(Response::HTTP_NOT_FOUND);
+        }
+    }
+
+    /**
+     * Procesa una excepcion en la ejecución de una ruta
+     * @throws Throwable
+     */
+    private static function handleRequestException (Throwable $ex) {
+        ob_clean();
+        $response = get_response();
+        $response->clear();
+        $errorRoute = self::$errorRoutes->getRoute();
+        if (!empty($routes)) {
+            $routeResult = self::executeAction($errorRoute->getAction(), array_merge($_REQUEST, $errorRoute->getParameters(), [Throwable::class=>$ex, Exception::class=>$ex]));
+            if (!empty($routeResult)) {
+                $response->content($routeResult);
+            }
+            $response->send();
+        }
+        else {
+            throw $ex;
+        }
+    }
+
+    /**
+     * Procesa una petición web
+     */
+    public static function handleRequest() {
+        $response = get_response();
         try {
-            $routes = self::$routes->getMatchedRoutes($requestMethod, $requestPath);
-            if (!empty($routes)) {
-                foreach (self::$beforeRoutes->getMatchedRoutes($requestMethod, $requestPath) as $route) {
-                    self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters()));
+            $route = self::$routes->getRoute();
+            if (!empty($route)) {
+                $beforeRoute = self::$beforeRoutes->getRoute();
+                $executeRoute = true;
+                if (!empty($beforeRoute)) {
+                    $beforeRouteResponse = self::executeAction($beforeRoute->getAction(), array_merge($_REQUEST, $beforeRoute->getParameters()));
+                    if (isset($beforeRouteResponse) && is_bool($beforeRouteResponse)) {
+                        $executeRoute = $beforeRouteResponse;
+                    }
                 }
-                if (!$response->sent()) {
-                    foreach ($routes as $route) {
+
+                if ($executeRoute) {
+                    try {
                         $routeResult = self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters()));
-                        if (!empty($routeResult)) {
+                        if (isset($routeResult)) {
                             $response->content($routeResult);
                         }
-                    }
-                    if (!$response->sent()) {
-                        foreach (self::$afterRoutes->getMatchedRoutes($requestMethod, $requestPath) as $route) {
-                            $routeResult = self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters()));
-                            if (!empty($routeResult)) {
+                        $afterRoute = self::$afterRoutes->getRoute();
+                        if (!empty($afterRoute)) {
+                            $routeResult = self::executeAction($afterRoute->getAction(), array_merge($_REQUEST, $afterRoute->getParameters()));
+                            if (isset($routeResult)) {
                                 $response->content($routeResult);
                             }
                         }
+                        $response->send();
+                    }
+                    catch (ActionNotFoundException $notFoundException) {
+                        self::handleRequestNotFound();
                     }
                 }
-                $response->send();
             }
             else {
-                $response->clear();
-                $response->statusCode(Response::HTTP_NOT_FOUND);
-                $notFoundRoutes = self::$notFoundRoutes->getMatchedRoutes($requestMethod, $requestPath);
-                if (!empty($notFoundRoutes)) {
-                    foreach ($notFoundRoutes as $route) {
-                        $routeResult = self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters()));
-                        if (!empty($routeResult)) {
-                            $response->content($routeResult);
-                        }
-                    }
-                    $response->send();
-                }
-                else {
-                    handle_error_code(Response::HTTP_NOT_FOUND);
-                }
+                self::handleRequestNotFound();
             }
         }
-        catch (\Throwable $ex) {
-            ob_clean();
-            $response->clear();
-            $routes = self::$errorRoutes->getMatchedRoutes($requestMethod, $requestPath);
-            if (!empty($routes)) {
-                foreach ($routes as $route) {
-                    $routeResult = self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters(), [\Throwable::class=>$ex, \Exception::class=>$ex]));
-                    if (!empty($routeResult)) {
-                        $response->content($routeResult);
-                    }
-                }
-                $response->send();
-            }
-            else {
-                throw $ex;
-            }
+        catch (Throwable $ex) {
+            self::handleRequestException($ex);
         }
     }
 
@@ -198,7 +319,7 @@ class Routes {
     }
 }
 
-$routesClass = new \ReflectionClass(Routes::class);
+$routesClass = new ReflectionClass(Routes::class);
 $initMethod = $routesClass->getMethod("init");
 $initMethod->setAccessible(true);
 $initMethod->invoke(null);

@@ -4,7 +4,7 @@ namespace NeoPHP\Events;
 
 /**
  * Class Events
- * @package NeoPHP\Events
+ * @package Sitrack\Events
  */
 abstract class Events {
 

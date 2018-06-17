@@ -2,9 +2,12 @@
 
 namespace NeoPHP\Controllers;
 
+use ReflectionClass;
+use ReflectionException;
+
 /**
  * Class Controllers
- * @package NeoPHP\mvc\controllers
+ * @package Sitrack\mvc\controllers
  */
 abstract class Controllers {
 
@@ -13,10 +16,17 @@ abstract class Controllers {
     /**
      * @param $controllerClass
      * @return mixed
+     * @throws ReflectionException
      */
     public static function get($controllerClass) {
         if (!isset(self::$controllers[$controllerClass])) {
-            self::$controllers[$controllerClass] = new $controllerClass;
+            if (class_exists($controllerClass)) {
+                $reflectionClass = new ReflectionClass($controllerClass);
+                self::$controllers[$controllerClass] = $reflectionClass->isAbstract()? $controllerClass : (new $controllerClass);
+            }
+            else {
+                self::$controllers[$controllerClass] = null;
+            }
         }
         return self::$controllers[$controllerClass];
     }
