@@ -297,7 +297,11 @@ class PostgresQueryBuilder extends QueryBuilder {
 
     protected function buildValueSql($value, array &$bindings) {
         $sql = "";
-        if (is_object($value)) {
+
+        if ($value == null) {
+            $sql = "NULL";
+        }
+        else if (is_object($value)) {
             if ($value instanceof Query) {
                 $sql .= "(" . $this->buildSql($value, $bindings) . ")";
             }

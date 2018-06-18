@@ -33,17 +33,28 @@ abstract class Commands {
             $commandTokens = array_slice($tokens, 1);
 
             $commandParameters = [];
+            $currentCommandName = null;
+
             for ($i = 0; $i < sizeof($commandTokens); $i++) {
                 $commandToken = $commandTokens[$i];
-                $commandAssignationIndex = strpos($commandToken, '=');
 
-                if ($commandAssignationIndex <= 0) {
-                    throw new RuntimeException("Invalid command parameter \"$commandToken\" !!");
+                if (substr($commandToken, 0, 2) == '--') {
+                    if ($currentCommandName != null) {
+                        $commandParameters[$currentCommandName] = true;
+                    }
+                    $currentCommandName = substr($commandToken, 2);
                 }
+                else {
+                    if ($currentCommandName == null) {
+                        throw new RuntimeException("Invalid argument \"$commandToken\". Arguments must start with \"--\"");
+                    }
+                    $commandParameters[$currentCommandName] = $commandToken;
+                    $currentCommandName = null;
+                }
+            }
 
-                $commandParameterName = substr($commandToken, 0, $commandAssignationIndex);
-                $commandParameterValue = substr($commandToken, $commandAssignationIndex + 1);
-                $commandParameters[$commandParameterName] = $commandParameterValue;
+            if ($currentCommandName != null) {
+                $commandParameters[$currentCommandName] = true;
             }
 
             self::executeCommand($commandName, $commandParameters);
@@ -65,8 +76,25 @@ abstract class Commands {
             $commandAction = self::$commands[$commandName];
         }
         else {
-            //todo: hacer la busqueda de un comando a partir de un namespace base
-            throw new CommandNotFoundException("Command name \"$commandName\" not found !!");
+            $commandsBaseNamespace = get_property("cli.commands_base_namespace");
+            if (!empty($commandsBaseNamespace)) {
+                $commandAction = $commandsBaseNamespace;
+                $commandTokens = explode(".", $commandName);
+                $commandTokensSize = sizeof($commandTokens);
+                if ($commandTokensSize > 1) {
+                    for ($i = 0; $i < $commandTokensSize - 1; $i++) {
+                        $commandToken = $commandTokens[$i];
+                        $commandAction .= '\\';
+                        $commandAction .= str_replace(' ', '', ucwords(str_replace('_', ' ', $commandToken)));
+                    }
+                }
+                $commandAction .= '\\';
+                $commandAction .= str_replace(' ', '', ucwords(str_replace('_', ' ', $commandTokens[$commandTokensSize - 1])));
+                $commandAction .= get_property("cli.commands_suffix", "Command");
+            }
+            else {
+                throw new CommandNotFoundException("Command \"$commandName\" not found !!");
+            }
         }
 
         $result = null;
@@ -81,7 +109,7 @@ abstract class Commands {
                 get_app()->execute($commandAction, $commandParameters);
             }
             catch (ActionNotFoundException $ex) {
-                throw new CommandNotFoundException("Command \"$commandAction\" not found !!", 0, $ex);
+                throw new CommandNotFoundException("Command \"$commandName\" not found !!. Command class \"$commandAction\" not found !! ", 0, $ex);
             }
         }
         return $result;
