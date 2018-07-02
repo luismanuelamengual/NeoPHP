@@ -358,20 +358,14 @@ class Application {
         else {
             if ($inDebugMode) {
                 $request = get_request();
+                $whoops = new \Whoops\Run;
                 if ($request->ajax()) {
-                    $error = new stdClass();
-                    $error->message = $ex->getMessage();
-                    $error->trace = $ex->getTrace();
-                    $response = get_response();
-                    $response->statusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
-                    $response->content($error);
-                    $response->send();
+                    $whoops->pushHandler(new \Whoops\Handler\PlainTextHandler());
                 }
                 else {
-                    $whoops = new \Whoops\Run;
                     $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
-                    $whoops->handleException($ex);
                 }
+                $whoops->handleException($ex);
             }
             else {
                 handle_error_code(Response::HTTP_INTERNAL_SERVER_ERROR);

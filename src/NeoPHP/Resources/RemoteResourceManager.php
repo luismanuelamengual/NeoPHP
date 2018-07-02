@@ -83,10 +83,13 @@ class RemoteResourceManager extends ResourceManager {
      */
     private function getRemoteContents (Query $query, $method) {
         $session = get_session();
-        $parameters = [ $session->name() => $session->id(), 'rawQuery' => serialize($query), 'debug' => true ];
+        $parameters = [
+            $session->name() => $session->id(),
+            'rawQuery' => serialize($query),
+            'debug' => get_property("app.debug")
+        ];
         $session->closeWrite();
         $curl = new Curl();
-        $curl->setHeader('X-Requested-With', 'XMLHttpRequest');
         $curl->setOpt(CURLOPT_FOLLOWLOCATION, true);
         switch ($method) {
             case 'GET':
@@ -109,14 +112,7 @@ class RemoteResourceManager extends ResourceManager {
         }
 
         if ($curl->error) {
-            $errorMessage = "";
-            if (!empty($curl->response) && ($curl->response instanceof stdClass) && !empty($curl->response->message)) {
-                $errorMessage .= $curl->response->message;
-            }
-            else {
-                $errorMessage .= $curl->errorMessage;
-            }
-            throw new RuntimeException("Remote exception (" . $curl->errorCode . ") - " . $errorMessage);
+            throw new RuntimeException("Remote exception - " . $curl->errorMessage, $curl->errorCode);
         }
         $session->start();
         return $curl->response;
