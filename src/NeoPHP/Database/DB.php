@@ -53,6 +53,9 @@ abstract class DB {
             $connectionDsn .= ";port=" . $connectionConfig["port"];
             $connectionDsn .= ";dbname=" . $connectionConfig["database"];
             $connectionPdo = new PDO($connectionDsn, $connectionConfig["username"], $connectionConfig["password"]);
+            if (!empty($connectionConfig["emulate_prepared_statements"])) {
+                $connectionPdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
+            }
             self::$connections[$connectionName] = new Connection($connectionPdo, $connectionQueryBuilder, $connectionConfig);
         }
         return self::$connections[$connectionName];

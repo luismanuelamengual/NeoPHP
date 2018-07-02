@@ -29,6 +29,11 @@ abstract class Commands {
         try {
             global $argv;
             $tokens = array_slice($argv, 1);
+
+            if (empty($tokens)) {
+                throw new RuntimeException("Command name is required !!");
+            }
+
             $commandName = (string)$tokens[0];
             $commandTokens = array_slice($tokens, 1);
 
@@ -60,6 +65,7 @@ abstract class Commands {
             self::executeCommand($commandName, $commandParameters);
         }
         catch (CommandNotFoundException $exception) {
+            get_logger()->warning($exception->getMessage());
             echo $exception->getMessage() . "\n";
         }
     }

@@ -146,6 +146,12 @@ class PostgresQueryBuilder extends QueryBuilder {
         if ($query->getLimit() != null) {
             $sql .= " LIMIT " . $query->getLimit();
         }
+        if ($query->isForUpdate()) {
+            $sql .= " FOR UPDATE";
+        }
+        if ($query->isForShare()) {
+            $sql .= " FOR SHARE";
+        }
         return $sql;
     }
 
@@ -298,7 +304,7 @@ class PostgresQueryBuilder extends QueryBuilder {
     protected function buildValueSql($value, array &$bindings) {
         $sql = "";
 
-        if ($value == null) {
+        if ($value === null) {
             $sql = "NULL";
         }
         else if (is_object($value)) {
@@ -307,7 +313,7 @@ class PostgresQueryBuilder extends QueryBuilder {
             }
             else if ($value instanceof DateTimeInterface) {
                 $sql .= "?";
-                $bindings[] = gmdate("Y-m-d H:i:s", $value->getTimestamp());
+                $bindings[] = $value->format("Y-m-d H:i:s");
             }
         }
         else if (is_array($value)) {
