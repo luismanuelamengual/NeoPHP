@@ -2,13 +2,17 @@
 
 namespace NeoPHP;
 
+use ErrorException;
 use Exception;
+use NeoPHP\Http\Response;
 use ReflectionClass;
 use ReflectionFunction;
 use ReflectionMethod;
 use NeoPHP\Console\Commands;
 use NeoPHP\Controllers\Controllers;
 use NeoPHP\Routing\Routes;
+use NeoPHP\Mail\Mailer;
+use stdClass;
 
 /**
  * Class Application
@@ -48,8 +52,8 @@ class Application {
      */
     private function __construct($basePath) {
         $this->basePath = $basePath;
-        set_error_handler("handle_error", E_ALL | E_STRICT);
-        set_exception_handler("handle_exception");
+        set_error_handler(array($this, "handleError"), E_ALL | E_STRICT);
+        set_exception_handler(array($this, "handleException"));
     }
 
     /**
@@ -228,5 +232,150 @@ class Application {
             $functionParams[] = $parameterValue;
         }
         return $functionParams;
+    }
+
+    /**
+     * Maneja un error de aplicación
+     * @param int $errno Número de error
+     * @param string $errstr Mensaje de error
+     * @param string $errfile Archivo que arrojo el error
+     * @param int $errline Linea de error
+     * @param string $errcontext Contexto del error
+     * @throws ErrorException
+     */
+    public function handleError($errno, $errstr, $errfile, $errline, $errcontext) {
+        throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
+    }
+
+    /**
+     * Maneja una exepción de aplicación
+     * @param Exception $ex exepción
+     * @throws \PHPMailer\PHPMailer\Exception
+     */
+    public function handleException ($ex) {
+
+        $inDebugMode = get_property("app.debug") || get_request("debug");
+
+        if (!$inDebugMode) {
+            if (get_property("app.log_errors")) {
+                get_logger()->error($ex);
+            }
+
+            if (get_property("app.email_errors")) {
+
+                $recipients = get_property("app.email_error_recipients");
+                if (!empty($recipients)) {
+                    $emailContent = '';
+                    $emailContent .= '<b><u>Error report</u></b>';
+                    $emailContent .= "<br><br>";
+                    $emailContent .= get_class($ex);
+                    $emailContent .= ": ";
+                    $emailContent .= $ex->getMessage();
+                    $emailContent .= " in file ";
+                    $emailContent .= $ex->getFile();
+                    $emailContent .= " on line ";
+                    $emailContent .= $ex->getLine();
+                    $emailContent .= "<br><br>";
+                    $emailContent .= "<b>Stack trace: </b>";
+                    $emailContent .= "<br>";
+                    $frames = $ex->getTrace();
+                    $lineNumber = 1;
+                    foreach ($frames as $frame) {
+                        $emailContent .= "<br>";
+                        $emailContent .= ($lineNumber++);
+                        $emailContent .= ". ";
+                        if (!empty($frame["class"])) {
+                            $emailContent .= $frame["class"];
+                        }
+                        if (!empty($frame["type"])) {
+                            $emailContent .= $frame["type"];
+                        }
+                        if (!empty($frame["function"])) {
+                            $emailContent .= $frame["function"];
+                        }
+                        $emailContent .= "() ";
+                        $emailContent .= "<u><span style=\"color:#4288CE;\">";
+                        if (!empty($frame["file"])) {
+                            $emailContent .= $frame["file"];
+                        }
+                        if (!empty($frame["line"])) {
+                            $emailContent .= ":";
+                            $emailContent .= $frame["line"];
+                        }
+                        $emailContent .= "</span></u>";
+                    }
+
+                    $emailContent .= "<br>";
+
+                    if (!empty($_SESSION)) {
+                        $emailContent .= "<br>";
+                        $emailContent .= "<b>Session: </b>";
+                        $emailContent .= "<pre>";
+                        $emailContent .= print_r($_SESSION, true);
+                        $emailContent .= "</pre>";
+                    }
+
+                    if (!empty($_REQUEST)) {
+                        $emailContent .= "<br>";
+                        $emailContent .= "<b>Request: </b>";
+                        $emailContent .= "<pre>";
+                        $emailContent .= print_r($_REQUEST, true);
+                        $emailContent .= "</pre>";
+                    }
+
+                    if (!empty($_COOKIE)) {
+                        $emailContent .= "<br>";
+                        $emailContent .= "<b>Cookies: </b>";
+                        $emailContent .= "<pre>";
+                        $emailContent .= print_r($_COOKIE, true);
+                        $emailContent .= "</pre>";
+                    }
+
+                    if (!empty($_SERVER)) {
+                        $emailContent .= "<br>";
+                        $emailContent .= "<b>Server: </b>";
+                        $emailContent .= "<pre>";
+                        $emailContent .= print_r($_SERVER, true);
+                        $emailContent .= "</pre>";
+                    }
+
+                    $mailer = Mailer::create();
+                    foreach ($recipients as $recipient) {
+                        $mailer->addAddress($recipient);
+                    }
+                    $mailer->Subject = "Error report";
+                    $mailer->Body = $emailContent;
+                    $mailer->send();
+                }
+            }
+        }
+
+        if (php_sapi_name() == "cli") {
+            $whoops = new \Whoops\Run;
+            $whoops->pushHandler(new \Whoops\Handler\PlainTextHandler());
+            $whoops->handleException($ex);
+        }
+        else {
+            if ($inDebugMode) {
+                $request = get_request();
+                if ($request->ajax()) {
+                    $error = new stdClass();
+                    $error->message = $ex->getMessage();
+                    $error->trace = $ex->getTrace();
+                    $response = get_response();
+                    $response->statusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
+                    $response->content($error);
+                    $response->send();
+                }
+                else {
+                    $whoops = new \Whoops\Run;
+                    $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
+                    $whoops->handleException($ex);
+                }
+            }
+            else {
+                handle_error_code(Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+        }
     }
 }

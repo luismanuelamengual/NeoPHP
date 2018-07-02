@@ -161,58 +161,6 @@ if (!function_exists('fire_event')) {
     }
 }
 
-if (!function_exists('handle_error')) {
-    /**
-     * @param $errno
-     * @param $errstr
-     * @param $errfile
-     * @param $errline
-     * @param $errcontext
-     * @throws ErrorException
-     */
-    function handle_error($errno, $errstr, $errfile, $errline, $errcontext) {
-        throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
-    }
-}
-
-if (!function_exists('handle_exception')) {
-    /**
-     * @param $ex
-     */
-    function handle_exception($ex) {
-
-        get_logger()->error($ex);
-
-        if (php_sapi_name() == "cli") {
-            $whoops = new \Whoops\Run;
-            $whoops->pushHandler(new \Whoops\Handler\PlainTextHandler());
-            $whoops->handleException($ex);
-        }
-        else {
-            if (get_property("app.debug") || get_request("debug")) {
-                $request = get_request();
-                if ($request->ajax()) {
-                    $error = new stdClass();
-                    $error->message = $ex->getMessage();
-                    $error->trace = $ex->getTrace();
-                    $response = get_response();
-                    $response->statusCode(\NeoPHP\Http\Response::HTTP_INTERNAL_SERVER_ERROR);
-                    $response->content($error);
-                    $response->send();
-                }
-                else {
-                    $whoops = new \Whoops\Run;
-                    $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
-                    $whoops->handleException($ex);
-                }
-            }
-            else {
-                handle_error_code(\NeoPHP\Http\Response::HTTP_INTERNAL_SERVER_ERROR);
-            }
-        }
-    }
-}
-
 if (!function_exists('handle_error_code')) {
     /**
      * @param $code

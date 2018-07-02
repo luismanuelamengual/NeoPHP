@@ -37,6 +37,8 @@ abstract class Mailer {
 
         $mailer = new PHPMailer;
         $mailer->IsSMTP();
+        $mailer->isHTML(true);
+        $mailer->CharSet = 'UTF-8';
         $mailer->SMTPAuth = true;
         $mailer->SMTPAutoTLS = false;
         $mailer->Host = $mailServer["host"];
