@@ -92,31 +92,45 @@ class ResourceManagerProxy {
      * @return array
      */
     public function pluck($field, $indexField=null) {
-        $fieldResults = [];
-        $selectFields = [$field];
-        if ($indexField != null) {
+
+        $usingFormatting = preg_match_all('/{(\w+)}/', $field, $matches);
+
+        //Obtención del campo/s de la consulta
+        $fields = [];
+        if ($usingFormatting) {
+            $fields = $matches[1];
+        }
+        else {
+            $fields = [$field];
+        }
+
+        //Establecer los campos del select
+        $selectFields = $fields;
+        if ($indexField != null && !in_array($indexField, $selectFields)) {
             $selectFields[] = $indexField;
         }
         $this->selectFields($selectFields);
 
-        $returnField = $field;
-        if (($pos = strpos($returnField, '.')) !== false) {
-            $returnField = substr($returnField, $pos + 1);
-        }
-        $returnIndexField = $indexField;
-        if ($returnIndexField != null) {
-            if (($pos = strpos($returnIndexField, '.')) !== false) {
-                $returnIndexField = substr($returnIndexField, $pos + 1);
-            }
-        }
-
+        //Creación del array de resultados
+        $fieldResults = [];
         $results = $this->find();
         foreach ($results as $result) {
-            if ($returnIndexField != null) {
-                $fieldResults[$result->$returnIndexField] = $result->$returnField;
+            $value = null;
+            if (!$usingFormatting) {
+                $value = $result->{$fields[0]};
             }
             else {
-                $fieldResults[] = $result->$returnField;
+                $value = $field;
+                foreach ($fields as $returnField) {
+                    $value = str_replace("{" . $returnField . "}", $result->$returnField, $value);
+                }
+            }
+
+            if ($indexField != null) {
+                $fieldResults[$result->$indexField] = $value;
+            }
+            else {
+                $fieldResults[] = $value;
             }
         }
         return $fieldResults;

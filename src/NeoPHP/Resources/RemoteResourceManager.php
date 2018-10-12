@@ -3,13 +3,13 @@
 namespace NeoPHP\Resources;
 
 use Curl\Curl;
+use Exception;
 use RuntimeException;
 use NeoPHP\Database\Query\DeleteQuery;
 use NeoPHP\Database\Query\InsertQuery;
 use NeoPHP\Database\Query\Query;
 use NeoPHP\Database\Query\SelectQuery;
 use NeoPHP\Database\Query\UpdateQuery;
-use stdClass;
 
 /**
  * Class RemoteResource
@@ -86,7 +86,8 @@ class RemoteResourceManager extends ResourceManager {
         $parameters = [
             $session->name() => $session->id(),
             'rawQuery' => serialize($query),
-            'debug' => get_property("app.debug")
+            'debug' => get_property("app.debug"),
+            'returnException' => true
         ];
         $session->closeWrite();
         $curl = new Curl();
@@ -112,6 +113,12 @@ class RemoteResourceManager extends ResourceManager {
         }
 
         if ($curl->error) {
+            if (!empty($curl->response)) {
+                $remoteException = unserialize($curl->response);
+                if ($remoteException instanceof Exception) {
+                    throw new RuntimeException("Remote exception - " . $curl->errorMessage, $curl->errorCode, $remoteException);
+                }
+            }
             throw new RuntimeException("Remote exception - " . $curl->errorMessage, $curl->errorCode);
         }
         $session->start();

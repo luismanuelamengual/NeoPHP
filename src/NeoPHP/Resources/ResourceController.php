@@ -38,38 +38,48 @@ class ResourceController {
             $resource->joins($query->getJoins());
         }
         else {
-            if ($request->has("limit")) {
-                $resource->limit($request->get("limit"));
-            }
-            else {
-                $resource->limit(100);
-            }
-            if ($request->has("offset")) {
-                $resource->offset($request->get("offset"));
-            }
-            if ($request->has("distinct")) {
-                $resource->distinct($request->get("distinct"));
-            }
-            if ($request->has("select")) {
-                $resource->selectFields(explode(",", $request->get("select")));
-            }
-            if ($request->has("orderBy")) {
-                $resource->orderByFields(explode(",", $request->get("orderBy")));
-            }
-            if ($request->has("groupBy")) {
-                $resource->groupByFields(explode(",", $request->get("groupBy")));
-            }
-            if ($request->has("where")) {
-                $resource->whereConditionGroup($this->createConditionGroup($request->get("where")));
-            }
-            if ($request->has("having")) {
-                $resource->havingConditionGroup($this->createConditionGroup($request->get("having")));
-            }
-            if ($request->has("query")) {
-                $resource->where("query", $request->get("query"));
-            }
-            if ($request->has("id")) {
-                $resource->where("id", $request->get("id"));
+            $resource->limit(100);
+            $parameters = $request->params();
+            foreach ($parameters as $key=>$value) {
+                switch ($key) {
+                    case "limit":
+                        $resource->limit($value);
+                        break;
+                    case "offset":
+                        $resource->offset($value);
+                        break;
+                    case "distinct":
+                        $resource->distinct($value);
+                        break;
+                    case "select":
+                        $resource->selectFields(explode(",", $value));
+                        break;
+                    case "orderBy":
+                        $resource->orderByFields(explode(",", $value));
+                        break;
+                    case "groupBy":
+                        $resource->groupByFields(explode(",", $value));
+                        break;
+                    case "where":
+                        $resource->whereConditionGroup($this->createConditionGroup($value));
+                        break;
+                    case "having":
+                        $resource->havingConditionGroup($this->createConditionGroup($value));
+                        break;
+                    case "filters":
+                        $filters = $value;
+                        foreach ($filters as $filter) {
+                            if (!empty($filter["operator"])) {
+                                $resource->where($filter["property"], $filter["operator"], $filter["property"]);
+                            } else {
+                                $resource->where($filter["property"], $filter["value"]);
+                            }
+                        }
+                        break;
+                    default:
+                        $resource->where($key, $value);
+                        break;
+                }
             }
         }
         return $resource->find();
