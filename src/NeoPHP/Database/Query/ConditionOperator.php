@@ -17,6 +17,8 @@ abstract class ConditionOperator {
     const NOT_NULL = "notNull";
     const IN = "in";
     const NOT_IN = "notIn";
+    const CONTAINS = "ct";
+    const NOT_CONTAINS = "nct";
 
     public static function getOperator(string $operatorString) {
         switch (trim($operatorString)) {

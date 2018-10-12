@@ -12,13 +12,13 @@ use NeoPHP\Database\Query\Traits\JoinsTrait;
 use NeoPHP\Database\Query\Traits\OrderByFieldsTrait;
 use NeoPHP\Database\Query\Traits\SelectFieldsTrait;
 use NeoPHP\Database\Query\Traits\SelectModifiersTrait;
-use NeoPHP\Database\Query\Traits\SourceTrait;
+use NeoPHP\Database\Query\Traits\TableTrait;
 use NeoPHP\Database\Query\Traits\WhereConditionsTrait;
 use NeoPHP\Database\Query\UpdateQuery;
 
 class ResourceManagerProxy {
 
-    use SourceTrait,
+    use TableTrait,
         FieldsTrait,
         SelectModifiersTrait,
         SelectFieldsTrait,
@@ -43,7 +43,7 @@ class ResourceManagerProxy {
      * @return SelectQuery
      */
     protected function createSelectQuery(): SelectQuery {
-        $query = new SelectQuery($this->getSource());
+        $query = new SelectQuery($this->getTable());
         $query->limit($this->getLimit());
         $query->offset($this->getOffset());
         $query->distinct($this->getDistinct());
@@ -61,7 +61,7 @@ class ResourceManagerProxy {
      * @return InsertQuery
      */
     protected function createInsertQuery(array $fields = []): InsertQuery {
-        $query = new InsertQuery($this->getSource());
+        $query = new InsertQuery($this->getTable());
         $query->fields(!empty($fields)? $fields : $this->getFields());
         return $query;
     }
@@ -71,7 +71,7 @@ class ResourceManagerProxy {
      * @return UpdateQuery
      */
     protected function createUpdateQuery(array $fields = []): UpdateQuery {
-        $query = new UpdateQuery($this->getSource());
+        $query = new UpdateQuery($this->getTable());
         $query->fields(!empty($fields)? $fields : $this->getFields());
         $query->whereConditionGroup($this->getWhereConditionGroup());
         return $query;
@@ -81,7 +81,7 @@ class ResourceManagerProxy {
      * @return DeleteQuery
      */
     protected function createDeleteQuery(): DeleteQuery {
-        $query = new DeleteQuery($this->getSource());
+        $query = new DeleteQuery($this->getTable());
         $query->whereConditionGroup($this->getWhereConditionGroup());
         return $query;
     }

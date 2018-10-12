@@ -13,6 +13,6 @@ class UpdateQuery extends Query {
         FieldsTrait;
 
     public function __construct($table=null) {
-        $this->source($table);
+        $this->table($table);
     }
 }

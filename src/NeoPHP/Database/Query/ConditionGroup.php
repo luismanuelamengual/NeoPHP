@@ -16,6 +16,14 @@ class ConditionGroup {
         $this->connector = $connector;
     }
 
+    public function __clone() {
+        $clonedConditions = [];
+        foreach ($this->conditions as $condition) {
+            $clonedConditions[] = clone $condition;
+        }
+        $this->conditions = $clonedConditions;
+    }
+
     public function connector($connector) {
         $this->connector = $connector;
         return $this;
@@ -155,5 +163,52 @@ class ConditionGroup {
         $condition->caseSensitive = $caseSensitive;
         $this->conditions[] = $condition;
         return $this;
+    }
+
+    public function getCondition ($field, $operator = null, $caseSensitive = true, $mandatory = false) {
+        return $this->findCondition($this, $field, $operator, $caseSensitive, $mandatory);
+    }
+
+    public function removeCondition ($field, $operator = null, $caseSensitive = true, $mandatory = false) {
+        return $this->findCondition($this, $field, $operator, $caseSensitive, $mandatory, true);
+    }
+
+    private function findCondition (ConditionGroup &$conditionGroup, $field, $operator = null, $caseSensitive = true, $mandatory = false, $removeCondition = false) {
+        $foundCondition = null;
+        if (!$conditionGroup->isEmpty() && (!$mandatory || $conditionGroup->getConnector() == ConditionGroup::CONNECTOR_AND) ) {
+            if ($operator != null) {
+                if (is_array($operator)) {
+                    foreach ($operator as &$op) {
+                        $op = ConditionOperator::getOperator($op);
+                    }
+                } else {
+                    $operator = ConditionOperator::getOperator($operator);
+                }
+            }
+            $conditions = &$conditionGroup->getConditions();
+            foreach ($conditions as $key=>$condition) {
+                if ($condition->type == ConditionType::GROUP) {
+                    if (!$mandatory) {
+                        $foundCondition = $this->findCondition($condition->group, $field, $operator, $caseSensitive, $mandatory, $removeCondition);
+                        if ($foundCondition != null) {
+                            break;
+                        }
+                    }
+                }
+                else if ($condition->type != ConditionType::RAW) {
+                    if ($caseSensitive ? ($condition->field == $field) : (strcasecmp($condition->field, $field) == 0)) {
+                        if ($operator == null || (is_array($operator) ? in_array($condition->operator, $operator) : $condition->operator == $operator)) {
+                            $foundCondition = $condition;
+                            if ($removeCondition) {
+                                unset($conditions[$key]);
+                                $conditions = array_values($conditions);
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return $foundCondition;
     }
 }

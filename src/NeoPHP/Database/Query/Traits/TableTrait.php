@@ -4,14 +4,24 @@ namespace NeoPHP\Database\Query\Traits;
 
 trait TableTrait {
 
-    private $source;
+    private $table;
+    private $alias;
 
-    public function source($source) {
-        $this->source = $source;
+    public function table($table) {
+        $this->table = $table;
         return $this;
     }
 
-    public function &getSource() {
-        return $this->source;
+    public function &getTable() {
+        return $this->table;
+    }
+
+    public function alias($alias) {
+        $this->alias = $alias;
+        return $this;
+    }
+
+    public function &getAlias() {
+        return $this->alias;
     }
 }

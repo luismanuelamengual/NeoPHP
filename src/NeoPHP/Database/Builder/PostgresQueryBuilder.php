@@ -101,16 +101,20 @@ class PostgresQueryBuilder extends QueryBuilder {
             }
         }
         $sql .= " FROM ";
-        $sql .= $query->getSource();
+        $sql .= $this->buildSelectSource($query->getTable(),$bindings);
+        $tableAlias = $query->getAlias();
+        if (!empty($tableAlias)) {
+            $sql .= " AS " . $tableAlias;
+        }
         $joins = $query->getJoins();
         if (!empty($joins)) {
             foreach ($joins as $join) {
-                $sql .= " " . $this->buildJoinSql($join, $bindings);
+                $sql .= " " . $this->buildJoinSql($join,$bindings);
             }
         }
         if ($query->hasWhereConditions()) {
             $sql .= " WHERE ";
-            $sql .= $this->buildConditionGroupSql($query->getWhereConditionGroup(), $bindings);
+            $sql .= $this->buildConditionGroupSql($query->getWhereConditionGroup(),$bindings);
         }
         $groupByFields = $query->getGroupByFields();
         if (!empty($groupByFields)) {
@@ -157,7 +161,7 @@ class PostgresQueryBuilder extends QueryBuilder {
 
     protected function buildInsertSql(InsertQuery $query, array &$bindings) {
         $sql = "INSERT INTO ";
-        $sql .= $query->getSource();
+        $sql .= $query->getTable();
         $fieldsSql = "";
         $valuesSql = "";
         $i = 0;
@@ -176,7 +180,7 @@ class PostgresQueryBuilder extends QueryBuilder {
 
     protected function buildUpdateSql(UpdateQuery $query, array &$bindings) {
         $sql = "UPDATE ";
-        $sql .= $query->getSource();
+        $sql .= $query->getTable();
         $sql .= " SET ";
         $i = 0;
         foreach ($query->getFields() as $field => $value) {
@@ -201,7 +205,7 @@ class PostgresQueryBuilder extends QueryBuilder {
 
     protected function buildDeleteSql(DeleteQuery $query, array &$bindings) {
         $sql = "DELETE FROM ";
-        $sql .= $query->getSource();
+        $sql .= $query->getTable();
         if (!$query->hasWhereConditions() && get_property("database.missingWhereClauseProtection", true)) {
             throw new \RuntimeException("Missing where clause in delete sql. If intentional check \"database.missingWhereClauseProtection\" property");
         }
@@ -211,6 +215,17 @@ class PostgresQueryBuilder extends QueryBuilder {
         }
         else if (get_property("database.missingWhereClauseProtection", true)) {
             throw new \RuntimeException("Missing where clause in delete sql. If intentional check \"database.missingWhereClauseProtection\" property");
+        }
+        return $sql;
+    }
+
+    protected function buildSelectSource ($source, array &$bindings) {
+        $sql = "";
+        if ($source instanceof SelectQuery) {
+            $sql .= "(" . $this->buildSelectSql($source, $bindings) . ")";
+        }
+        else {
+            $sql .= $source;
         }
         return $sql;
     }
@@ -284,6 +299,12 @@ class PostgresQueryBuilder extends QueryBuilder {
                         break;
                     case ConditionOperator::NOT_LIKE:
                         $sql .= " NOT" . ($condition->caseSensitive? " LIKE " : " ILIKE ") . $this->buildValueSql("%" . $condition->value . "%", $bindings);
+                        break;
+                    case ConditionOperator::CONTAINS:
+                        $sql .= " @> " . $this->buildValueSql("{" . (is_array($condition->value)?implode(",",$condition->value) : $condition->value) . "}", $bindings);
+                        break;
+                    case ConditionOperator::NOT_CONTAINS:
+                        $sql .= " NOT @> " . $this->buildValueSql("{" . (is_array($condition->value)?implode(",",$condition->value) : $condition->value) . "}", $bindings);
                         break;
                     default:
                         $sql .= " " . strtoupper($operator) . " " . $this->buildValueSql($condition->value, $bindings);

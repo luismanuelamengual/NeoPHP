@@ -51,31 +51,69 @@ class ConnectionTable {
      * @return array resultado
      */
     public function pluck($field, $indexField=null) {
-        $fieldResults = [];
-        $selectFields = [$field];
-        if ($indexField != null) {
+
+        $fieldsFormat = $field;
+        $usingFormatting = preg_match_all('/{(\w+\.\w+|\w+)}/', $field, $matches);
+
+        //Obtención del campo/s de la consulta
+        $fields = [];
+        if ($usingFormatting) {
+            $fields = $matches[1];
+            foreach ($fields as $formatField) {
+                if (($pos = strpos($formatField, '.')) !== false) {
+                    $replaceFormatField = substr($formatField, $pos + 1);
+                    $fieldsFormat = str_replace($formatField, $replaceFormatField, $fieldsFormat);
+                }
+            }
+        }
+        else {
+            $fields = [$field];
+        }
+
+        //Establecer los campos del select
+        $selectFields = $fields;
+        if ($indexField != null && !in_array($indexField, $selectFields)) {
             $selectFields[] = $indexField;
         }
         $this->selectFields($selectFields);
 
-        $returnField = $field;
-        if (($pos = strpos($returnField, '.')) !== false) {
-            $returnField = substr($returnField, $pos + 1);
-        }
+        //Obtención del campo de indice
         $returnIndexField = $indexField;
-        if ($returnIndexField != null) {
+        if (!empty($returnIndexField)) {
             if (($pos = strpos($returnIndexField, '.')) !== false) {
                 $returnIndexField = substr($returnIndexField, $pos + 1);
             }
         }
 
+        //Obtención de los campos de retorno
+        $returnFields = [];
+        foreach ($fields as $returnField) {
+            if (($pos = strpos($returnField, '.')) !== false) {
+                $returnField = substr($returnField, $pos + 1);
+            }
+            $returnFields[] = $returnField;
+        }
+
+        //Creación del array de resultados
+        $fieldResults = [];
         $results = $this->find();
         foreach ($results as $result) {
-            if ($returnIndexField != null) {
-                $fieldResults[$result->$returnIndexField] = $result->$returnField;
+            $value = null;
+            if (!$usingFormatting) {
+                $value = $result->{$returnFields[0]};
             }
             else {
-                $fieldResults[] = $result->$returnField;
+                $value = $fieldsFormat;
+                foreach ($returnFields as $returnField) {
+                    $value = str_replace("{" . $returnField . "}", $result->$returnField, $value);
+                }
+            }
+
+            if ($returnIndexField != null) {
+                $fieldResults[$result->$returnIndexField] = $value;
+            }
+            else {
+                $fieldResults[] = $value;
             }
         }
         return $fieldResults;
@@ -133,7 +171,7 @@ class ConnectionTable {
      * @return mixed
      */
     public function find($indexField=null) {
-        $query = new SelectQuery($this->getSource());
+        $query = new SelectQuery($this->getTable());
         $query->limit($this->getLimit());
         $query->offset($this->getOffset());
         $query->distinct($this->getDistinct());
@@ -164,7 +202,7 @@ class ConnectionTable {
      * @return mixed
      */
     public function insert(array $fields = []) {
-        $query = new InsertQuery($this->getSource());
+        $query = new InsertQuery($this->getTable());
         $query->fields(!empty($fields)? $fields : $this->getFields());
         return $this->connection->exec($query);
     }
@@ -175,7 +213,7 @@ class ConnectionTable {
      * @return mixed
      */
     public function update(array $fields = []) {
-        $query = new UpdateQuery($this->getSource());
+        $query = new UpdateQuery($this->getTable());
         $query->fields(!empty($fields)? $fields : $this->getFields());
         $query->whereConditionGroup($this->getWhereConditionGroup());
         return $this->connection->exec($query);
@@ -186,7 +224,7 @@ class ConnectionTable {
      * @return mixed
      */
     public function delete() {
-        $query = new DeleteQuery($this->getSource());
+        $query = new DeleteQuery($this->getTable());
         $query->whereConditionGroup($this->getWhereConditionGroup());
         return $this->connection->exec($query);
     }

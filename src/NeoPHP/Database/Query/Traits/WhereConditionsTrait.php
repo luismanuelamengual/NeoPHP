@@ -78,4 +78,30 @@ trait WhereConditionsTrait {
         $this->getWhereConditionGroup()->onNotLike($field, $value, $caseSensitive);
         return $this;
     }
+
+    /**
+     * Retorna la condicion buscada o null si no la encuentra
+     * @param string $field
+     * @param string $operator
+     * @param bool $caseSensitive
+     * @param bool $mandatory : indica que la condicion buscada debe ser de tipo obligatoria, esto es:
+     * dentro de un conector AND y en primer nivel (no dentro de condiciones anidadas)
+     * @return mixed : foundCondition o null si no la encuentra
+     */
+    public function getWhereCondition ($field, $operator = null, $caseSensitive = true, $mandatory = false) {
+        return $this->getWhereConditionGroup()->getCondition($field, $operator, $caseSensitive, $mandatory);
+    }
+
+    /**
+     * Elimina la condicion buscada y la retorna. Retorna null si no la encuentra
+     * @param string $field
+     * @param string $operator
+     * @param bool $caseSensitive
+     * @param bool $mandatory : indica que la condicion buscada debe ser de tipo obligatoria, esto es:
+     * dentro de un conector AND y en primer nivel (no dentro de condiciones anidadas)
+     * @return mixed : foundCondition o null si no la encuentra
+     */
+    public function removeWhereCondition ($field, $operator = null, $caseSensitive = true, $mandatory = false) {
+        return $this->getWhereConditionGroup()->removeCondition($field, $operator, $caseSensitive, $mandatory);
+    }
 }
