@@ -4,15 +4,15 @@ namespace NeoPHP;
 
 use ErrorException;
 use Exception;
+use NeoPHP\Console\Commands;
+use NeoPHP\Controllers\Controllers;
+use NeoPHP\Exceptions\Exceptions;
 use NeoPHP\Http\Response;
+use NeoPHP\Mail\Mailer;
+use NeoPHP\Routing\Routes;
 use ReflectionClass;
 use ReflectionFunction;
 use ReflectionMethod;
-use NeoPHP\Console\Commands;
-use NeoPHP\Controllers\Controllers;
-use NeoPHP\Routing\Routes;
-use NeoPHP\Mail\Mailer;
-use stdClass;
 
 /**
  * Class Application
@@ -250,7 +250,7 @@ class Application {
     /**
      * Maneja una exepción de aplicación
      * @param Exception $ex exepción
-     * @throws \PHPMailer\PHPMailer\Exception
+     * @throws \ReflectionException
      */
     public function handleException ($ex) {
 
@@ -343,7 +343,7 @@ class Application {
                     foreach ($recipients as $recipient) {
                         $mailer->addAddress($recipient);
                     }
-                    $mailer->Subject = "Error report";
+                    $mailer->Subject = "Error Report";
                     $mailer->Body = $emailContent;
                     $mailer->send();
                 }
@@ -356,19 +356,29 @@ class Application {
             $whoops->handleException($ex);
         }
         else {
-            if ($inDebugMode) {
-                $request = get_request();
-                $whoops = new \Whoops\Run;
-                if ($request->ajax()) {
-                    $whoops->pushHandler(new \Whoops\Handler\PlainTextHandler());
-                }
-                else {
-                    $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
-                }
-                $whoops->handleException($ex);
+            if (get_request("returnException")) {
+                Exceptions::flatten($ex);
+                $response = get_response();
+                $response->statusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
+                $response->contentType('text/plain');
+                $response->content(serialize($ex));
+                $response->send();
             }
             else {
-                handle_error_code(Response::HTTP_INTERNAL_SERVER_ERROR);
+                if ($inDebugMode) {
+                    $request = get_request();
+                    $whoops = new \Whoops\Run;
+                    if ($request->ajax()) {
+                        $whoops->pushHandler(new \Whoops\Handler\PlainTextHandler());
+                    }
+                    else {
+                        $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
+                    }
+                    $whoops->handleException($ex);
+                }
+                else {
+                    handle_error_code(Response::HTTP_INTERNAL_SERVER_ERROR);
+                }
             }
         }
     }
