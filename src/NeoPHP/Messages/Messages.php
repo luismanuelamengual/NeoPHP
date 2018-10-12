@@ -8,6 +8,10 @@ namespace NeoPHP\Messages;
  */
 class Messages {
 
+    const CAPITALIZATION_NONE = 1;
+    const CAPITALIZATION_FIRST_CHAR = 2;
+    const CAPITALIZATION_ALL = 3;
+
     private static $language;
     private static $messages;
     private static $messagesPath;
@@ -16,12 +20,12 @@ class Messages {
      * Messages initialization
      */
     private static function init() {
-        $lang = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2);
+        $lang = isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])? substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2) : null;
         if (empty($lang))
             $lang = "es";
         self::$language = $lang;
         self::$messages = [];
-        self::$messagesPath = get_property("app.messagesPath", get_app()->resourcesPath() . DIRECTORY_SEPARATOR . "messages");
+        self::$messagesPath = get_property("app.messages_path", get_app()->resourcesPath() . DIRECTORY_SEPARATOR . "messages");
     }
 
     /**
@@ -89,12 +93,32 @@ class Messages {
 
         $bundleKeyValue = null;
         if (!$missingBundle) {
+
+            $capitalization = self::CAPITALIZATION_NONE;
+            if (ctype_upper($bundleKey{0})) {
+                if ($bundleKey == strtoupper($bundleKey)) {
+                    $capitalization = self::CAPITALIZATION_ALL;
+                }
+                else {
+                    $capitalization = self::CAPITALIZATION_FIRST_CHAR;
+                }
+                $bundleKey = strtolower($bundleKey);
+            }
+
             if (isset($messageBundle[$bundleKey])) {
-                if (sizeof($replacements) > 0) {
+                if (!empty($replacements)) {
                     $bundleKeyValue = call_user_func_array("sprintf", array_merge([$messageBundle[$bundleKey]], $replacements));
                 }
                 else {
                     $bundleKeyValue = $messageBundle[$bundleKey];
+                }
+                switch ($capitalization) {
+                    case self::CAPITALIZATION_FIRST_CHAR:
+                        $bundleKeyValue = ucfirst($bundleKeyValue);
+                        break;
+                    case self::CAPITALIZATION_ALL:
+                        $bundleKeyValue = strtoupper($bundleKeyValue);
+                        break;
                 }
             }
             else {
