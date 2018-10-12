@@ -125,7 +125,7 @@ if (!function_exists('get_message')) {
      * @return null
      */
     function get_message($key, ...$replacements) {
-        return \NeoPHP\Messages\Messages::get($key, array_slice(func_get_args(), 1));
+        return call_user_func_array('\NeoPHP\Messages\Messages::get', func_get_args());
     }
 }
 
