@@ -138,4 +138,12 @@ final class Session {
     public function has($name) {
         return isset($_SESSION[$name]);
     }
+
+    /**
+     * Establece nuevas variables de sesión
+     * @param array $sessionData variables nuevas de sesión
+     */
+    public function setData (array $sessionData = []) {
+        $_SESSION = $sessionData;
+    }
 }

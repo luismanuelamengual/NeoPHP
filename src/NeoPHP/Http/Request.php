@@ -39,7 +39,7 @@ final class Request {
      * @return mixed
      */
     public function host() {
-        return $_SERVER["HTTP_HOST"];
+        return !empty($_SERVER["HTTP_HOST"])? $_SERVER["HTTP_HOST"] : null;
     }
 
     /**
@@ -259,7 +259,7 @@ final class Request {
      * @return mixed
      */
     public function method() {
-        return $_SERVER["REQUEST_METHOD"];
+        return isset($_SERVER["REQUEST_METHOD"])? $_SERVER["REQUEST_METHOD"] : null;
     }
 
     /**
@@ -289,6 +289,24 @@ final class Request {
      * @return bool
      */
     public function isSecureRequest() {
-        return (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443;
+        return (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (!empty($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
+    }
+
+    /**
+     *  Borra las variables de request
+     */
+    public function clear() {
+        $this->setData();
+    }
+
+    /**
+     * Establece nuevas variables de request
+     * @param array $request nuevas variables de request
+     */
+    public function setData(array $request = []) {
+        unset($this->parameters);
+        unset($this->path);
+        unset($this->pathParts);
+        $_REQUEST = $request;
     }
 }
