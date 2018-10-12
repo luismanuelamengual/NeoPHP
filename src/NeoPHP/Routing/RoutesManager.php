@@ -57,7 +57,11 @@ class RoutesManager {
         foreach ($pathParts as $pathPart) {
             $routesIndex = &$routesIndex[$pathPart];
         }
-        $routesIndex[self::ROUTE_AUTO_GENERATION_KEY][$method] = [$path, $namespace];
+        $methodAutoRouteIndex = &$routesIndex[self::ROUTE_AUTO_GENERATION_KEY][$method];
+        if (empty($methodAutoRouteIndex)) {
+            $methodAutoRouteIndex = [];
+        }
+        $methodAutoRouteIndex[] = [$path, $namespace];
     }
 
     /**
@@ -160,46 +164,55 @@ class RoutesManager {
      * @param $routeArray
      * @return Route
      */
-    private function createAutoGenerationRoute ($requestPathParts, $routeArray) : Route {
-        $basePath = $routeArray[0];
-        $baseNamespace = $routeArray[1];
+    private function createAutoGenerationRoute ($requestPathParts, $routeArray) {
 
-        //Obtención de las partes del path
-        $basePathParts = explode(Request::PATH_SEPARATOR, trim($basePath, Request::PATH_SEPARATOR));
-        if (sizeof($basePathParts) > 1) {
-            $requestPathParts = array_slice($requestPathParts, sizeof($basePathParts)-1);
-        }
-        $pathPartsSize = sizeof($requestPathParts);
+        $action = null;
+        foreach ($routeArray as $route) {
+            $basePath = $route[0];
+            $baseNamespace = $route[1];
 
-        //Obtención del nombre de la clase de controlador
-        $controllerClassName = $baseNamespace;
-        if ($pathPartsSize > 1) {
-            for ($i = 0; $i < $pathPartsSize - 1; $i++) {
+            //Obtención de las partes del path
+            $basePathParts = explode(Request::PATH_SEPARATOR, trim($basePath, Request::PATH_SEPARATOR));
+            if (sizeof($basePathParts) > 1) {
+                $requestPathParts = array_slice($requestPathParts, sizeof($basePathParts) - 1);
+            }
+            $pathPartsSize = sizeof($requestPathParts);
+
+            //Obtención del nombre de la clase de controlador
+            $controllerClassName = $baseNamespace;
+            if ($pathPartsSize > 1) {
+                for ($i = 0; $i < $pathPartsSize - 1; $i++) {
+                    if (!empty($controllerClassName)) {
+                        $controllerClassName .= '\\';
+                    }
+                    $requestPathPart = $requestPathParts[$i];
+                    $requestPathPart = str_replace(' ', '', ucwords(str_replace('_', ' ', $requestPathPart)));
+                    $controllerClassName .= $requestPathPart;
+                }
+            }
+            else {
                 if (!empty($controllerClassName)) {
                     $controllerClassName .= '\\';
                 }
-                $requestPathPart = $requestPathParts[$i];
-                $requestPathPart = str_replace(' ', '', ucwords(str_replace('_', ' ', $requestPathPart)));
-                $controllerClassName .= $requestPathPart;
+                $controllerClassName .= 'Main';
+            }
+            $controllerClassName .= get_property('routes.controllers_suffix', 'Controller');
+
+            if (class_exists($controllerClassName)) {
+                //Obtención del nombre de la metodo del controlador
+                $controllerAction = (empty($requestPathParts) || empty($requestPathParts[$pathPartsSize - 1])) ? 'index' : $requestPathParts[$pathPartsSize - 1];
+                $controllerAction = str_replace(' ', '', ucwords(str_replace('_', ' ', $controllerAction)));
+                $controllerAction .= get_property('routes.actions_suffix', 'Action');
+                $controllerAction[0] = strtolower($controllerAction[0]);
+
+                //Obtención del nombre de la acción
+                $routeAction = $controllerClassName . '@' . $controllerAction;
+
+                //Creación de la acción
+                $action = new Route($routeAction, []);
+                break;
             }
         }
-        else {
-            if (!empty($controllerClassName)) {
-                $controllerClassName .= '\\';
-            }
-            $controllerClassName .= 'Main';
-        }
-        $controllerClassName .= get_property('routes.controllers_suffix', 'Controller');
-
-        //Obtención del nombre de la metodo del controlador
-        $controllerAction = (empty($requestPathParts) || empty($requestPathParts[$pathPartsSize - 1]))? 'index' : $requestPathParts[$pathPartsSize - 1];
-        $controllerAction = str_replace(' ', '', ucwords(str_replace('_', ' ', $controllerAction)));
-        $controllerAction .= get_property('routes.actions_suffix', 'Action');
-        $controllerAction[0] = strtolower($controllerAction[0]);
-
-        //Obtención del nombre de la acción
-        $routeAction = $controllerClassName . '@' . $controllerAction;
-
-        return new Route($routeAction, []);
+        return $action;
     }
 }
