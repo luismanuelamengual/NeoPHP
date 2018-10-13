@@ -25,9 +25,8 @@ class RoutesManager {
      * @param $method
      * @param $path
      * @param $action
-     * @param null|array $parameters
      */
-    public function registerRoute($method, $path, $action, $parameters = null) {
+    public function registerRoute($method, $path, $action) {
         $path = trim($path, self::ROUTE_PATH_SEPARATOR);
         $pathParts = !empty($path)? explode(self::ROUTE_PATH_SEPARATOR, $path) : [];
         if (empty($method)) {
@@ -45,7 +44,7 @@ class RoutesManager {
             }
             $routesIndex = &$routesIndex[$pathPart];
         }
-        $routesIndex[$routeActionsKey][$method][] = [$path, $action, $parameters];
+        $routesIndex[$routeActionsKey][$method][] = [$path, $action];
     }
 
     /**
@@ -114,7 +113,7 @@ class RoutesManager {
         foreach ($methodActions as $routeData) {
             $routePath = $routeData[0];
             $routeAction = $routeData[1];
-            $routeParameters = $routeData[2] ?? [];
+            $routeParameters = [];
             if (strpos($routePath, self::ROUTE_PARAMETER_PREFIX) !== false || strpos($routePath, self::ROUTE_GENERIC_PATH) !== false) {
                 $routePathParts = explode(self::ROUTE_PATH_SEPARATOR, trim($routePath, self::ROUTE_PATH_SEPARATOR));;
                 for ($i = 0; $i < sizeof($routePathParts); $i++) {
