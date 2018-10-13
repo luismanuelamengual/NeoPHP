@@ -69,15 +69,13 @@ class RoutesManager {
      */
     private function getRoutesFromIndex (&$routesIndex, &$requestMethod, &$requestPathParts, $requestPathIndex = 0) : array {
         $routes = [];
-        if (array_key_exists($requestPathIndex, $requestPathParts)) {
+        if (!empty($requestPathParts[$requestPathIndex])) {
             $requestPathPart = $requestPathParts[$requestPathIndex];
-            if (!empty($requestPathPart)) {
-                if (array_key_exists($requestPathPart, $routesIndex)) {
-                    $routes = array_merge($routes, $this->getRoutesFromIndex($routesIndex[$requestPathPart], $requestMethod, $requestPathParts, $requestPathIndex + 1));
-                }
-                if (array_key_exists(self::ROUTE_PARAMETER_WILDCARD, $routesIndex)) {
-                    $routes = array_merge($routes, $this->getRoutesFromIndex($routesIndex[self::ROUTE_PARAMETER_WILDCARD], $requestMethod, $requestPathParts, $requestPathIndex + 1));
-                }
+            if (array_key_exists($requestPathPart, $routesIndex)) {
+                $routes = array_merge($routes, $this->getRoutesFromIndex($routesIndex[$requestPathPart], $requestMethod, $requestPathParts, $requestPathIndex + 1));
+            }
+            if (array_key_exists(self::ROUTE_PARAMETER_WILDCARD, $routesIndex)) {
+                $routes = array_merge($routes, $this->getRoutesFromIndex($routesIndex[self::ROUTE_PARAMETER_WILDCARD], $requestMethod, $requestPathParts, $requestPathIndex + 1));
             }
         }
         else if (array_key_exists(self::ROUTE_ACTIONS_KEY, $routesIndex)) {
