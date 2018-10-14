@@ -56,58 +56,58 @@ class RoutesManager {
         $requestMethod = $request->method();
         $requestPathParts = $request->pathParts();
         $routesIndex = $this->routesIndex;
-        return $this->getRoutesFromIndex($routesIndex, $requestMethod, $requestPathParts);
+        $routes = [];
+        $this->getRoutesFromIndex($routes,$routesIndex, $requestMethod, $requestPathParts);
+        return $routes;
     }
 
     /**
      * Obtiene una ruta desde un indice de rutas
+     * @param $routes
      * @param $routesIndex
      * @param $requestMethod
      * @param $requestPathParts
      * @param int $requestPathIndex
      * @return array rutas obtenidas
      */
-    private function getRoutesFromIndex (&$routesIndex, &$requestMethod, &$requestPathParts, $requestPathIndex = 0) : array {
-        $routes = [];
+    private function getRoutesFromIndex (&$routes, &$routesIndex, &$requestMethod, &$requestPathParts, $requestPathIndex = 0) {
         if (!empty($requestPathParts[$requestPathIndex])) {
             $requestPathPart = $requestPathParts[$requestPathIndex];
             if (array_key_exists($requestPathPart, $routesIndex)) {
-                $routes = array_merge($routes, $this->getRoutesFromIndex($routesIndex[$requestPathPart], $requestMethod, $requestPathParts, $requestPathIndex + 1));
+                $this->getRoutesFromIndex($routes,$routesIndex[$requestPathPart], $requestMethod, $requestPathParts, $requestPathIndex + 1);
             }
             if (array_key_exists(self::ROUTE_PARAMETER_WILDCARD, $routesIndex)) {
-                $routes = array_merge($routes, $this->getRoutesFromIndex($routesIndex[self::ROUTE_PARAMETER_WILDCARD], $requestMethod, $requestPathParts, $requestPathIndex + 1));
+                $this->getRoutesFromIndex($routes,$routesIndex[self::ROUTE_PARAMETER_WILDCARD], $requestMethod, $requestPathParts, $requestPathIndex + 1);
             }
         }
         else if (array_key_exists(self::ROUTE_ACTIONS_KEY, $routesIndex)) {
             $testRoutes = &$routesIndex[self::ROUTE_ACTIONS_KEY];
             if (array_key_exists($requestMethod, $testRoutes)) {
-                $routes = array_merge($routes, $this->getRoutesFromIndexMethodActions($testRoutes[$requestMethod], $requestPathParts));
+                $this->getRoutesFromIndexMethodActions($routes,$testRoutes[$requestMethod], $requestPathParts);
             }
             if (array_key_exists(self::ROUTE_GENERIC_METHOD, $testRoutes)) {
-                $routes = array_merge($routes, $this->getRoutesFromIndexMethodActions($testRoutes[self::ROUTE_GENERIC_METHOD], $requestPathParts));
+                $this->getRoutesFromIndexMethodActions($routes,$testRoutes[self::ROUTE_GENERIC_METHOD], $requestPathParts);
             }
         }
 
         if (array_key_exists(self::ROUTE_GENERIC_ACTIONS_KEY, $routesIndex)) {
             $testRoutes = &$routesIndex[self::ROUTE_GENERIC_ACTIONS_KEY];
             if (array_key_exists($requestMethod, $testRoutes)) {
-                $routes = array_merge($routes, $this->getRoutesFromIndexMethodActions($testRoutes[$requestMethod], $requestPathParts));
+                $this->getRoutesFromIndexMethodActions($routes,$testRoutes[$requestMethod], $requestPathParts);
             }
             if (array_key_exists(self::ROUTE_GENERIC_METHOD, $testRoutes)) {
-                $routes = array_merge($routes, $this->getRoutesFromIndexMethodActions($testRoutes[self::ROUTE_GENERIC_METHOD], $requestPathParts));
+                $this->getRoutesFromIndexMethodActions($routes,$testRoutes[self::ROUTE_GENERIC_METHOD], $requestPathParts);
             }
         }
-        return $routes;
     }
 
     /**
      * Obtiene rutas desde las acciones del metodo
+     * @param array routes
      * @param array $methodActions
      * @param $requestPathParts
-     * @return array rutas creadas
      */
-    private function getRoutesFromIndexMethodActions (array &$methodActions, array &$requestPathParts) : array {
-        $createdRoutes = [];
+    private function getRoutesFromIndexMethodActions (&$routes, array &$methodActions, array &$requestPathParts) {
         foreach ($methodActions as $routeData) {
             $routePath = $routeData[0];
             $routeAction = $routeData[1];
@@ -117,7 +117,8 @@ class RoutesManager {
                 for ($i = 0; $i < sizeof($routePathParts); $i++) {
                     $routePathPart = $routePathParts[$i];
                     if ($routePathPart == self::ROUTE_GENERIC_PATH) {
-                        $routeParameters[self::ROUTE_PATH_PARAMETER_NAME] = array_slice($requestPathParts, $i);
+                        $path = array_slice($requestPathParts, $i);
+                        $routeParameters[self::ROUTE_PATH_PARAMETER_NAME] = $path;
                         break;
                     }
                     else if ($routePathPart[0] == self::ROUTE_PARAMETER_PREFIX) {
@@ -127,8 +128,7 @@ class RoutesManager {
                     }
                 }
             }
-            $createdRoutes[] = new Route($routeAction, $routeParameters);
+            $routes[] = new Route($routeAction, $routeParameters);
         }
-        return $createdRoutes;
     }
 }

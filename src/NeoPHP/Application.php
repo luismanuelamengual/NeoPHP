@@ -250,7 +250,7 @@ class Application {
     /**
      * Maneja una exepción de aplicación
      * @param Exception $ex exepción
-     * @throws \ReflectionException
+     * @throws \PHPMailer\PHPMailer\Exception
      */
     public function handleException ($ex) {
 
