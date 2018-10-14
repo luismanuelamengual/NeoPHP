@@ -68,7 +68,6 @@ class RoutesManager {
      * @param $requestMethod
      * @param $requestPathParts
      * @param int $requestPathIndex
-     * @return array rutas obtenidas
      */
     private function getRoutesFromIndex (&$routes, &$routesIndex, &$requestMethod, &$requestPathParts, $requestPathIndex = 0) {
         if (!empty($requestPathParts[$requestPathIndex])) {
@@ -83,32 +82,33 @@ class RoutesManager {
         else if (array_key_exists(self::ROUTE_ACTIONS_KEY, $routesIndex)) {
             $testRoutes = &$routesIndex[self::ROUTE_ACTIONS_KEY];
             if (array_key_exists($requestMethod, $testRoutes)) {
-                $this->getRoutesFromIndexMethodActions($routes,$testRoutes[$requestMethod], $requestPathParts);
+                $this->getRoutesFromIndexActions($routes,$testRoutes[$requestMethod], $requestMethod,$requestPathParts);
             }
             if (array_key_exists(self::ROUTE_GENERIC_METHOD, $testRoutes)) {
-                $this->getRoutesFromIndexMethodActions($routes,$testRoutes[self::ROUTE_GENERIC_METHOD], $requestPathParts);
+                $this->getRoutesFromIndexActions($routes,$testRoutes[self::ROUTE_GENERIC_METHOD], $requestMethod, $requestPathParts);
             }
         }
 
         if (array_key_exists(self::ROUTE_GENERIC_ACTIONS_KEY, $routesIndex)) {
             $testRoutes = &$routesIndex[self::ROUTE_GENERIC_ACTIONS_KEY];
             if (array_key_exists($requestMethod, $testRoutes)) {
-                $this->getRoutesFromIndexMethodActions($routes,$testRoutes[$requestMethod], $requestPathParts);
+                $this->getRoutesFromIndexActions($routes,$testRoutes[$requestMethod], $requestMethod, $requestPathParts);
             }
             if (array_key_exists(self::ROUTE_GENERIC_METHOD, $testRoutes)) {
-                $this->getRoutesFromIndexMethodActions($routes,$testRoutes[self::ROUTE_GENERIC_METHOD], $requestPathParts);
+                $this->getRoutesFromIndexActions($routes,$testRoutes[self::ROUTE_GENERIC_METHOD], $requestMethod, $requestPathParts);
             }
         }
     }
 
     /**
      * Obtiene rutas desde las acciones del metodo
-     * @param array routes
-     * @param array $methodActions
-     * @param $requestPathParts
+     * @param $routes
+     * @param array $routeActions
+     * @param $requestMethod
+     * @param array $requestPathParts
      */
-    private function getRoutesFromIndexMethodActions (&$routes, array &$methodActions, array &$requestPathParts) {
-        foreach ($methodActions as $routeData) {
+    private function getRoutesFromIndexActions (&$routes, array &$routeActions, &$requestMethod, array &$requestPathParts) {
+        foreach ($routeActions as $routeData) {
             $routePath = $routeData[0];
             $routeAction = $routeData[1];
             $routeParameters = [];
@@ -119,6 +119,9 @@ class RoutesManager {
                     if ($routePathPart == self::ROUTE_GENERIC_PATH) {
                         $path = array_slice($requestPathParts, $i);
                         $routeParameters[self::ROUTE_PATH_PARAMETER_NAME] = $path;
+                        if ($routeAction instanceof RouteActionGenerator) {
+                            $routeAction = $routeAction->generateAction($requestMethod, $path);
+                        }
                         break;
                     }
                     else if ($routePathPart[0] == self::ROUTE_PARAMETER_PREFIX) {
@@ -128,7 +131,9 @@ class RoutesManager {
                     }
                 }
             }
-            $routes[] = new Route($routeAction, $routeParameters);
+            if (!empty($routeAction)) {
+                $routes[] = new Route($routeAction, $routeParameters);
+            }
         }
     }
 }
