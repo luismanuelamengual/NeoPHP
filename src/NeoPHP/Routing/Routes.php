@@ -237,7 +237,7 @@ class Routes {
         $response = get_response();
         $response->clear();
         $response->statusCode(Response::HTTP_NOT_FOUND);
-        $notFoundRoutes = self::$notFoundRoutes->getRoute();
+        $notFoundRoutes = self::$notFoundRoutes->getRoutes();
         if (!empty($notFoundRoutes)) {
             foreach ($notFoundRoutes as $notFoundRoute) {
                 $routeResult = self::executeAction($notFoundRoute->getAction(), array_merge($_REQUEST, $notFoundRoute->getParameters()));
