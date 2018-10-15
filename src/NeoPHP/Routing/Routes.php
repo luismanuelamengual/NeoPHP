@@ -3,7 +3,7 @@
 namespace NeoPHP\Routing;
 
 use Exception;
-use NeoPHP\Controllers\ControllersRouteActionGenerator;
+use NeoPHP\Controllers\ControllersRouteGenerator;
 use ReflectionClass;
 use NeoPHP\ActionNotFoundException;
 use NeoPHP\Http\Request;
@@ -195,7 +195,7 @@ class Routes {
      * @param $namespace
      */
     public static function controllersGet ($path, $namespace = null) {
-        self::get($path, new ControllersRouteActionGenerator($namespace));
+        self::get($path, new ControllersRouteGenerator($namespace));
     }
 
     /**
@@ -203,7 +203,7 @@ class Routes {
      * @param $namespace
      */
     public static function controllersPut ($path, $namespace = null) {
-        self::put($path, new ControllersRouteActionGenerator($namespace));
+        self::put($path, new ControllersRouteGenerator($namespace));
     }
 
     /**
@@ -211,7 +211,7 @@ class Routes {
      * @param $namespace
      */
     public static function controllersPost ($path, $namespace = null) {
-        self::post($path, new ControllersRouteActionGenerator($namespace));
+        self::post($path, new ControllersRouteGenerator($namespace));
     }
 
     /**
@@ -219,7 +219,7 @@ class Routes {
      * @param $namespace
      */
     public static function controllersDelete ($path, $namespace = null) {
-        self::delete($path, new ControllersRouteActionGenerator($namespace));
+        self::delete($path, new ControllersRouteGenerator($namespace));
     }
 
     /**
@@ -227,7 +227,7 @@ class Routes {
      * @param $namespace
      */
     public static function controllers ($path, $namespace = null) {
-        self::any($path, new ControllersRouteActionGenerator($namespace));
+        self::any($path, new ControllersRouteGenerator($namespace));
     }
 
     /**

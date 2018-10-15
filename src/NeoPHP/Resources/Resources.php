@@ -68,7 +68,8 @@ abstract class Resources {
                         if (!Strings::endsWith($resourceRemoteUrl, '/')) {
                             $resourceRemoteUrl .= '/';
                         }
-                        $resourceRemoteUrl .= 'resources/';
+                        $resourcesBaseContext = get_property("resources.base_context", "resources");
+                        $resourceRemoteUrl .= $resourcesBaseContext . '/';
                         $resourceRemoteUrl .= $resourceName;
                         $resourceManager = new RemoteResourceManager();
                         $resourceManager->setRemoteUrl($resourceRemoteUrl);

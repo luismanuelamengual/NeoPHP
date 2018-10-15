@@ -119,9 +119,6 @@ class RoutesManager {
                     if ($routePathPart == self::ROUTE_GENERIC_PATH) {
                         $path = array_slice($requestPathParts, $i);
                         $routeParameters[self::ROUTE_PATH_PARAMETER_NAME] = $path;
-                        if ($routeAction instanceof RouteActionGenerator) {
-                            $routeAction = $routeAction->generateAction($requestMethod, $path);
-                        }
                         break;
                     }
                     else if ($routePathPart[0] == self::ROUTE_PARAMETER_PREFIX) {
@@ -131,7 +128,13 @@ class RoutesManager {
                     }
                 }
             }
-            if (!empty($routeAction)) {
+            if ($routeAction instanceof RouteGenerator) {
+                $route = $routeAction->generateRoute($requestMethod, isset($path)?$path : $requestPathParts);
+                if ($route) {
+                    $routes[] = $route;
+                }
+            }
+            else {
                 $routes[] = new Route($routeAction, $routeParameters);
             }
         }

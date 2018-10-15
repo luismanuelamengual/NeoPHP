@@ -2,13 +2,14 @@
 
 namespace NeoPHP\Controllers;
 
-use NeoPHP\Routing\RouteActionGenerator;
+use NeoPHP\Routing\Route;
+use NeoPHP\Routing\RouteGenerator;
 
 /**
  * Class ControllersRouteActionGenerator
  * @package NeoPHP\Routing
  */
-class ControllersRouteActionGenerator implements RouteActionGenerator {
+class ControllersRouteGenerator implements RouteGenerator {
 
     private $namespace;
 
@@ -25,7 +26,7 @@ class ControllersRouteActionGenerator implements RouteActionGenerator {
      * @param array $path
      * @return mixed|null|string
      */
-    public function generateAction($method, array $path) {
+    public function generateRoute($method, array $path) : ?Route {
         $pathPartsSize = sizeof($path);
 
         //Obtención del nombre de la clase de controlador
@@ -48,7 +49,7 @@ class ControllersRouteActionGenerator implements RouteActionGenerator {
         }
         $controllerClassName .= get_property('routes.controllers_suffix', 'Controller');
 
-        $action = null;
+        $route = null;
         if (class_exists($controllerClassName)) {
             //Obtención del nombre de la metodo del controlador
             $controllerAction = (empty($path) || empty($path[$pathPartsSize - 1])) ? 'index' : $path[$pathPartsSize - 1];
@@ -58,7 +59,9 @@ class ControllersRouteActionGenerator implements RouteActionGenerator {
 
             //Obtención del nombre de la acción
             $action = $controllerClassName . '@' . $controllerAction;
+
+            $route = new Route($action);
         }
-        return $action;
+        return $route;
     }
 }

@@ -6,12 +6,12 @@ namespace NeoPHP\Routing;
  * Interface RouteActionGenerator
  * @package NeoPHP\Routing
  */
-interface RouteActionGenerator  {
+interface RouteGenerator  {
 
     /**
      * @param $method
      * @param array $path
      * @return mixed
      */
-    public function generateAction($method, array $path);
+    public function generateRoute($method, array $path) : ?Route;
 }
