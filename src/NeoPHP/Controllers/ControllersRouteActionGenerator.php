@@ -1,6 +1,8 @@
 <?php
 
-namespace NeoPHP\Routing;
+namespace NeoPHP\Controllers;
+
+use NeoPHP\Routing\RouteActionGenerator;
 
 /**
  * Class ControllersRouteActionGenerator

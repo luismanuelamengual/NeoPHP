@@ -3,6 +3,7 @@
 namespace NeoPHP\Routing;
 
 use Exception;
+use NeoPHP\Controllers\ControllersRouteActionGenerator;
 use ReflectionClass;
 use NeoPHP\ActionNotFoundException;
 use NeoPHP\Http\Request;
