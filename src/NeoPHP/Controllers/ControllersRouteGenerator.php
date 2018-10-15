@@ -23,7 +23,7 @@ class ControllersRouteGenerator implements RouteGenerator {
 
     /**
      * Generates a route for accessing controllers
-     * @param array $method
+     * @param string $method
      * @param array $path
      * @return mixed|null|string
      */
