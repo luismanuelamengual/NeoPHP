@@ -12,13 +12,13 @@ abstract class Events {
 
     /**
      * @param $event
-     * @param $callbackOrAction
+     * @param $action
      */
-    public static function register ($event, $callbackOrAction) {
+    public static function register ($event, $action) {
         if (!array_key_exists($event, self::$listeners)) {
             self::$listeners[$event] = [];
         }
-        self::$listeners[$event][] = $callbackOrAction;
+        self::$listeners[$event][] = $action;
     }
 
     /**

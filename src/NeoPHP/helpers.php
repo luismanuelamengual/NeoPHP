@@ -2,7 +2,7 @@
 
 if (!function_exists('create_app')) {
     /**
-     * Crea una aplicación NeoPHP
+     * Creates an application
      * @return \NeoPHP\Application
      */
     function create_app($basePath=null) {
@@ -12,7 +12,7 @@ if (!function_exists('create_app')) {
 
 if (!function_exists('get_app')) {
     /**
-     * Obtiene una aplicación NeoPHP
+     * Return the current application instance
      * @return \NeoPHP\Application
      */
     function get_app() {
@@ -22,7 +22,7 @@ if (!function_exists('get_app')) {
 
 if (!function_exists('get_host_url')) {
     /**
-     * Obtiene la url host del servidor
+     * Returns the host url
      * @return string
      */
     function get_host_url() {
@@ -36,11 +36,11 @@ if (!function_exists('get_host_url')) {
 
 if (!function_exists('get_url')) {
     /**
-     * Obtiene la url base del sitio php
+     * Returns the base url
      * @param string|null $path
      * @return string
      */
-    function get_url(string $path=null) {
+    function get_url(?string $path=null) {
         $request = get_request();
         $url = get_host_url();
         $url .= $request->baseContext();
@@ -56,42 +56,46 @@ if (!function_exists('get_url')) {
 
 if (!function_exists('get_property')) {
     /**
-     * @param $key
+     * Returns the value of a property
+     * @param string $key property name
      * @param null $defaultValue
      * @return mixed
      */
-    function get_property($key, $defaultValue=null) {
+    function get_property(string $key, $defaultValue=null) {
         return \NeoPHP\Properties\Properties::get($key, $defaultValue);
     }
 }
 
 if (!function_exists('set_property')) {
     /**
-     * @param $key
-     * @param $value
+     * Set a property value
+     * @param string $key property name
+     * @param mixed $value value of the property
      */
-    function set_property($key, $value) {
+    function set_property(string $key, $value) {
         \NeoPHP\Properties\Properties::set($key, $value);
     }
 }
 
 if (!function_exists('get_logger')) {
     /**
-     * @param null $loggerName
+     * Returns the application logger
+     * @param string|null $loggerName
      * @return \Monolog\Logger
      */
-    function get_logger($loggerName=null) {
+    function get_logger(?string $loggerName=null) {
         return \NeoPHP\Log\Loggers::get($loggerName);
     }
 }
 
 if (!function_exists('get_request')) {
     /**
-     * @param null $parameterName
-     * @param null $defaultValue
+     * Returns http request data
+     * @param string|null $parameterName
+     * @param mixed|null $defaultValue
      * @return \NeoPHP\Http\Request
      */
-    function get_request($parameterName=null, $defaultValue=null) {
+    function get_request(?string $parameterName=null, $defaultValue=null) {
         $request = \NeoPHP\Http\Request::instance();
         return isset($parameterName)? $request->get($parameterName, $defaultValue) : $request;
     }
@@ -99,6 +103,7 @@ if (!function_exists('get_request')) {
 
 if (!function_exists('get_response')) {
     /**
+     * Returns http response
      * @return \NeoPHP\Http\Response
      */
     function get_response() {
@@ -108,11 +113,12 @@ if (!function_exists('get_response')) {
 
 if (!function_exists('get_session')) {
     /**
-     * @param null $parameterName
-     * @param null $defaultValue
+     * Returns http session data
+     * @param string|null $parameterName
+     * @param mixed|null $defaultValue
      * @return \NeoPHP\Http\Session
      */
-    function get_session($parameterName=null, $defaultValue=null) {
+    function get_session(?string $parameterName=null, $defaultValue=null) {
         $session = \NeoPHP\Http\Session::instance();
         return isset($parameterName)? $session->get($parameterName, $defaultValue) : $session;
     }
@@ -120,50 +126,55 @@ if (!function_exists('get_session')) {
 
 if (!function_exists('get_message')) {
     /**
-     * @param $key
+     * Returns a message
+     * @param string $key
      * @param array ...$replacements
-     * @return null
+     * @return string translated message
      */
-    function get_message($key, ...$replacements) {
+    function get_message(string $key, ...$replacements) {
         return call_user_func_array('\NeoPHP\Messages\Messages::get', func_get_args());
     }
 }
 
 if (!function_exists('create_view')) {
     /**
-     * @param $name
-     * @param array $parameters
+     * Returns a view from the application
+     * @param string $name name of the view
+     * @param array $parameters parameters for the view
      * @return \NeoPHP\Views\View
      */
-    function create_view($name, array $parameters = []) {
+    function create_view(string $name, array $parameters = []) {
         return NeoPHP\Views\Views::create($name, $parameters);
     }
 }
 
 if (!function_exists('register_event_listener')) {
     /**
-     * @param $event
-     * @param $callbackOrAction
+     * Registers an event listener
+     * @param string $event event to listen
+     * @param mixed $action action to be executed
      */
-    function register_event_listener($event, $callbackOrAction) {
-        \NeoPHP\Events\Events::register($event, $callbackOrAction);
+    function register_event_listener(string $event, $action) {
+        \NeoPHP\Events\Events::register($event, $action);
     }
 }
 
 if (!function_exists('fire_event')) {
     /**
-     * @param $event
-     * @param array $parameters
-     * @throws Exception
+     * Fires an event
+     * @param string $event event  to fire
+     * @param array $parameters parameters of the event
+     * @throws Exception exception
      */
-    function fire_event($event, array $parameters = []) {
+    function fire_event(string $event, array $parameters = []) {
         \NeoPHP\Events\Events::fire($event, $parameters);
     }
 }
 
 if (!function_exists('handle_error_code')) {
     /**
-     * @param $code
+     * Handles an error code
+     * @param $code error code
      */
     function handle_error_code($code) {
 

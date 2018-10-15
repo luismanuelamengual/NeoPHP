@@ -31,15 +31,17 @@ class Application {
     private $modules = [];
 
     /**
+     * Creates a new application
      * @param $basePath
      * @return Application
      */
-    public static function create($basePath): Application {
+    public static function create(string $basePath): Application {
         self::$instance = new Application($basePath);
         return self::$instance;
     }
 
     /**
+     * Returns the application instance
      * @return Application
      */
     public static function get(): Application {
@@ -50,17 +52,18 @@ class Application {
      * Application constructor.
      * @param $basePath
      */
-    private function __construct($basePath) {
+    private function __construct(string $basePath) {
         $this->basePath = $basePath;
         set_error_handler(array($this, "handleError"), E_ALL | E_STRICT);
         set_exception_handler(array($this, "handleException"));
     }
 
     /**
-     * @param null $basePath
+     * Set or returns the application base path
+     * @param string|null $basePath
      * @return mixed
      */
-    public function basePath($basePath = null) {
+    public function basePath(?string $basePath = null) {
         if ($basePath != null) {
             $this->basePath = $basePath;
         }
@@ -68,40 +71,41 @@ class Application {
     }
 
     /**
-     * Returns the storage path
-     * @param null $storagePath
-     * @return mixed|null
+     * Set or returns the storage path
+     * @param string|null $storagePath
+     * @return mixed
      */
-    public function storagePath($storagePath = null) {
+    public function storagePath(?string $storagePath = null) {
         if ($storagePath != null) {
             $this->storagePath = $storagePath;
         }
         else if (!isset($this->storagePath)) {
-            $this->storagePath = get_property("app.storagePath", $this->basePath . DIRECTORY_SEPARATOR . "storage");
+            $this->storagePath = get_property("app.storage_path", $this->basePath . DIRECTORY_SEPARATOR . "storage");
         }
         return $this->storagePath;
     }
 
     /**
-     * Returns the resources path
-     * @param null $resourcesPath
-     * @return mixed|null
+     * Set or returns the resources path
+     * @param string|null $resourcesPath
+     * @return mixed
      */
-    public function resourcesPath($resourcesPath = null) {
+    public function resourcesPath(?string $resourcesPath = null) {
         if ($resourcesPath != null) {
             $this->resourcesPath = $resourcesPath;
         }
         else if (!isset($this->resourcesPath)) {
-            $this->resourcesPath = get_property("app.resourcesPath", $this->basePath . DIRECTORY_SEPARATOR . "resources");
+            $this->resourcesPath = get_property("app.resources_path", $this->basePath . DIRECTORY_SEPARATOR . "resources");
         }
         return $this->resourcesPath;
     }
 
     /**
-     * @param null $configPath
+     * Set or returns the config path
+     * @param string|null $configPath
      * @return null|string
      */
-    public function configPath($configPath = null) {
+    public function configPath(?string $configPath = null) {
         if ($configPath != null) {
             $this->configPath = $configPath;
         }
@@ -114,10 +118,11 @@ class Application {
     }
 
     /**
-     * @param null $localConfigPath
+     * Set or returns the local config path
+     * @param string|null $localConfigPath
      * @return null|string
      */
-    public function localConfigPath($localConfigPath = null) {
+    public function localConfigPath(?string $localConfigPath = null) {
         if ($localConfigPath != null) {
             $this->localConfigPath = $localConfigPath;
         }
@@ -130,15 +135,15 @@ class Application {
     }
 
     /**
-     * Agrega un nuevo modulo a la aplicación
-     * @param Module $module
+     * Adds a new module to the application
+     * @param Module $module module to add
      */
     public function addModule (Module $module) {
         $this->modules[] = $module;
     }
 
     /**
-     * Inicializa la aplicación
+     * Initializes the application
      * @throws Exception
      */
     public function start() {
@@ -155,7 +160,8 @@ class Application {
     }
 
     /**
-     * @param $action
+     * Executes an action
+     * @param mixed $action action to execute
      * @param array $parameters
      * @return mixed|null
      * @throws Exception
@@ -186,6 +192,7 @@ class Application {
     }
 
     /**
+     * Returns the parameters values for a function
      * @param ReflectionMethod|ReflectionFunction $function
      * @param array $parameters
      * @return array
@@ -235,12 +242,12 @@ class Application {
     }
 
     /**
-     * Maneja un error de aplicación
-     * @param int $errno Número de error
-     * @param string $errstr Mensaje de error
-     * @param string $errfile Archivo que arrojo el error
-     * @param int $errline Linea de error
-     * @param string $errcontext Contexto del error
+     * Handles an application error
+     * @param int $errno error number
+     * @param string $errstr error message
+     * @param string $errfile error file
+     * @param int $errline error file line
+     * @param string $errcontext error context
      * @throws ErrorException
      */
     public function handleError($errno, $errstr, $errfile, $errline, $errcontext) {
@@ -248,7 +255,7 @@ class Application {
     }
 
     /**
-     * Maneja una exepción de aplicación
+     * Handles an application exception
      * @param Exception $ex exepción
      * @throws \PHPMailer\PHPMailer\Exception
      */
