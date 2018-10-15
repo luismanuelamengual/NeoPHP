@@ -14,8 +14,9 @@ abstract class Controllers {
     private static $controllers = [];
 
     /**
-     * @param $controllerClass
-     * @return mixed
+     * Returns a controller instance
+     * @param string $controllerClass
+     * @return mixed controller instance
      * @throws ReflectionException
      */
     public static function get($controllerClass) {
