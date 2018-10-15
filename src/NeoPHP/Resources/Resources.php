@@ -70,7 +70,7 @@ abstract class Resources {
                         }
                         $resourcesBaseContext = get_property("resources.base_context", "resources");
                         $resourceRemoteUrl .= $resourcesBaseContext . '/';
-                        $resourceRemoteUrl .= $resourceName;
+                        $resourceRemoteUrl .= str_replace(".", "/", $resourceName);
                         $resourceManager = new RemoteResourceManager();
                         $resourceManager->setRemoteUrl($resourceRemoteUrl);
                     }
