@@ -6,7 +6,7 @@ use RuntimeException;
 use NeoPHP\ActionNotFoundException;
 
 /**
- * Class Commands
+ * Class Commands - Permite la registración de comandos en el sistema
  * @package NeoPHP\Console
  */
 abstract class Commands {
@@ -15,14 +15,16 @@ abstract class Commands {
     private static $commands = [];
 
     /**
-     * @param $commandName
+     * Registra un nuevo comando en el sistema
+     * @param string $commandName nombre de comando
      * @param $action
      */
-    public static function register($commandName, $action) {
+    public static function register(string $commandName, $action) {
         self::$commands[$commandName] = $action;
     }
 
     /**
+     * Función que maneja un comando ingresado al sistema
      * @throws \Exception
      */
     public static function handleCommand() {
