@@ -48,14 +48,14 @@ abstract class Resources {
             else {
                 $resourcesNamespace = get_property("resources.base_namespace");
                 if (isset($resourcesNamespace)) {
-                    $resourceManagerClass = $resourcesNamespace;
+                    $resourceManagerClass = trim($resourcesNamespace, "\\");
                     $resourceTokens = explode(".", $resourceName);
                     for ($i = 0; $i < sizeof($resourceTokens); $i++) {
                         $resourceToken = $resourceTokens[$i];
                         $resourceManagerClass .= "\\";
                         $resourceManagerClass .= str_replace(' ', '', ucwords(str_replace('_', ' ', $resourceToken)));
                     }
-                    $resourceManagerClass .= "Resource";
+                    $resourceManagerClass .= get_property("resources.resources_suffix", "Resource");
                     if (class_exists($resourceManagerClass) && is_subclass_of($resourceManagerClass, ResourceManager::class)) {
                         $resourceManager = new $resourceManagerClass;
                     }
