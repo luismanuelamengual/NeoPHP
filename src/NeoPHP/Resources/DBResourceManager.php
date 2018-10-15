@@ -289,7 +289,7 @@ abstract class DBResourceManager extends ResourceManager {
 
                 if ($hasFieldMappings) {
                     if ($query->hasWhereConditions()) {
-                        $this->renameConditionFields($query->getWhereConditionGroup(), $columnNames, $originalSource, $query->getSource());
+                        $this->renameConditionFields($query->getWhereConditionGroup(), $columnNames, $originalSource, $query->getTable());
                     }
 
                     $this->renameOrderByFields($query, $columnNames, $originalSource);
@@ -302,22 +302,22 @@ abstract class DBResourceManager extends ResourceManager {
             $hasFieldMappings = $this->hasFieldMappings($columnNames);
             if ($hasFieldMappings) {
                 if ($query->hasWhereConditions()) {
-                    $this->renameConditionFields($query->getWhereConditionGroup(), $columnNames, $originalSource, $query->getSource());
+                    $this->renameConditionFields($query->getWhereConditionGroup(), $columnNames, $originalSource, $query->getTable());
                 }
-                $this->renameSetFields($query, $columnNames, $originalSource, $query->getSource());
+                $this->renameSetFields($query, $columnNames, $originalSource, $query->getTable());
             }
         }
         else if ($query instanceof InsertQuery) {
             $hasFieldMappings = $this->hasFieldMappings($columnNames);
             if ($hasFieldMappings) {
-                $this->renameSetFields($query, $columnNames, $originalSource, $query->getSource());
+                $this->renameSetFields($query, $columnNames, $originalSource, $query->getTable());
             }
         }
         else if ($query instanceof DeleteQuery) {
             $hasFieldMappings = $this->hasFieldMappings($columnNames);
             if ($hasFieldMappings) {
                 if ($query->hasWhereConditions()) {
-                    $this->renameConditionFields($query->getWhereConditionGroup(), $columnNames, $originalSource, $query->getSource());
+                    $this->renameConditionFields($query->getWhereConditionGroup(), $columnNames, $originalSource, $query->getTable());
                 }
             }
         }
@@ -333,9 +333,9 @@ abstract class DBResourceManager extends ResourceManager {
         if($tableName == null) {
             $tableName = $this->getTableName();
         }
-        $previusSource = $query->getSource();
+        $previusSource = $query->getTable();
         if(!empty($tableName)) {
-            $query->source($tableName);
+            $query->table($tableName);
         }
         return $previusSource;
     }
@@ -538,10 +538,10 @@ abstract class DBResourceManager extends ResourceManager {
             foreach ($selectFields as &$field) {
                 if ($field instanceof stdClass) {
                     $aliasName = $field->alias;
-                    $columnName = $this->getFieldNewName($field->expression, $namesMap, $originalSource, $query->getSource());
+                    $columnName = $this->getFieldNewName($field->expression, $namesMap, $originalSource, $query->getTable());
                 } else {
                     $aliasName = $field;
-                    $columnName = $this->getFieldNewName($field, $namesMap, $originalSource, $query->getSource());
+                    $columnName = $this->getFieldNewName($field, $namesMap, $originalSource, $query->getTable());
                 }
                 if($columnName != null) {
                     if ($columnName == $aliasName) {
@@ -569,7 +569,7 @@ abstract class DBResourceManager extends ResourceManager {
         $orderByFields = &$query->getOrderByFields();
         if (!empty($orderByFields)) {
             foreach ($orderByFields as &$orderByField) {
-                $newName = $this->getFieldNewName($orderByField->field, $namesMap, $originalSource, $query->getSource());
+                $newName = $this->getFieldNewName($orderByField->field, $namesMap, $originalSource, $query->getTable());
                 if($newName != null) {
                     $orderByField->field = $newName;
                 }
@@ -589,7 +589,7 @@ abstract class DBResourceManager extends ResourceManager {
         }
         $groupByFields = &$query->getGroupByFields();
         if (!empty($groupByFields)) {
-            $source = $query->getSource();
+            $source = $query->getTable();
             $newGroupByFields = [];
             foreach ($groupByFields as $field) {
                 if ($field == '*') {
@@ -631,7 +631,7 @@ abstract class DBResourceManager extends ResourceManager {
         $joins = &$query->getJoins();
         if(!empty($joins)) {
             foreach ($joins as &$join) {
-                $this->renameConditionFields($join, $namesMap, $originalSource, $query->getSource());
+                $this->renameConditionFields($join, $namesMap, $originalSource, $query->getTable());
             }
         }
     }
@@ -659,7 +659,7 @@ abstract class DBResourceManager extends ResourceManager {
         }
 
         if (!empty($fieldNames)) {
-            $source = $query->getSource();
+            $source = $query->getTable();
 
             //select fields
             $result = $this->hasOtherSelectField($query, $fieldNames, $selectAllMeansOther, $foundField);
@@ -738,7 +738,7 @@ abstract class DBResourceManager extends ResourceManager {
             $result = $selectAllMeansOther;
             $foundField = '*';
         } else {
-            $source = $query->getSource();
+            $source = $query->getTable();
             foreach ($selectFields as $selectField) {
                 $field = $selectField instanceof stdClass ? $selectField->expression : $selectField;
 

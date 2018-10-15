@@ -62,7 +62,7 @@ abstract class Resources {
                 }
 
                 if ($resourceManager == null) {
-                    $resourcesRemoteUrl = get_property("resources.remoteUrl");
+                    $resourcesRemoteUrl = get_property("resources.remote_url");
                     if (!empty($resourcesRemoteUrl)) {
                         $resourceRemoteUrl = $resourcesRemoteUrl;
                         if (!Strings::endsWith($resourceRemoteUrl, '/')) {

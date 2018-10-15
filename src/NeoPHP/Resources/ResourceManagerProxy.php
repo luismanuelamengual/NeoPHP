@@ -36,7 +36,7 @@ class ResourceManagerProxy {
      */
     public function __construct(ResourceManager $resourceManager, $resourceName) {
         $this->resourceManager = $resourceManager;
-        $this->source($resourceName);
+        $this->table($resourceName);
     }
 
     /**

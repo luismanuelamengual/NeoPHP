@@ -40,7 +40,7 @@ class ConnectionTable {
      * @param $table
      */
     public function __construct($connection, $table) {
-        $this->source($table);
+        $this->table($table);
         $this->connection = $connection;
     }
 

@@ -23,7 +23,7 @@ class SelectQuery extends Query {
         JoinsTrait;
 
     public function __construct($table=null) {
-        $this->source($table);
+        $this->table($table);
     }
 
     public function __clone() {
