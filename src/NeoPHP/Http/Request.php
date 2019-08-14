@@ -60,15 +60,22 @@ final class Request {
      * @param bool $trustForwardedHeader
      * @return mixed
      */
-    public function clientAddress($trustForwardedHeader = false) {
-        return $trustForwardedHeader === true ? $_SERVER["HTTP_X_FORWARDED_FOR"] : $_SERVER["REMOTE_ADDR"];
+    public function clientAddress() {
+        $clientAddress = null;
+        if (isset($_SERVER["HTTP_X_FORWARDED_FOR"])) {
+            $clientAddress = $_SERVER["HTTP_X_FORWARDED_FOR"];
+        }
+        else if (isset($_SERVER["REMOTE_ADDR"])) {
+            $clientAddress = $_SERVER["REMOTE_ADDR"];
+        }
+        return $clientAddress;
     }
 
     /**
      * @return mixed
      */
     public function userAgent() {
-        return $_SERVER["HTTP_USER_AGENT"];
+        return isset($_SERVER["HTTP_USER_AGENT"])? $_SERVER["HTTP_USER_AGENT"] : null;
     }
 
     /**
@@ -289,7 +296,9 @@ final class Request {
      * @return bool
      */
     public function isSecureRequest() {
-        return (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (!empty($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
+        return (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
+            (!empty($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443) ||
+            (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https');
     }
 
     /**

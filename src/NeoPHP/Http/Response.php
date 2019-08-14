@@ -52,6 +52,7 @@ final class Response {
     const HTTP_REQUESTED_RANGE_NOT_SATISFIABLE = 416;
     const HTTP_EXPECTATION_FAILED = 417;
     const HTTP_I_AM_A_TEAPOT = 418;                                               // RFC2324
+    const HTTP_AUTHENTICATION_TIMEOUT = 419;
     const HTTP_MISDIRECTED_REQUEST = 421;                                         // RFC7540
     const HTTP_UNPROCESSABLE_ENTITY = 422;                                        // RFC4918
     const HTTP_LOCKED = 423;                                                      // RFC4918
@@ -203,6 +204,7 @@ final class Response {
         $this->header("Location", $url);
         $this->statusCode($permanent? self::HTTP_PERMANENTLY_REDIRECT : self::HTTP_TEMPORARY_REDIRECT);
         $this->send();
+        exit;
     }
 
     /**
