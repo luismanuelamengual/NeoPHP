@@ -32,6 +32,9 @@ class RemoteResourceManager extends ResourceManager {
      * @param string $remoteUrl
      */
     public function setRemoteUrl(string $remoteUrl) {
+        if (!Strings::endsWith($remoteUrl, "/")) {
+            $remoteUrl .= "/";
+        }
         $this->remoteUrl = $remoteUrl;
     }
 
@@ -42,7 +45,7 @@ class RemoteResourceManager extends ResourceManager {
      * @throws \ErrorException
      */
     public function find(SelectQuery $query) {
-        return $this->getRemoteContents($query, 'GET');
+        return $this->getRemoteContents($query);
     }
 
     /**
@@ -52,7 +55,7 @@ class RemoteResourceManager extends ResourceManager {
      * @throws \ErrorException
      */
     public function insert(InsertQuery $query) {
-        return $this->getRemoteContents($query, 'PUT');
+        return $this->getRemoteContents($query);
     }
 
     /**
@@ -62,7 +65,7 @@ class RemoteResourceManager extends ResourceManager {
      * @throws \ErrorException
      */
     public function update(UpdateQuery $query) {
-        return $this->getRemoteContents($query, 'POST');
+        return $this->getRemoteContents($query);
     }
 
     /**
@@ -72,54 +75,39 @@ class RemoteResourceManager extends ResourceManager {
      * @throws \ErrorException
      */
     public function delete(DeleteQuery $query) {
-        return $this->getRemoteContents($query, 'DELETE');
+        return $this->getRemoteContents($query);
     }
 
     /**
      * @param Query $query
-     * @param $method
      * @return null
      * @throws \ErrorException
      */
-    private function getRemoteContents (Query $query, $method) {
+    private function getRemoteContents (Query $query) {
         $session = get_session();
-        $parameters = [
-            $session->name() => $session->id(),
-            'rawQuery' => serialize($query),
-            'debug' => get_property("app.debug"),
-            'returnException' => true
-        ];
-        $session->closeWrite();
         $curl = new Curl();
-        $curl->setOpt(CURLOPT_FOLLOWLOCATION, true);
-        switch ($method) {
-            case 'GET':
-                $curl->setOpt(CURLOPT_CUSTOMREQUEST, 'GET');
-                $curl->setOpt(CURLOPT_RETURNTRANSFER, true);
-                $curl->setOpt(CURLOPT_POST, true);
-                $curl->setOpt(CURLOPT_POSTFIELDS, $curl->buildPostData($parameters));
-                $curl->setUrl($this->remoteUrl);
-                $curl->exec();
-                break;
-            case 'PUT':
-                $curl->put($this->remoteUrl, $parameters);
-                break;
-            case 'POST':
-                $curl->post($this->remoteUrl, $parameters);
-                break;
-            case 'DELETE':
-                $curl->delete($this->remoteUrl, $parameters);
-                break;
-        }
-
-        if ($curl->error) {
-            if (!empty($curl->response)) {
-                $remoteException = unserialize($curl->response);
-                if ($remoteException instanceof Exception) {
-                    throw new RuntimeException("Remote exception - " . $curl->errorMessage, $curl->errorCode, $remoteException);
-                }
+        if (Auth::isAuthenticated()) {
+            $authenticator = Auth::getAuthenticator();
+            $type = "Auth ";
+            if ($authenticator instanceof JWTAuthenticator) {
+                $type = "Bearer ";
             }
-            throw new RuntimeException("Remote exception - " . $curl->errorMessage, $curl->errorCode);
+            $curl->setHeader("Authorization", $type . $authenticator->getTokenKey());
+        }
+        $session->closeWrite();
+        $curl->setHeader("Accept-Encoding", "application/gzip");
+        $curl->setHeader("Content-Type", "application/sql");
+        $curl->post($this->getRemoteUrl(), serialize($query), true);
+        if ($curl->error) {
+            $messageError = "Remote exception - " . $curl->errorMessage;
+            if (isset($curl->response)) {
+                try {
+                    $res = json_decode($curl->response);
+                    $messageError .= (": \"".$res->message."\"");
+                }catch (\Throwable $exception) {}
+            }
+            $messageError .= " in $curl->url";
+            throw new RuntimeException($messageError , $curl->errorCode);
         }
         $session->start();
         return $curl->response;

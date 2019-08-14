@@ -2,6 +2,12 @@
 
 namespace NeoPHP\Resources;
 
+use NeoPHP\Database\Query\DeleteQuery;
+use NeoPHP\Database\Query\InsertQuery;
+use NeoPHP\Database\Query\Query;
+use NeoPHP\Database\Query\QueryParser;
+use NeoPHP\Database\Query\SelectQuery;
+use NeoPHP\Database\Query\UpdateQuery;
 use RuntimeException;
 use NeoPHP\Database\Query\ConditionGroup;
 
@@ -18,68 +24,114 @@ class ResourceController {
     const CONDITION_TYPE_NOTNULL = "NOTNULL";
 
     /**
+     * Obtiene el manager del recurso
+     * @param $resourceName
+     * @return ResourceManagerProxy
+     */
+    private function getResourceManager ($resourceName) : ResourceManagerProxy {
+        $resource = Resource::get($resourceName);
+        $resourceManager = $resource->getManager();
+        if ($resourceManager instanceof DefaultResourceManager) {
+            throw new RuntimeException("Default database resources are forbidden remotely");
+        }
+        return $resource;
+    }
+
+    /**
+     * Ejecuta una consulta de recursos
+     */
+    public function queryResources () {
+        $sql = get_request()->content();
+        $contentType = get_request()->header("Content-Type");
+        if ("application/sql" == $contentType) {
+            $query = unserialize($sql);
+        }
+        elseif (!($sql instanceof Query)) {
+            $query = QueryParser::parseQuery($sql);
+        }
+        $result = null;
+        $resource = $this->getResourceManager($query->getSource());
+        if ($query instanceof SelectQuery) {
+            $resource->selectFields($query->getSelectFields());
+            $resource->limit($query->getLimit());
+            $resource->offset($query->getOffset());
+            $resource->distinct($query->getDistinct());
+            $resource->orderByFields($query->getOrderByFields());
+            $resource->groupByFields($query->getGroupByFields());
+            $resource->whereConditionGroup($query->getWhereConditionGroup());
+            $resource->havingConditionGroup($query->getHavingConditionGroup());
+            $resource->joins($query->getJoins());
+            $result = $resource->find();
+        }
+        if ($query instanceof InsertQuery) {
+            $resource->fields($query->getFields());
+            $result = $resource->insert();
+        }
+        if ($query instanceof UpdateQuery) {
+            $resource->fields($query->getFields());
+            $resource->whereConditionGroup($query->getwhereConditionGroup());
+            $result = $resource->update();
+        }
+        if ($query instanceof DeleteQuery) {
+            $resource->whereConditionGroup($query->getwhereConditionGroup());
+            $result = $resource->delete();
+        }
+        return $result;
+    }
+
+    /**
      * Busca recursos en el sistema
      * @param $resourceName
      * @return mixed
      */
     public function findResources ($resourceName) {
         $request = get_request();
-        $resource = Resources::get($resourceName);
-        if ($request->has("rawQuery")) {
-            $query = unserialize($request->get("rawQuery"));
-            $resource->limit($query->getLimit());
-            $resource->offset($query->getOffset());
-            $resource->distinct($query->getDistinct());
-            $resource->selectFields($query->getSelectFields());
-            $resource->orderByFields($query->getOrderByFields());
-            $resource->groupByFields($query->getGroupByFields());
-            $resource->whereConditionGroup($query->getwhereConditionGroup());
-            $resource->havingConditionGroup($query->getHavingConditionGroup());
-            $resource->joins($query->getJoins());
-        }
-        else {
-            $resource->limit(100);
-            $parameters = $request->params();
-            foreach ($parameters as $key=>$value) {
-                switch ($key) {
-                    case "limit":
-                        $resource->limit($value);
-                        break;
-                    case "offset":
-                        $resource->offset($value);
-                        break;
-                    case "distinct":
-                        $resource->distinct($value);
-                        break;
-                    case "select":
-                        $resource->selectFields(explode(",", $value));
-                        break;
-                    case "orderBy":
-                        $resource->orderByFields(explode(",", $value));
-                        break;
-                    case "groupBy":
-                        $resource->groupByFields(explode(",", $value));
-                        break;
-                    case "where":
-                        $resource->whereConditionGroup($this->createConditionGroup($value));
-                        break;
-                    case "having":
-                        $resource->havingConditionGroup($this->createConditionGroup($value));
-                        break;
-                    case "filters":
-                        $filters = $value;
-                        foreach ($filters as $filter) {
-                            if (!empty($filter["operator"])) {
-                                $resource->where($filter["property"], $filter["operator"], $filter["property"]);
-                            } else {
-                                $resource->where($filter["property"], $filter["value"]);
-                            }
+        $resource = $this->getResourceManager($resourceName);
+        $resource->limit(100);
+        $parameters = $request->params();
+        $sessionName = get_session()->name();
+        foreach ($parameters as $key=>$value) {
+            switch ($key) {
+                case $sessionName:
+                    break;
+                case "limit":
+                    $resource->limit($value);
+                    break;
+                case "offset":
+                case "start":
+                    $resource->offset($value);
+                    break;
+                case "distinct":
+                    $resource->distinct($value);
+                    break;
+                case "select":
+                    $resource->selectFields(explode(",", $value));
+                    break;
+                case "orderBy":
+                    call_user_func_array([$resource, "orderBy"], explode(",", $value));
+                    break;
+                case "groupBy":
+                    $resource->groupByFields(explode(",", $value));
+                    break;
+                case "where":
+                    $resource->whereConditionGroup($this->createConditionGroup($value));
+                    break;
+                case "having":
+                    $resource->havingConditionGroup($this->createConditionGroup($value));
+                    break;
+                case "filters":
+                    $filters = $value;
+                    foreach ($filters as $filter) {
+                        if (!empty($filter["operator"])) {
+                            $resource->where($filter["property"], $filter["operator"], $filter["property"]);
+                        } else {
+                            $resource->where($filter["property"], $filter["value"]);
                         }
-                        break;
-                    default:
-                        $resource->where($key, $value);
-                        break;
-                }
+                    }
+                    break;
+                default:
+                    $resource->where($key, $value);
+                    break;
             }
         }
         return $resource->find();
@@ -92,12 +144,27 @@ class ResourceController {
      */
     public function insertResource ($resourceName) {
         $request = get_request();
-        $resource = Resources::get($resourceName);
-        if ($request->has("rawQuery")) {
-            $query = unserialize($request->get("rawQuery"));
-            $resource->fields($query->getFields());
+        $resource = $this->getResourceManager($resourceName);
+        $parameters = $request->params();
+        foreach ($parameters as $key=>$value) {
+            $resource->set($key, $value);
         }
         return $resource->insert();
+    }
+
+    /**
+     * @param string $resourceName nombre del recurso
+     * @return mixed resultado de la inserción del recurso
+     */
+    public function updateResource ($resourceName) {
+        throw new RuntimeException("Method not implemented !!", Response::HTTP_NOT_IMPLEMENTED);
+    }
+
+    /**
+     * @param $resourceName
+     */
+    public function deleteResource ($resourceName) {
+        throw new RuntimeException("Method not implemented !!", Response::HTTP_NOT_IMPLEMENTED);
     }
 
     /**

@@ -21,6 +21,20 @@ use stdClass;
 abstract class DBResourceManager extends ResourceManager {
 
     /**
+     * Variable para nombre de coneccion a la DB
+     * @var null
+     */
+    protected $dbConnection = null;
+
+    /**
+     * Retirba el nombre de la conecction a usar
+     * @return Connection connection
+     */
+    protected function getConnection() : Connection {
+        return DB::connection($this->dbConnection);
+    }
+
+    /**
      * Retorna el nombre de la tabla que corresponde al recurso
      * @return null
      */
@@ -115,7 +129,7 @@ abstract class DBResourceManager extends ResourceManager {
      */
     protected function executeSelectQuery(SelectQuery $query) {
         $this->prepareSelectQuery($query);
-        return DB::query($query);
+        return $this->getConnection()->query($query);
     }
 
     /**
@@ -125,7 +139,7 @@ abstract class DBResourceManager extends ResourceManager {
      */
     protected function executeUpdateQuery(UpdateQuery $query) {
         $this->prepareUpdateQuery($query);
-        return DB::exec($query);
+        return $this->getConnection()->exec($query);
     }
 
     /**
@@ -135,7 +149,7 @@ abstract class DBResourceManager extends ResourceManager {
      */
     protected function executeInsertQuery(InsertQuery $query) {
         $this->prepareInsertQuery($query);
-        return DB::exec($query);
+        return $this->getConnection()->exec($query);
     }
 
     /**
@@ -145,7 +159,7 @@ abstract class DBResourceManager extends ResourceManager {
      */
     protected function executeDeleteQuery(DeleteQuery $query) {
         $this->prepareDeleteQuery($query);
-        return DB::exec($query);
+        return $this->getConnection()->exec($query);
     }
 
     /**

@@ -8,7 +8,8 @@ use NeoPHP\Routing\Routes;
 class ResourcesWebModule extends Module {
 
     public function start() {
-        $resourcesBaseContext = get_property("resources.base_context", "resources");
-        Routes::any("$resourcesBaseContext/*", new ResourcesRouteGenerator());
+        Routes::any("*", new ResourcesRouteGenerator());
+        $resourcesControllerClassName = ResourceController::class;
+        Routes::post("resource", $resourcesControllerClassName . "@queryResources");
     }
 }

@@ -36,7 +36,15 @@ class ResourceManagerProxy {
      */
     public function __construct(ResourceManager $resourceManager, $resourceName) {
         $this->resourceManager = $resourceManager;
-        $this->table($resourceName);
+        $this->source($resourceName);
+    }
+
+    /**
+     * Obtiene el manejador de recursos asociado
+     * @return ResourceManager
+     */
+    public function getManager () : ResourceManager {
+        return $this->resourceManager;
     }
 
     /**
@@ -47,12 +55,12 @@ class ResourceManagerProxy {
         $query->limit($this->getLimit());
         $query->offset($this->getOffset());
         $query->distinct($this->getDistinct());
-        $query->selectFields($this->getSelectFields());
-        $query->orderByFields($this->getOrderByFields());
-        $query->groupByFields($this->getGroupByFields());
+        $query->selectFields(unserialize(serialize($this->getSelectFields())));
+        $query->orderByFields(unserialize(serialize($this->getOrderByFields())));
+        $query->groupByFields(unserialize(serialize($this->getGroupByFields())));
         $query->whereConditionGroup(clone $this->getwhereConditionGroup());
         $query->havingConditionGroup(clone $this->getHavingConditionGroup());
-        $query->joins($this->getJoins());
+        $query->joins(unserialize(serialize($this->getJoins())));
         return $query;
     }
 
@@ -142,7 +150,7 @@ class ResourceManagerProxy {
     public function first() {
         $this->limit(1);
         $results = $this->find();
-        return reset($results);
+        return !empty($results) && is_array($results)? reset($results) : null;
     }
 
     /**
