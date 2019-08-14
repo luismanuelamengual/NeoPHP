@@ -10,14 +10,11 @@ abstract class Nodes {
 
     public static function get(string $nodeName=null) : Node {
         if (!isset(self::$nodes[$nodeName])) {
-            if (get_property("resources.remote_url")) {
-                throw new RuntimeException("Property \"resources.remote_url\" is deprecated !!, please use .env file and change APP_NAME to a value different to \"site5\" !!", Response::HTTP_VERSION_NOT_SUPPORTED);
-            }
             $nodeConfig = null;
             if (is_null($nodeName)) {
                 $nodeName = get_property("nodes.default");
             }
-            if (is_null($nodeName) || $nodeName == get_property("app.name")) {
+            if (is_null($nodeName) || $nodeName == get_property("app.node_name")) {
                 self::$nodes[$nodeName] = new LocalNode();
             }
             else {
