@@ -25,4 +25,14 @@ abstract class Strings {
         $length = strlen($needle);
         return $length === 0 || (substr($haystack, -$length) === $needle);
     }
+
+    /**
+     * Indica si un string contiene a otro
+     * @param string $haystack
+     * @param string $needle
+     * @return bool
+     */
+    public static function contains(string $haystack, string $needle) : bool {
+        return (strpos($haystack, $needle) !== false);
+    }
 }

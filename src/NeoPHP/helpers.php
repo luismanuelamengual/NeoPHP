@@ -132,7 +132,7 @@ if (!function_exists('get_message')) {
      * @return string translated message
      */
     function get_message(string $key, ...$replacements) {
-        return call_user_func_array('\NeoPHP\Messages\Messages::get', func_get_args());
+        return \NeoPHP\Messages\Messages::get($key, $replacements);
     }
 }
 
@@ -171,15 +171,50 @@ if (!function_exists('fire_event')) {
     }
 }
 
-if (!function_exists('handle_error_code')) {
+if (! function_exists('get_env')) {
     /**
-     * Handles an error code
-     * @param $code error code
+     * Gets the value of an environment variable.
+     *
+     * @param  string  $key
+     * @param  mixed   $default
+     * @return mixed
      */
-    function handle_error_code($code) {
+    function get_env($key, $default = null)
+    {
+        $value = getenv($key);
+        if ($value === false) {
+            return get_value($default);
+        }
+        switch (strtolower($value)) {
+            case 'true':
+            case '(true)':
+                return true;
+            case 'false':
+            case '(false)':
+                return false;
+            case 'empty':
+            case '(empty)':
+                return '';
+            case 'null':
+            case '(null)':
+                return;
+        }
+        if (($valueLength = strlen($value)) > 1 && $value[0] === '"' && $value[$valueLength - 1] === '"') {
+            return substr($value, 1, -1);
+        }
+        return $value;
+    }
+}
 
-        http_response_code($code);
-        include __DIR__ . DIRECTORY_SEPARATOR . "errorPage.php";
-        exit;
+if (! function_exists('get_value')) {
+    /**
+     * Return the default value of the given value.
+     *
+     * @param  mixed  $value
+     * @return mixed
+     */
+    function get_value($value)
+    {
+        return $value instanceof Closure ? $value() : $value;
     }
 }
