@@ -25,7 +25,7 @@ abstract class Loggers {
             self::$initialized = true;
         }
         if ($loggerName == null) {
-            $loggerName = get_property("logging.default") ?: "main";
+            $loggerName = get_property("logging.default", "main");
         }
         if (!isset(self::$loggers[$loggerName])) {
             self::$loggers[$loggerName] = Cascade::getLogger($loggerName);

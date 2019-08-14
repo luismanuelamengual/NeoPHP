@@ -20,10 +20,6 @@ class Messages {
      * Messages initialization
      */
     private static function init() {
-        $lang = isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])? substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2) : null;
-        if (empty($lang))
-            $lang = "es";
-        self::$language = $lang;
         self::$messages = [];
         self::$messagesPath = get_property("app.messages_path", get_app()->resourcesPath() . DIRECTORY_SEPARATOR . "messages");
     }
@@ -36,8 +32,21 @@ class Messages {
             self::$language = $language;
         }
         else {
-            return self::$language;
+            return self::$language ?? get_app()->language();
         }
+    }
+
+    /**
+     * @param $bundleName
+     * @return mixed|null
+     */
+    public static function getBundle ($bundleName) {
+        $messageBundle = null;
+        $messageBundleFileName = self::getBundleFilename($bundleName);
+        if (file_exists($messageBundleFileName)) {
+            $messageBundle = @include_once($messageBundleFileName);
+        }
+        return $messageBundle;
     }
 
     /**
@@ -46,7 +55,7 @@ class Messages {
      */
     private static function getBundleFilename ($bundleName) {
         $bundleNameTokens = explode(".", $bundleName);
-        $messageBundleFileName = self::$messagesPath . DIRECTORY_SEPARATOR . self::$language;
+        $messageBundleFileName = self::$messagesPath . DIRECTORY_SEPARATOR . self::language();
         foreach ($bundleNameTokens as $bundleNameToken) {
             $messageBundleFileName .= DIRECTORY_SEPARATOR . $bundleNameToken;
         }
@@ -59,7 +68,7 @@ class Messages {
      * @param array $replacements
      * @return null
      */
-    public static function get($key, ...$replacements) {
+    public static function get($key, array $replacements = []) {
         $idx = strrpos($key, ".");
         $bundleName = null;
         $bundleKey = null;
@@ -73,7 +82,7 @@ class Messages {
         }
 
         $bundleNameTokens = explode(".", $bundleName);
-        $messageBundle = &self::$messages[self::$language];
+        $messageBundle = &self::$messages[self::language()];
         $missingBundle = false;
         foreach ($bundleNameTokens as $bundleNameToken) {
             if (!isset($messageBundle[$bundleNameToken])) {
@@ -84,9 +93,8 @@ class Messages {
         }
 
         if ($missingBundle) {
-            $messageBundleFileName = self::getBundleFilename($bundleName);
-            if (file_exists($messageBundleFileName)) {
-                $messageBundle = @include_once($messageBundleFileName);
+            $messageBundle = self::getBundle($bundleName);
+            if (!empty($messageBundle)) {
                 $missingBundle = false;
             }
         }
@@ -106,11 +114,12 @@ class Messages {
             }
 
             if (isset($messageBundle[$bundleKey])) {
+                $bundleKeyValue = $messageBundle[$bundleKey];
                 if (!empty($replacements)) {
-                    $bundleKeyValue = call_user_func_array("sprintf", array_merge([$messageBundle[$bundleKey]], $replacements));
-                }
-                else {
-                    $bundleKeyValue = $messageBundle[$bundleKey];
+                    foreach ($replacements as $replacementKey => $replacement) {
+                        $replacementKey = ":$replacementKey";
+                        $bundleKeyValue = str_replace($replacementKey, $replacement, $bundleKeyValue);
+                    }
                 }
                 switch ($capitalization) {
                     case self::CAPITALIZATION_FIRST_CHAR:
