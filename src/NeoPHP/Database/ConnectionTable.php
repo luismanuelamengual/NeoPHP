@@ -126,7 +126,7 @@ class ConnectionTable {
     public function first() {
         $this->limit(1);
         $results = $this->find();
-        return reset($results);
+        return !empty($results) && is_array($results)? reset($results) : null;
     }
 
     /**

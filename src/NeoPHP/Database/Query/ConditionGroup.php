@@ -52,7 +52,7 @@ class ConditionGroup {
         }
         else if (is_array($operatorOrValue)) {
             if (sizeof($operatorOrValue) == 1) {
-                $value = $operatorOrValue[0];
+                $value = current($operatorOrValue);
                 $operator = ConditionOperator::EQUALS;
             } else {
                 $value = $operatorOrValue;

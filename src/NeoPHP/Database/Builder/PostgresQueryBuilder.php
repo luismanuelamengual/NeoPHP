@@ -295,10 +295,10 @@ class PostgresQueryBuilder extends QueryBuilder {
                         $sql .= " IS NOT NULL";
                         break;
                     case ConditionOperator::LIKE:
-                        $sql .= ($condition->caseSensitive? " LIKE " : " ILIKE ") . $this->buildValueSql("%" . $condition->value . "%", $bindings);
+                        $sql .= (!empty($condition->caseSensitive)? " LIKE " : " ILIKE ") . $this->buildValueSql("%" . $condition->value . "%", $bindings);
                         break;
                     case ConditionOperator::NOT_LIKE:
-                        $sql .= " NOT" . ($condition->caseSensitive? " LIKE " : " ILIKE ") . $this->buildValueSql("%" . $condition->value . "%", $bindings);
+                        $sql .= " NOT" . (!empty($condition->caseSensitive)? " LIKE " : " ILIKE ") . $this->buildValueSql("%" . $condition->value . "%", $bindings);
                         break;
                     case ConditionOperator::CONTAINS:
                         $sql .= " @> " . $this->buildValueSql("{" . (is_array($condition->value)?implode(",",$condition->value) : $condition->value) . "}", $bindings);

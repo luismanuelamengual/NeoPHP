@@ -77,6 +77,7 @@ abstract class DB {
      * @param Query|string $sql query to be executed
      * @param array $bindings sql bindings
      * @return bool|int
+     * @throws \Exception
      */
     public static function exec($sql, array $bindings = []) {
         return self::connection()->exec($sql, $bindings);
@@ -87,6 +88,7 @@ abstract class DB {
      * @param Query|string $sql query to be executed
      * @param array $bindings sql bindings
      * @return array results
+     * @throws \Exception
      */
     public static function query($sql, array $bindings = []) {
         return self::connection()->query($sql, $bindings);
