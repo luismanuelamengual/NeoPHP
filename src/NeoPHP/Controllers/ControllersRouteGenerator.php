@@ -61,7 +61,7 @@ class ControllersRouteGenerator implements RouteGenerator {
             //Obtención del nombre de la acción
             $action = $controllerClassName . '@' . $controllerAction;
 
-            $route = new Route($action);
+            $route = new Route($action, [], true);
         }
         return $route;
     }

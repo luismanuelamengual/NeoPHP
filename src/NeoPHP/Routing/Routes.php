@@ -232,9 +232,10 @@ class Routes {
 
     /**
      * Procesa una ruta no encontrada
+     * @param $ex
      * @throws Exception
      */
-    private static function handleRequestNotFound () {
+    private static function handleRequestNotFound ($ex) {
         $response = get_response();
         $response->clear();
         $response->statusCode(Response::HTTP_NOT_FOUND);
@@ -249,7 +250,7 @@ class Routes {
             $response->send();
         }
         else {
-            handle_error_code(Response::HTTP_NOT_FOUND);
+            throw $ex;
         }
     }
 
@@ -258,7 +259,7 @@ class Routes {
      * @throws Throwable
      */
     private static function handleRequestException (Throwable $ex) {
-        ob_clean();
+        try { ob_clean(); } catch (Throwable $exception) {}
         $response = get_response();
         $response->clear();
         $errorRoutes = self::$errorRoutes->getRoutes();
@@ -286,13 +287,27 @@ class Routes {
             if (!empty($routes)) {
                 $beforeRoutes = self::$beforeRoutes->getRoutes();
                 if (!empty($beforeRoutes)) {
+                    $exclusiveBeforeRouteProcessed = false;
                     foreach ($beforeRoutes as $beforeRoute) {
+                        if ($beforeRoute->isExclusive()) {
+                            if ($exclusiveBeforeRouteProcessed) {
+                                continue;
+                            }
+                            $exclusiveBeforeRouteProcessed = true;
+                        }
                         self::executeAction($beforeRoute->getAction(), array_merge($_REQUEST, $beforeRoute->getParameters()));
                     }
                 }
 
                 try {
+                    $exclusiveRouteProcessed = false;
                     foreach ($routes as $route) {
+                        if ($route->isExclusive()) {
+                            if ($exclusiveRouteProcessed) {
+                                continue;
+                            }
+                            $exclusiveRouteProcessed = true;
+                        }
                         $routeResult = self::executeAction($route->getAction(), array_merge($_REQUEST, $route->getParameters()));
                         if (isset($routeResult)) {
                             $response->content($routeResult);
@@ -300,7 +315,14 @@ class Routes {
                     }
                     $afterRoutes = self::$afterRoutes->getRoutes();
                     if (!empty($afterRoutes)) {
+                        $exclusiveAfterRouteProcessed = false;
                         foreach ($afterRoutes as $afterRoute) {
+                            if ($afterRoute->isExclusive()) {
+                                if ($exclusiveAfterRouteProcessed) {
+                                    continue;
+                                }
+                                $exclusiveAfterRouteProcessed = true;
+                            }
                             $routeResult = self::executeAction($afterRoute->getAction(), array_merge($_REQUEST, $afterRoute->getParameters()));
                             if (isset($routeResult)) {
                                 $response->content($routeResult);
@@ -310,11 +332,11 @@ class Routes {
                     $response->send();
                 }
                 catch (ActionNotFoundException $notFoundException) {
-                    self::handleRequestNotFound();
+                    self::handleRequestNotFound($notFoundException);
                 }
             }
             else {
-                self::handleRequestNotFound();
+                self::handleRequestNotFound(new ActionNotFoundException("Route not found  !!"));
             }
         }
         catch (Throwable $ex) {
