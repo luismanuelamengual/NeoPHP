@@ -13,7 +13,7 @@ use NeoPHP\Controllers\Controllers;
 use NeoPHP\Http\Response;
 use NeoPHP\Mail\Mailer;
 use NeoPHP\Routing\Routes;
-use NeoPHP\Utils\Strings;
+use NeoPHP\Utils\StringUtils;
 use ReflectionClass;
 use ReflectionFunction;
 use ReflectionMethod;
@@ -390,7 +390,7 @@ class Application {
                 if (!empty($_SERVER)) {
                     $dataServer = [];
                     foreach ($_SERVER as $index => $data) {
-                        if (Strings::contains($index, "PASSWORD") || Strings::contains($index, "KEY")) continue;
+                        if (StringUtils::contains($index, "PASSWORD") || StringUtils::contains($index, "KEY")) continue;
                         $dataServer[$index] = $data;
                     }
                     $emailContent .= "<br>";
@@ -403,7 +403,7 @@ class Application {
                 if (!empty($_ENV)) {
                     $dataEnv = [];
                     foreach ($_ENV as $index => $data) {
-                        if (Strings::contains($index, "PASSWORD") || Strings::contains($index, "KEY")) continue;
+                        if (StringUtils::contains($index, "PASSWORD") || StringUtils::contains($index, "KEY")) continue;
                         $dataEnv[$index] = $data;
                     }
                     $emailContent .= "<br>";

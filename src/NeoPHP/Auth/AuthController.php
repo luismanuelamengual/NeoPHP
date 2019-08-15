@@ -3,7 +3,7 @@ namespace NeoPHP\Auth;
 
 use NeoPHP\Http\Response;
 use NeoPHP\Utils\DateUtils;
-use NeoPHP\Utils\Strings;
+use NeoPHP\Utils\StringUtils;
 use RuntimeException;
 
 class AuthController {
@@ -53,14 +53,14 @@ class AuthController {
         $verify = true;
         $method = $method ?? get_request()->method();
         $path = $route ?? get_request()->path();
-        if (Strings::startsWith($path, "/")) {
+        if (StringUtils::startsWith($path, "/")) {
             $path = substr($path, 1);
         }
         $exceptRoutes = $excludeRoutes ?? get_property("auth.except");
         if (!empty($exceptRoutes)) {
             foreach ($exceptRoutes as $exceptRoute) {
                 if (is_array($exceptRoute)) {
-                    if (Strings::startsWith($exceptRoute["route"],"/")) {
+                    if (StringUtils::startsWith($exceptRoute["route"],"/")) {
                         $exceptRoute["route"] = substr($exceptRoute["route"], 1);
                     }
                     if ($exceptRoute["route"] == $path && $exceptRoute["method"] == $method) {

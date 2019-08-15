@@ -4,14 +4,14 @@ namespace NeoPHP\Nodes;
 
 use NeoPHP\Resources\RemoteResourceManager;
 use NeoPHP\Resources\ResourceManager;
-use NeoPHP\Utils\Strings;
+use NeoPHP\Utils\StringUtils;
 
 class RemoteNode extends Node {
 
     private $endpoint;
 
     public function __construct($endpoint) {
-        if (!Strings::endsWith($endpoint,"/")) {
+        if (!StringUtils::endsWith($endpoint,"/")) {
             $endpoint .= "/";
         }
         $this->endpoint = $endpoint;
@@ -19,7 +19,7 @@ class RemoteNode extends Node {
 
     protected function createResourceManager($resourceName): ResourceManager {
         $remoteUrl = $this->endpoint;
-        if (!Strings::endsWith($remoteUrl, '/')) {
+        if (!StringUtils::endsWith($remoteUrl, '/')) {
             $remoteUrl .= '/';
         }
         $remoteUrl .= str_replace(".", "/", $resourceName);

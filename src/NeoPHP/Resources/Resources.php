@@ -2,7 +2,7 @@
 
 namespace NeoPHP\Resources;
 
-use NeoPHP\Utils\Strings;
+use NeoPHP\Utils\StringUtils;
 use RuntimeException;
 
 /**
@@ -65,7 +65,7 @@ abstract class Resources {
                     $resourcesRemoteUrl = get_property("resources.remote_url");
                     if (!empty($resourcesRemoteUrl)) {
                         $resourceRemoteUrl = $resourcesRemoteUrl;
-                        if (!Strings::endsWith($resourceRemoteUrl, '/')) {
+                        if (!StringUtils::endsWith($resourceRemoteUrl, '/')) {
                             $resourceRemoteUrl .= '/';
                         }
                         $resourcesBaseContext = get_property("resources.base_context", "resources");

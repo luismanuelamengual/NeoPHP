@@ -2,7 +2,7 @@
 
 namespace NeoPHP\Utils;
 
-abstract class Strings {
+abstract class StringUtils {
 
     /**
      * Indica si un texte comienza con un texto en particular
