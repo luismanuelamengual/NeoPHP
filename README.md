@@ -9,6 +9,12 @@
 
 Modern PHP framework for web developers, not for web 'artisans' (wtf ??!!)
 
+## Installation
+
+```
+composer create-project neogroup/neophp-project MyApp
+```
+
 ## Documentation
 
 - [Getting started](doc/01-getting_started.md)
