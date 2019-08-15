@@ -15,4 +15,8 @@ class UpdateQuery extends Query {
     public function __construct($table=null) {
         $this->table($table);
     }
+
+    public function __clone() {
+        $this->whereConditions = clone $this->whereConditions;
+    }
 }
