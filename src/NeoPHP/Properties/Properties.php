@@ -54,15 +54,9 @@ abstract class Properties {
      * @param $moduleName
      */
     private static function loadPropertiesModule($moduleName) {
-        $moduleFileName = get_app()->localConfigPath() . DIRECTORY_SEPARATOR . $moduleName . ".php";
+        $moduleFileName = get_app()->configPath() . DIRECTORY_SEPARATOR . $moduleName . ".php";
         if (file_exists($moduleFileName)) {
             self::$properties[$moduleName] = @include_once($moduleFileName);
-        }
-        else {
-            $moduleFileName = get_app()->configPath() . DIRECTORY_SEPARATOR . $moduleName . ".php";
-            if (file_exists($moduleFileName)) {
-                self::$properties[$moduleName] = @include_once($moduleFileName);
-            }
         }
     }
 }
