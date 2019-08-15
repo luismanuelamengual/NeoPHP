@@ -9,7 +9,7 @@ use RuntimeException;
  * @package NeoPHP\Controllers
  * @author Luis Manuel Amengual <luis.amengual@sitrack.com>
  */
-class OutputController {
+class FormattersController {
 
     const OUTPUT_FORMAT_PARAMETER_NAME = "outputFormat";
 
