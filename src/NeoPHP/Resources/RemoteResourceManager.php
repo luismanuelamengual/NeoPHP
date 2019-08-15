@@ -9,6 +9,7 @@ use NeoPHP\Database\Query\Query;
 use NeoPHP\Database\Query\SelectQuery;
 use NeoPHP\Database\Query\UpdateQuery;
 use RuntimeException;
+use Throwable;
 
 /**
  * Class RemoteResource
@@ -31,9 +32,6 @@ class RemoteResourceManager extends ResourceManager {
      * @param string $remoteUrl
      */
     public function setRemoteUrl(string $remoteUrl) {
-        if (!Strings::endsWith($remoteUrl, "/")) {
-            $remoteUrl .= "/";
-        }
         $this->remoteUrl = $remoteUrl;
     }
 
@@ -94,7 +92,7 @@ class RemoteResourceManager extends ResourceManager {
                 try {
                     $res = json_decode($curl->response);
                     $messageError .= (": \"".$res->message."\"");
-                }catch (\Throwable $exception) {}
+                }catch (Throwable $exception) {}
             }
             $messageError .= " in $curl->url";
             throw new RuntimeException($messageError , $curl->errorCode);
