@@ -14,7 +14,7 @@ abstract class Nodes {
             if (is_null($nodeName)) {
                 $nodeName = get_property("nodes.default");
             }
-            if (is_null($nodeName) || $nodeName == get_property("app.node_name")) {
+            if (is_null($nodeName) || $nodeName == get_property("app.name")) {
                 self::$nodes[$nodeName] = new LocalNode();
             }
             else {
