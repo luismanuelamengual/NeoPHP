@@ -3,13 +3,12 @@
 namespace NeoPHP\Resources;
 
 use Curl\Curl;
-use Exception;
-use RuntimeException;
 use NeoPHP\Database\Query\DeleteQuery;
 use NeoPHP\Database\Query\InsertQuery;
 use NeoPHP\Database\Query\Query;
 use NeoPHP\Database\Query\SelectQuery;
 use NeoPHP\Database\Query\UpdateQuery;
+use RuntimeException;
 
 /**
  * Class RemoteResource
@@ -82,19 +81,10 @@ class RemoteResourceManager extends ResourceManager {
      * @param Query $query
      * @return null
      * @throws \ErrorException
+     * @todo authentication in curl remote contents
      */
     private function getRemoteContents (Query $query) {
-        $session = get_session();
         $curl = new Curl();
-        if (Auth::isAuthenticated()) {
-            $authenticator = Auth::getAuthenticator();
-            $type = "Auth ";
-            if ($authenticator instanceof JWTAuthenticator) {
-                $type = "Bearer ";
-            }
-            $curl->setHeader("Authorization", $type . $authenticator->getTokenKey());
-        }
-        $session->closeWrite();
         $curl->setHeader("Accept-Encoding", "application/gzip");
         $curl->setHeader("Content-Type", "application/sql");
         $curl->post($this->getRemoteUrl(), serialize($query), true);
@@ -109,7 +99,6 @@ class RemoteResourceManager extends ResourceManager {
             $messageError .= " in $curl->url";
             throw new RuntimeException($messageError , $curl->errorCode);
         }
-        $session->start();
         return $curl->response;
     }
 }
