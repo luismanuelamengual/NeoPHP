@@ -6,7 +6,7 @@ use Closure;
 use Exception;
 use PDO;
 use NeoPHP\Database\Builder\QueryBuilder;
-use NeoPHP\Database\Query\Query;
+use NeoPHP\Query\Query;
 use stdClass;
 
 /**

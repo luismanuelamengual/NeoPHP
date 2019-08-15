@@ -3,7 +3,7 @@
 namespace NeoPHP\Database;
 
 use NeoPHP\Database\Builder\PostgresQueryBuilder;
-use NeoPHP\Database\Query\Query;
+use NeoPHP\Query\Query;
 use PDO;
 use RuntimeException;
 

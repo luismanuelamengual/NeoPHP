@@ -3,10 +3,10 @@
 namespace NeoPHP\Resources;
 
 use RuntimeException;
-use NeoPHP\Database\Query\DeleteQuery;
-use NeoPHP\Database\Query\InsertQuery;
-use NeoPHP\Database\Query\SelectQuery;
-use NeoPHP\Database\Query\UpdateQuery;
+use NeoPHP\Query\DeleteQuery;
+use NeoPHP\Query\InsertQuery;
+use NeoPHP\Query\SelectQuery;
+use NeoPHP\Query\UpdateQuery;
 
 abstract class ResourceManager {
 

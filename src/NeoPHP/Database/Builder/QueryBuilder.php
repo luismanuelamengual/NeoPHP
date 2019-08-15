@@ -2,7 +2,7 @@
 
 namespace NeoPHP\Database\Builder;
 
-use NeoPHP\Database\Query\Query;
+use NeoPHP\Query\Query;
 
 abstract class QueryBuilder {
 

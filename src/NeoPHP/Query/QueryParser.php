@@ -1,6 +1,6 @@
 <?php
 
-namespace NeoPHP\Database\Query;
+namespace NeoPHP\Query;
 
 use Exception;
 use RuntimeException;

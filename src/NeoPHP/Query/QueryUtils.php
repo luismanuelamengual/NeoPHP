@@ -1,10 +1,10 @@
 <?php
 
-namespace NeoPHP\Database\Query;
+namespace NeoPHP\Query;
 
 /**
  * Class QueryUtils - Utilidades para los queries
- * @package NeoPHP\Database\Query
+ * @package NeoPHP\Query
  */
 abstract class QueryUtils {
 

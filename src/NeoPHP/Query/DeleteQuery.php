@@ -1,9 +1,9 @@
 <?php
 
-namespace NeoPHP\Database\Query;
+namespace NeoPHP\Query;
 
-use NeoPHP\Database\Query\Traits\TableTrait;
-use NeoPHP\Database\Query\Traits\WhereConditionsTrait;
+use NeoPHP\Query\Traits\TableTrait;
+use NeoPHP\Query\Traits\WhereConditionsTrait;
 
 class DeleteQuery extends Query {
 

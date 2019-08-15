@@ -2,19 +2,19 @@
 
 namespace NeoPHP\Database;
 
-use NeoPHP\Database\Query\DeleteQuery;
-use NeoPHP\Database\Query\InsertQuery;
-use NeoPHP\Database\Query\SelectQuery;
-use NeoPHP\Database\Query\Traits\FieldsTrait;
-use NeoPHP\Database\Query\Traits\GroupByFieldsTrait;
-use NeoPHP\Database\Query\Traits\HavingConditionsTrait;
-use NeoPHP\Database\Query\Traits\JoinsTrait;
-use NeoPHP\Database\Query\Traits\OrderByFieldsTrait;
-use NeoPHP\Database\Query\Traits\SelectFieldsTrait;
-use NeoPHP\Database\Query\Traits\SelectModifiersTrait;
-use NeoPHP\Database\Query\Traits\TableTrait;
-use NeoPHP\Database\Query\Traits\WhereConditionsTrait;
-use NeoPHP\Database\Query\UpdateQuery;
+use NeoPHP\Query\DeleteQuery;
+use NeoPHP\Query\InsertQuery;
+use NeoPHP\Query\SelectQuery;
+use NeoPHP\Query\Traits\FieldsTrait;
+use NeoPHP\Query\Traits\GroupByFieldsTrait;
+use NeoPHP\Query\Traits\HavingConditionsTrait;
+use NeoPHP\Query\Traits\JoinsTrait;
+use NeoPHP\Query\Traits\OrderByFieldsTrait;
+use NeoPHP\Query\Traits\SelectFieldsTrait;
+use NeoPHP\Query\Traits\SelectModifiersTrait;
+use NeoPHP\Query\Traits\TableTrait;
+use NeoPHP\Query\Traits\WhereConditionsTrait;
+use NeoPHP\Query\UpdateQuery;
 
 /**
  * Class ConnectionTable

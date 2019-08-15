@@ -1,8 +1,8 @@
 <?php
 
-namespace NeoPHP\Database\Query\Traits;
+namespace NeoPHP\Query\Traits;
 
-use NeoPHP\Database\Query\ConditionGroup;
+use NeoPHP\Query\ConditionGroup;
 
 trait HavingConditionsTrait {
 

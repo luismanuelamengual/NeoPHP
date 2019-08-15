@@ -4,14 +4,14 @@ namespace NeoPHP\Resources;
 
 use RuntimeException;
 use NeoPHP\Database\DB;
-use NeoPHP\Database\Query\ConditionGroup;
-use NeoPHP\Database\Query\ConditionOperator;
-use NeoPHP\Database\Query\ConditionType;
-use NeoPHP\Database\Query\DeleteQuery;
-use NeoPHP\Database\Query\InsertQuery;
-use NeoPHP\Database\Query\Query;
-use NeoPHP\Database\Query\SelectQuery;
-use NeoPHP\Database\Query\UpdateQuery;
+use NeoPHP\Query\ConditionGroup;
+use NeoPHP\Query\ConditionOperator;
+use NeoPHP\Query\ConditionType;
+use NeoPHP\Query\DeleteQuery;
+use NeoPHP\Query\InsertQuery;
+use NeoPHP\Query\Query;
+use NeoPHP\Query\SelectQuery;
+use NeoPHP\Query\UpdateQuery;
 use stdClass;
 
 /**

@@ -3,16 +3,16 @@
 namespace NeoPHP\Database\Builder;
 
 use DateTimeInterface;
-use NeoPHP\Database\Query\ConditionOperator;
-use NeoPHP\Database\Query\ConditionType;
-use NeoPHP\Database\Query\ConditionGroup;
-use NeoPHP\Database\Query\DeleteQuery;
-use NeoPHP\Database\Query\InsertQuery;
-use NeoPHP\Database\Query\Join;
-use NeoPHP\Database\Query\Query;
-use NeoPHP\Database\Query\SelectQuery;
-use NeoPHP\Database\Query\UnionQuery;
-use NeoPHP\Database\Query\UpdateQuery;
+use NeoPHP\Query\ConditionOperator;
+use NeoPHP\Query\ConditionType;
+use NeoPHP\Query\ConditionGroup;
+use NeoPHP\Query\DeleteQuery;
+use NeoPHP\Query\InsertQuery;
+use NeoPHP\Query\Join;
+use NeoPHP\Query\Query;
+use NeoPHP\Query\SelectQuery;
+use NeoPHP\Query\UnionQuery;
+use NeoPHP\Query\UpdateQuery;
 use stdClass;
 
 class PostgresQueryBuilder extends QueryBuilder {

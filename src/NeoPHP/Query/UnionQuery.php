@@ -1,9 +1,9 @@
 <?php
 
-namespace NeoPHP\Database\Query;
+namespace NeoPHP\Query;
 
-use NeoPHP\Database\Query\Traits\OrderByFieldsTrait;
-use NeoPHP\Database\Query\Traits\SelectModifiersTrait;
+use NeoPHP\Query\Traits\OrderByFieldsTrait;
+use NeoPHP\Query\Traits\SelectModifiersTrait;
 
 class UnionQuery extends Query {
 

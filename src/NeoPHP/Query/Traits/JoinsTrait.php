@@ -1,8 +1,8 @@
 <?php
 
-namespace NeoPHP\Database\Query\Traits;
+namespace NeoPHP\Query\Traits;
 
-use NeoPHP\Database\Query\Join;
+use NeoPHP\Query\Join;
 
 trait JoinsTrait {
 

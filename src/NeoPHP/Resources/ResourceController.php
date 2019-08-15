@@ -2,14 +2,14 @@
 
 namespace NeoPHP\Resources;
 
-use NeoPHP\Database\Query\DeleteQuery;
-use NeoPHP\Database\Query\InsertQuery;
-use NeoPHP\Database\Query\Query;
-use NeoPHP\Database\Query\QueryParser;
-use NeoPHP\Database\Query\SelectQuery;
-use NeoPHP\Database\Query\UpdateQuery;
+use NeoPHP\Query\DeleteQuery;
+use NeoPHP\Query\InsertQuery;
+use NeoPHP\Query\Query;
+use NeoPHP\Query\QueryParser;
+use NeoPHP\Query\SelectQuery;
+use NeoPHP\Query\UpdateQuery;
 use RuntimeException;
-use NeoPHP\Database\Query\ConditionGroup;
+use NeoPHP\Query\ConditionGroup;
 
 class ResourceController {
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace NeoPHP\Database\Query\Traits;
+namespace NeoPHP\Query\Traits;
 
 trait SelectModifiersTrait {
 
