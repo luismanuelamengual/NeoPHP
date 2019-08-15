@@ -6,7 +6,7 @@ use RuntimeException;
 
 /**
  * Class OutputController
- * @package Sitrack\Controllers
+ * @package NeoPHP\Controllers
  * @author Luis Manuel Amengual <luis.amengual@sitrack.com>
  */
 class OutputController {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Sitrack\Utils;
+namespace NeoPHP\Utils;
 
 use DateTime;
 use DateTimeZone;

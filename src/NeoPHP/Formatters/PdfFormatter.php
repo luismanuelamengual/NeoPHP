@@ -4,7 +4,7 @@ namespace NeoPHP\Formatters;
 
 use Dompdf\Dompdf;
 use Dompdf\Options;
-use Sitrack\Views\View;
+use NeoPHP\Views\View;
 use stdClass;
 
 class PdfFormatter extends Formatter {
