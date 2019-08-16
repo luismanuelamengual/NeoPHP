@@ -29,7 +29,7 @@ class ResourceController {
      * @return ResourceManagerProxy
      */
     private function getResourceManager ($resourceName) : ResourceManagerProxy {
-        $resource = Resource::get($resourceName);
+        $resource = Resources::get($resourceName);
         $resourceManager = $resource->getManager();
         if ($resourceManager instanceof DefaultResourceManager) {
             throw new RuntimeException("Default database resources are forbidden remotely");

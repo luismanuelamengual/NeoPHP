@@ -12,7 +12,7 @@ class ResourcesRouteGenerator implements RouteGenerator {
         $route = null;
         if (!empty($path)) {
             $resourceName = implode(".", array_filter($path));
-            $resourceManager = Resource::get($resourceName)->getManager();
+            $resourceManager = Resources::get($resourceName)->getManager();
             if ($resourceManager != null && !($resourceManager instanceof DefaultResourceManager)) {
                 $resourcesControllerClassName = ResourceController::class;
                 $contentType = get_request()->header("Content-Type");
