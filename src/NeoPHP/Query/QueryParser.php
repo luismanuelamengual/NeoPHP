@@ -28,8 +28,8 @@ abstract class QueryParser {
                         $state = self::STATE_SELECT;
                         break;
                     case "FROM":
-                        $source = $tokens[++$i];
-                        $query->source($source);
+                        $table = $tokens[++$i];
+                        $query->table($table);
                         $state = self::STATE_NONE;
                         break;
                     case "WHERE":
