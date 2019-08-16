@@ -24,7 +24,7 @@ abstract class Auth {
         return self::$registeredAuthenticators;
     }
 
-    public static function getActiveAuthenticator() : Authenticator {
+    public static function getActiveAuthenticator() : ?Authenticator {
         return self::$activeAuthenticator;
     }
 
